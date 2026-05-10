@@ -554,13 +554,24 @@
         </div>
       </div>
 
-      <div class="form-group" style="margin-top:16px;">
-        <label class="form-label" for="input-match">Match type</label>
-        <select class="form-input" id="input-match">
-          <option value="">Select…</option>
-          <option>Friendly</option><option>League</option>
-          <option>Tournament</option><option>Training</option>
-        </select>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" for="input-match">Match type</label>
+          <select class="form-input" id="input-match">
+            <option value="">Select…</option>
+            <option>Friendly</option><option>League</option>
+            <option>Tournament</option><option>Training</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" for="input-kit">Your team's kit colour</label>
+          <select class="form-input" id="input-kit">
+            <option value="">Select…</option>
+            <option>Red</option><option>Blue</option><option>White</option>
+            <option>Yellow</option><option>Black</option><option>Green</option>
+            <option>Orange</option><option>Purple</option><option>Pink</option><option>Other</option>
+          </select>
+        </div>
       </div>
 
       <div class="form-group">
@@ -666,11 +677,30 @@
     return '#ff6b6b';
   }
 
+  const MATCH_TYPE_LABEL = {
+    'League':     'League Game',
+    'Tournament': 'Tournament Game',
+    'Friendly':   'Friendly Game',
+    'Training':   'Training Session',
+  };
+
   function renderReport(data, isDemo) {
     const gradeEl = document.getElementById('report-grade');
     gradeEl.textContent = data.overall_grade || '—';
     gradeEl.style.color = gradeColor(data.overall_grade);
     document.getElementById('report-summary').textContent = data.summary || '';
+
+    // Populate player identity in the report header
+    const jersey = data.jersey_number ? `#${data.jersey_number}` : '';
+    document.getElementById('report-title-line').textContent = jersey || 'Report';
+
+    const metaParts = [];
+    if (data.position)    metaParts.push(data.position);
+    if (data.age_bracket) metaParts.push(data.age_bracket);
+    if (data.dominant_foot) metaParts.push(`${data.dominant_foot} foot`);
+    const matchLabel = MATCH_TYPE_LABEL[data.match_type] || data.match_type || '';
+    if (matchLabel) metaParts.push(matchLabel);
+    document.getElementById('report-meta').textContent = metaParts.join(' · ');
 
     const grid = document.getElementById('feedback-grid');
     grid.innerHTML = '';
@@ -688,7 +718,6 @@
     if (isDemo) {
       show('demo-banner');
       document.getElementById('report-eyebrow').textContent = 'Sample Report';
-      document.getElementById('report-title-line').textContent = 'Demo';
     }
 
     hide('state-loading');
@@ -705,13 +734,14 @@
     const foot     = document.getElementById('input-foot').value;
     const age      = document.getElementById('input-age').value;
     const match    = document.getElementById('input-match').value;
+    const kit      = document.getElementById('input-kit').value;
     const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-      && jersey && position && foot && age && match
+      && jersey && position && foot && age && match && kit
       && selectedFile !== null;
     document.getElementById('btn-submit').disabled = !valid;
   }
 
-  ['input-email','input-jersey','input-position','input-foot','input-age','input-match']
+  ['input-email','input-jersey','input-position','input-foot','input-age','input-match','input-kit']
     .forEach(id => document.getElementById(id).addEventListener('change', validateForm));
   document.getElementById('input-email').addEventListener('input', validateForm);
   document.getElementById('input-jersey').addEventListener('input', validateForm);
@@ -772,6 +802,7 @@
           dominant_foot:  document.getElementById('input-foot').value,
           age_bracket:    document.getElementById('input-age').value,
           match_type:     document.getElementById('input-match').value,
+          kit_colour:     document.getElementById('input-kit').value,
         }),
       });
       if (!res.ok) throw new Error('Could not get upload URL');
