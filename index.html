@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>PitchScout AI — Scout Report</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root {
     --green: #00e676;
@@ -291,6 +292,31 @@
     vertical-align: middle;
     font-family: 'Barlow Condensed', sans-serif;
   }
+
+  /* ─── PDF BUTTON ─── */
+  .btn-pdf {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 32px;
+    background: transparent;
+    color: var(--green);
+    border: 1px solid rgba(0,230,118,0.4);
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .btn-pdf:hover {
+    background: rgba(0,230,118,0.08);
+    border-color: var(--green);
+  }
+  .btn-pdf svg { flex-shrink: 0; }
 
   /* ─── FOOTER ─── */
   .report-footer {
@@ -661,6 +687,11 @@
 
     <div class="feedback-heading">Skill observations</div>
     <div class="feedback-grid" id="feedback-grid"></div>
+
+    <button class="btn-pdf" id="btn-pdf" onclick="generatePDF()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download PDF Report
+    </button>
   </div>
 
 </div>
@@ -672,6 +703,7 @@
 
 <script>
   const API_BASE = 'https://mdvmhkrsc3.execute-api.us-east-1.amazonaws.com';
+  let reportData = null;
 
   function show(id) { document.getElementById(id).style.display = id.startsWith('state') ? 'flex' : 'block'; }
   function hide(id) { document.getElementById(id).style.display = 'none'; }
@@ -699,6 +731,7 @@
   };
 
   function renderReport(data, isDemo) {
+    reportData = data;
     const gradeEl = document.getElementById('report-grade');
     gradeEl.textContent = data.overall_grade || '—';
     gradeEl.style.color = gradeColor(data.overall_grade);
@@ -851,6 +884,164 @@
       showUploadError('Upload failed — please try again. ' + err.message);
     }
   });
+
+  // ── PDF generation ──
+  function generatePDF() {
+    if (!reportData) return;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+    const W = 210, M = 16, CW = W - M * 2;
+    let y = 0;
+
+    const C = {
+      dark:   [8,  15,  10],
+      green:  [0,  200, 100],
+      greenD: [0,  160,  75],
+      text:   [25,  35,  30],
+      muted:  [100,120, 110],
+      surf:   [244,250, 246],
+      red:    [220,  80,  80],
+      yellow: [200, 160,  20],
+      white:  [255,255, 255],
+    };
+
+    const fill  = (r,g,b) => doc.setFillColor(r,g,b);
+    const ink   = (r,g,b) => doc.setTextColor(r,g,b);
+    const font  = (style, size) => { doc.setFont('helvetica', style); doc.setFontSize(size); };
+
+    // ── Header band ──
+    fill(...C.dark); doc.rect(0, 0, W, 26, 'F');
+    ink(...C.green); font('bold', 16);
+    doc.text('PITCHSCOUT AI', M, 11);
+    ink(180,210,195); font('normal', 7);
+    doc.text('ANALYSIS REPORT', M, 18);
+    ink(...C.muted); font('normal', 6.5);
+    const dateStr = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+    doc.text(dateStr, W - M, 18, { align: 'right' });
+    y = 36;
+
+    // ── Player title + grade ──
+    const jersey = reportData.jersey_number ? `#${reportData.jersey_number}` : 'Report';
+    const gradeC = { A: C.green, B: C.greenD, C: C.yellow }[reportData.overall_grade?.[0]] || C.red;
+
+    // Grade block (right)
+    const GX = W - M - 28, GY = y - 6, GW = 28, GH = 26;
+    fill(...C.dark); doc.roundedRect(GX, GY, GW, GH, 2, 2, 'F');
+    ink(...gradeC); font('bold', 26);
+    doc.text(reportData.overall_grade || '-', GX + GW / 2, GY + 17, { align: 'center' });
+    ink(...C.muted); font('normal', 5.5);
+    doc.text('OVERALL GRADE', GX + GW / 2, GY + 23, { align: 'center' });
+
+    // Player label + jersey (left)
+    ink(...C.muted); font('bold', 7.5);
+    doc.text('PLAYER', M, y);
+    ink(...C.green); font('bold', 26);
+    doc.text(jersey, M, y + 14);
+
+    // Meta line
+    const metaParts = [
+      reportData.position,
+      reportData.age_bracket,
+      reportData.dominant_foot ? reportData.dominant_foot + ' foot' : null,
+      ({ League:'League Game', Tournament:'Tournament Game', Friendly:'Friendly Game', Training:'Training Session' })[reportData.match_type] || reportData.match_type,
+    ].filter(Boolean);
+    ink(...C.muted); font('normal', 8);
+    doc.text(metaParts.join('  ·  '), M, y + 22);
+
+    y += 34;
+
+    // ── Divider ──
+    doc.setDrawColor(...C.green); doc.setLineWidth(0.3);
+    doc.line(M, y, W - M, y);
+    y += 8;
+
+    // ── Summary ──
+    ink(...C.green); font('bold', 6.5);
+    doc.text('// ANALYSIS SUMMARY', M, y);
+    y += 5;
+
+    const sumLines = doc.splitTextToSize(reportData.summary || '', CW - 5);
+    const sumH = sumLines.length * 4.8 + 8;
+    fill(...C.surf); doc.rect(M, y, CW, sumH, 'F');
+    fill(...C.green); doc.rect(M, y, 1.5, sumH, 'F');
+    ink(...C.text); font('normal', 8);
+    doc.text(sumLines, M + 6, y + 5);
+    y += sumH + 10;
+
+    // ── Feedback ──
+    ink(...C.muted); font('bold', 6.5);
+    doc.text('SKILL OBSERVATIONS', M, y);
+    y += 6;
+
+    const colW = (CW - 5) / 2;
+    const RCFG = {
+      green:  { c: C.green,  label: 'STRENGTH' },
+      yellow: { c: C.yellow, label: 'DEVELOPING' },
+      red:    { c: C.red,    label: 'NEEDS WORK' },
+    };
+
+    let col = 0;
+    let rowTopY = y;
+
+    (reportData.feedback || []).forEach(item => {
+      const cfg = RCFG[item.rating] || RCFG.yellow;
+      const x   = M + col * (colW + 5);
+      const commentLines = doc.splitTextToSize(item.comment || '', colW - 8);
+      const cardH = 10 + commentLines.length * 4.5 + 4;
+
+      if (y + cardH > 278) {
+        doc.addPage(); y = 20; col = 0; rowTopY = y;
+      }
+
+      fill(...C.surf); doc.roundedRect(x, y, colW, cardH, 1.5, 1.5, 'F');
+      fill(...cfg.c); doc.rect(x, y, 1.5, cardH, 'F');
+
+      // Category tag
+      ink(...cfg.c); font('bold', 6);
+      doc.text(`${cfg.label} — ${item.category || ''}`, x + 4, y + 5.5);
+
+      // Timestamp (plain text, right-aligned in card)
+      if (item.timestamp) {
+        ink(...C.muted); font('normal', 5.5);
+        doc.text(`[${item.timestamp}]`, x + colW - 3, y + 5.5, { align: 'right' });
+      }
+
+      // Comment
+      ink(...C.text); font('normal', 7.5);
+      doc.text(commentLines, x + 4, y + 10.5);
+
+      if (col === 0) {
+        col = 1;
+      } else {
+        y += cardH + 4;
+        col = 0;
+        rowTopY = y;
+      }
+    });
+
+    // Flush last odd card
+    if (col === 1) {
+      const lastCardH = 10 + doc.splitTextToSize(
+        (reportData.feedback || []).slice(-1)[0]?.comment || '', colW - 8
+      ).length * 4.5 + 4;
+      y = rowTopY + lastCardH + 4;
+    }
+
+    // ── Footer on every page ──
+    const pages = doc.getNumberOfPages();
+    for (let p = 1; p <= pages; p++) {
+      doc.setPage(p);
+      doc.setDrawColor(...C.muted); doc.setLineWidth(0.2);
+      doc.line(M, 287, W - M, 287);
+      ink(...C.muted); font('normal', 5.5);
+      doc.text('Report is confidential. Player data anonymised. © 2026 PitchScout AI · pitchscout.ai', M, 292);
+      doc.text(`${p} / ${pages}`, W - M, 292, { align: 'right' });
+    }
+
+    const fname = `PitchScout_${(reportData.jersey_number || 'Report')}_${reportData.position || ''}_${new Date().toISOString().slice(0,10)}.pdf`;
+    doc.save(fname);
+  }
 
   // ── Init: route by ?session_id ──
   async function init() {
