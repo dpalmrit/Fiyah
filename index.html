@@ -1,550 +1,833 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Scout AI — Soccer Video Analysis</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PitchScout AI — Scout Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --green: #00e676;
+    --green-dim: #00b85a;
+    --dark: #080f0a;
+    --surface: #0d1a10;
+    --surface2: #122018;
+    --border: rgba(0,230,118,0.15);
+    --text: #e8f5ec;
+    --muted: #7a9982;
+    --accent: #39ff8a;
+    --red: #ff6b6b;
+    --yellow: #ffd166;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(0,230,118,0.025) 60px, rgba(0,230,118,0.025) 61px),
+      repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(0,230,118,0.018) 60px, rgba(0,230,118,0.018) 61px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    height: 64px;
+    background: rgba(8,15,10,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.4rem;
+    letter-spacing: 0.08em;
+    color: var(--green);
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .nav-logo span { color: var(--text); opacity: 0.5; }
+
+  .nav-badge {
+    background: rgba(0,230,118,0.1);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 5px 14px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--green);
+  }
+
+  /* ─── PAGE ─── */
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 100px 40px 80px;
+  }
+
+  /* ─── STATES ─── */
+  .state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .state-icon { font-size: 3rem; }
+
+  .state h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .state p { color: var(--muted); font-size: 0.95rem; line-height: 1.6; max-width: 360px; }
+
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid rgba(0,230,118,0.15);
+    border-top-color: var(--green);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  /* ─── REPORT HEADER ─── */
+  .report-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,230,118,0.1);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 32px;
+  }
+
+  .report-eyebrow::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+
+  .report-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 32px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .report-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(2rem, 5vw, 3rem);
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  .report-title .highlight { color: var(--green); display: block; }
+
+  .report-meta {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ─── GRADE BLOCK ─── */
+  .grade-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 36px;
+    text-align: center;
+    min-width: 140px;
+    flex-shrink: 0;
+  }
+
+  .grade-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 5.5rem;
+    font-weight: 900;
+    color: var(--green);
+    line-height: 1;
+  }
+
+  .grade-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 6px;
+  }
+
+  /* ─── SUMMARY ─── */
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 32px;
+    border-left: 3px solid var(--green);
+  }
+
+  .summary-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 12px;
+  }
+
+  .summary-text {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  /* ─── FEEDBACK ─── */
+  .feedback-heading {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .feedback-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .obs-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    border-left: 3px solid transparent;
+  }
+
+  .obs-card.positive { border-left-color: var(--green); }
+  .obs-card.negative { border-left-color: var(--red); }
+  .obs-card.neutral  { border-left-color: var(--yellow); }
+
+  .obs-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .obs-card.positive .obs-tag { color: var(--green); }
+  .obs-card.negative .obs-tag { color: var(--red); }
+  .obs-card.neutral  .obs-tag { color: var(--yellow); }
+
+  .obs-text {
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--text);
+  }
+
+  /* ─── FOOTER ─── */
+  .report-footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 28px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 900px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .footer-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    letter-spacing: 0.08em;
+    color: var(--green);
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .footer-legal { font-size: 0.75rem; color: rgba(122,153,130,0.5); }
+
+  /* ─── DEMO BANNER ─── */
+  .demo-banner {
+    background: rgba(0,230,118,0.07);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-bottom: 36px;
+  }
+
+  .demo-banner strong { color: var(--green); }
+
+  /* ─── UPLOAD FORM ─── */
+  .upload-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 48px 40px;
+    max-width: 520px;
+    width: 100%;
+    text-align: left;
+  }
+
+  .upload-card h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 8px;
+  }
+
+  .upload-card h2 span { color: var(--green); }
+
+  .upload-card .sub {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+
+  .form-group { margin-bottom: 20px; }
+
+  .form-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-input:focus { border-color: rgba(0,230,118,0.5); }
+  .form-input::placeholder { color: var(--muted); opacity: 0.6; }
+
+  .file-drop {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px dashed rgba(0,230,118,0.3);
+    border-radius: 8px;
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+
+  .file-drop:hover, .file-drop.dragover {
+    border-color: var(--green);
+    background: rgba(0,230,118,0.05);
+  }
+
+  .file-drop input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .file-drop-icon { font-size: 1.8rem; margin-bottom: 8px; }
+
+  .file-drop-label {
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+
+  .file-drop-label strong { color: var(--green); }
+
+  .file-selected {
+    font-size: 0.82rem;
+    color: var(--green);
+    margin-top: 10px;
+    font-weight: 500;
+  }
+
+  .btn-submit {
+    width: 100%;
+    margin-top: 8px;
+    background: var(--green);
+    color: var(--dark);
+    border: none;
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+  }
+
+  .btn-submit:hover { background: var(--accent); }
+  .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ─── UPLOAD PROGRESS ─── */
+  .progress-wrap {
+    width: 100%;
+    max-width: 360px;
+    margin-top: 8px;
+  }
+
+  .progress-bar-track {
+    background: rgba(0,230,118,0.12);
+    border-radius: 100px;
+    height: 6px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 100px;
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  .progress-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  /* ─── SUCCESS STATE ─── */
+  .success-icon {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: rgba(0,230,118,0.12);
+    border: 2px solid var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    margin: 0 auto 20px;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 680px) {
+    nav { padding: 0 20px; }
+    .page { padding: 90px 20px 60px; }
+    .report-header { flex-direction: column; }
+    .feedback-grid { grid-template-columns: 1fr; }
+    .report-footer { padding: 20px; }
+    .upload-card { padding: 32px 24px; }
+  }
+</style>
 </head>
 <body>
 
-  <a href="#main-content" class="skip-link">Skip to main content</a>
-  <div id="sr-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+<nav>
+  <a href="/" class="nav-logo">Pitch<span>Scout</span> AI</a>
+  <div class="nav-badge">Scout Report</div>
+</nav>
 
-  <!-- ═══════════════════════════════════════════════════════
-       INTAKE MODAL — shown before upload starts
-       Collects jersey number, position, age bracket, foot.
-       All data stays in session memory only — zero PII stored.
-  ════════════════════════════════════════════════════════ -->
-  <div id="intakeOverlay" class="intake-overlay" role="dialog" aria-modal="true"
-    aria-labelledby="intakeTitle" style="display:none">
-    <div class="intake-modal">
+<div class="page">
 
-      <div class="intake-header">
-        <p class="intake-step-label" id="intakeStepLabel">Step 1 of 2 — Player details</p>
-        <h2 id="intakeTitle">Tell us about the player</h2>
-        <p class="intake-sub">This stays in your browser only — nothing is stored on our servers.</p>
+  <!-- Loading state -->
+  <div class="state" id="state-loading">
+    <div class="spinner"></div>
+    <h2>Loading report…</h2>
+    <p>Fetching your scouting report.</p>
+  </div>
+
+  <!-- Upload form state -->
+  <div class="state" id="state-upload" style="display:none;">
+    <div class="upload-card">
+      <h2>Submit your <span>pitch</span></h2>
+      <p class="sub">Upload a video clip of your play. Our AI scout will analyze your technique and email you a full report in about 2 minutes.</p>
+
+      <div class="form-group">
+        <label class="form-label" for="input-email">Your email</label>
+        <input class="form-input" type="email" id="input-email" placeholder="you@example.com" autocomplete="email" />
       </div>
 
-      <!-- Step 1: player metadata -->
-      <div id="intakeStep1">
-        <div class="intake-fields">
-
-          <div class="intake-group intake-group--half">
-            <label for="jerseyNumber" class="intake-label">
-              Jersey number <span class="intake-required" aria-label="required">*</span>
-            </label>
-            <input type="number" id="jerseyNumber" name="jerseyNumber"
-              min="1" max="99" placeholder="e.g. 7"
-              class="intake-input" required
-              aria-describedby="jerseyHint" />
-            <p id="jerseyHint" class="intake-hint">Used by the AI to track the right player</p>
-          </div>
-
-          <div class="intake-group intake-group--half">
-            <label for="dominantFoot" class="intake-label">Dominant foot</label>
-            <select id="dominantFoot" class="intake-input intake-select">
-              <option value="">Select…</option>
-              <option value="Right">Right</option>
-              <option value="Left">Left</option>
-              <option value="Both">Both / Ambidextrous</option>
-            </select>
-          </div>
-
-          <div class="intake-group">
-            <label for="playerPosition" class="intake-label">Position</label>
-            <div class="position-grid" role="group" aria-labelledby="posLabel">
-              <p id="posLabel" class="sr-only">Select player position</p>
-              <button type="button" class="pos-btn" data-pos="GK">GK</button>
-              <button type="button" class="pos-btn" data-pos="CB">CB</button>
-              <button type="button" class="pos-btn" data-pos="LB">LB</button>
-              <button type="button" class="pos-btn" data-pos="RB">RB</button>
-              <button type="button" class="pos-btn" data-pos="CDM">CDM</button>
-              <button type="button" class="pos-btn" data-pos="CM">CM</button>
-              <button type="button" class="pos-btn" data-pos="CAM">CAM</button>
-              <button type="button" class="pos-btn" data-pos="LW">LW</button>
-              <button type="button" class="pos-btn" data-pos="RW">RW</button>
-              <button type="button" class="pos-btn" data-pos="ST">ST</button>
-            </div>
-            <input type="hidden" id="playerPosition" value="" />
-          </div>
-
-          <div class="intake-group intake-group--half">
-            <label for="ageBracket" class="intake-label">Age bracket</label>
-            <select id="ageBracket" class="intake-input intake-select">
-              <option value="">Select…</option>
-              <option value="U10">U10</option>
-              <option value="U12">U12</option>
-              <option value="U14">U14</option>
-              <option value="U16">U16</option>
-              <option value="U18">U18</option>
-              <option value="U21">U21</option>
-              <option value="Senior">Senior</option>
-            </select>
-          </div>
-
-          <div class="intake-group intake-group--half">
-            <label for="matchContext" class="intake-label">Match type</label>
-            <select id="matchContext" class="intake-input intake-select">
-              <option value="">Select…</option>
-              <option value="Friendly">Friendly</option>
-              <option value="League">League</option>
-              <option value="Tournament">Tournament</option>
-              <option value="Training">Training game</option>
-            </select>
-          </div>
-
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" for="input-jersey">Jersey number</label>
+          <input class="form-input" type="text" id="input-jersey" placeholder="e.g. 7" maxlength="3" />
         </div>
-
-        <p id="intakeError1" class="intake-error" style="display:none" role="alert">
-          Please enter a jersey number to continue.
-        </p>
-
-        <div class="intake-actions">
-          <button type="button" class="intake-cancel" id="intakeCancelBtn">Cancel</button>
-          <button type="button" class="intake-next" id="intakeNextBtn">
-            Next — choose footage →
-          </button>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" for="input-position">Position</label>
+          <select class="form-input" id="input-position">
+            <option value="">Select…</option>
+            <option>GK</option><option>CB</option><option>LB</option><option>RB</option>
+            <option>CDM</option><option>CM</option><option>CAM</option>
+            <option>LW</option><option>RW</option><option>ST</option>
+          </select>
         </div>
       </div>
 
-      <!-- Step 2: choose footage or run demo -->
-      <div id="intakeStep2" style="display:none">
-        <div class="intake-summary" id="intakeSummary" aria-label="Player details summary"></div>
-
-        <div class="intake-upload-area">
-          <div class="intake-drop" id="intakeDrop" role="button" tabindex="0"
-            aria-label="Drop video or press Enter to browse">
-            <span class="intake-drop-icon" aria-hidden="true">🎬</span>
-            <p class="intake-drop-text">Drop footage here or</p>
-            <button type="button" class="select-btn" id="intakeSelectBtn">Browse files</button>
-          </div>
-          <input type="file" id="intakeFileInput" accept="video/*" aria-label="Choose video file" />
-
-          <div class="intake-or" aria-hidden="true">or</div>
-
-          <button type="button" class="demo-btn intake-demo-btn" id="intakeDemoBtn">
-            ▶ Run demo analysis
-          </button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" for="input-foot">Dominant foot</label>
+          <select class="form-input" id="input-foot">
+            <option value="">Select…</option>
+            <option>Right</option><option>Left</option><option>Both</option>
+          </select>
         </div>
-
-        <button type="button" class="intake-back" id="intakeBackBtn">← Back</button>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" for="input-age">Age bracket</label>
+          <select class="form-input" id="input-age">
+            <option value="">Select…</option>
+            <option>U10</option><option>U11</option><option>U12</option><option>U13</option>
+            <option>U14</option><option>U15</option><option>U16</option><option>U17</option>
+            <option>U18</option><option>U19</option><option>Other</option>
+          </select>
+        </div>
       </div>
 
+      <div class="form-group" style="margin-top:16px;">
+        <label class="form-label" for="input-match">Match type</label>
+        <select class="form-input" id="input-match">
+          <option value="">Select…</option>
+          <option>Friendly</option><option>League</option>
+          <option>Tournament</option><option>Training</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Video clip</label>
+        <div class="file-drop" id="file-drop">
+          <input type="file" id="input-file" accept="video/*" />
+          <div class="file-drop-icon">🎬</div>
+          <div class="file-drop-label"><strong>Choose video</strong> or drag & drop</div>
+          <div class="file-drop-label" style="margin-top:4px;font-size:0.78rem;">MP4, MOV, AVI · max 500 MB</div>
+        </div>
+        <div class="file-selected" id="file-name-display" style="display:none;"></div>
+      </div>
+
+      <div id="upload-error" style="display:none;font-size:0.85rem;color:var(--red);margin-bottom:12px;"></div>
+
+      <button class="btn-submit" id="btn-submit" disabled>Analyze my pitch →</button>
     </div>
   </div>
 
-
-  <div class="app">
-
-    <header>
-      <nav class="nav" aria-label="Main navigation">
-        <div class="nav-logo" aria-label="Scout AI">
-          <span class="dot" aria-hidden="true"></span>SCOUT AI
-        </div>
-        <div class="nav-tabs" role="tablist" aria-label="App sections">
-          <button class="nav-tab active" role="tab" aria-selected="true"
-            aria-controls="view-upload" data-view="upload" id="tab-upload">Drop Portal</button>
-          <button class="nav-tab" role="tab" aria-selected="false"
-            aria-controls="view-dashboard" data-view="dashboard" id="tab-dashboard">Dashboard</button>
-          <button class="nav-tab" role="tab" aria-selected="false"
-            aria-controls="view-arch" data-view="arch" id="tab-arch">Architecture</button>
-        </div>
-        <div class="badge-live" role="status" aria-label="Live demo">LIVE</div>
-      </nav>
-    </header>
-
-    <main id="main-content">
-
-      <!-- ════════════════════════════════════════════════
-           UPLOAD VIEW
-      ════════════════════════════════════════════════ -->
-      <section id="view-upload" class="view active" role="tabpanel"
-        aria-labelledby="tab-upload" tabindex="-1">
-
-        <div class="upload-header">
-          <h1>Match Footage Drop</h1>
-          <p>Upload match footage for AI tactical analysis — all PII scrubbed at ingestion</p>
-        </div>
-
-        <!-- Drop zone — clicking opens intake modal -->
-        <div id="dropZone" class="drop-zone" role="button" tabindex="0"
-          aria-label="Start analysis — enter player details and upload footage"
-          aria-describedby="dropZoneHint">
-          <span class="icon" aria-hidden="true">🎬</span>
-          <h2>Drop your match footage here</h2>
-          <p id="dropZoneHint">MP4, MOV, AVI — up to 5 GB via S3 Transfer Acceleration</p>
-          <div class="drop-zone-actions">
-            <button class="select-btn" id="selectBtn" type="button">Select File</button>
-            <button class="demo-btn"   id="tryDemoBtn" type="button">▶ Try Demo</button>
-          </div>
-        </div>
-        <input type="file" id="fileInput" accept="video/*" aria-label="Choose video file" style="display:none" />
-
-        <!-- File preview -->
-        <div id="filePreview" class="file-preview" aria-hidden="true" aria-label="Selected file details">
-          <div id="previewThumb" class="preview-thumb" aria-hidden="true">
-            <span class="thumb-icon">🎥</span>
-          </div>
-          <div class="preview-meta">
-            <p class="preview-name" id="previewName">match_footage.mp4</p>
-            <div class="preview-tags">
-              <span class="preview-tag" id="previewSize"></span>
-              <span class="preview-tag" id="previewType"></span>
-            </div>
-          </div>
-          <div class="preview-status">
-            <span class="upload-speed" id="uploadSpeed" aria-live="polite"></span>
-            <span class="upload-eta"   id="uploadEta"   aria-live="polite"></span>
-          </div>
-        </div>
-
-        <!-- Security badges -->
-        <ul class="security-badges" aria-label="Security features">
-          <li class="sec-badge"><span aria-hidden="true">🔐</span> End-to-end encrypted</li>
-          <li class="sec-badge"><span aria-hidden="true">🔑</span> Pre-signed S3 URL</li>
-          <li class="sec-badge"><span aria-hidden="true">🚀</span> Transfer Acceleration</li>
-          <li class="sec-badge"><span aria-hidden="true">🧹</span> PII scrubbed</li>
-        </ul>
-
-        <!-- Progress pipeline -->
-        <div class="upload-progress" id="uploadProgress" aria-hidden="true">
-          <div class="progress-label">
-            <span id="progressLabel">Initialising…</span>
-            <span id="progressPct">0%</span>
-          </div>
-          <div class="progress-bar" role="progressbar" aria-valuemin="0"
-            aria-valuemax="100" aria-valuenow="0" aria-labelledby="progressLabel" id="progressBar">
-            <div class="progress-fill" id="progressFill"></div>
-          </div>
-          <div id="aiFrames" class="ai-frames" aria-hidden="true" style="display:none">
-            <div class="ai-frame" aria-hidden="true"></div>
-            <div class="ai-frame" aria-hidden="true"></div>
-            <div class="ai-frame" aria-hidden="true"></div>
-            <div class="ai-frame" aria-hidden="true"></div>
-            <span class="ai-label" id="aiAnalysisLabel">Analysing frames…</span>
-          </div>
-          <ol class="progress-steps" aria-label="Upload pipeline steps">
-            <li class="step-pill" id="step1">Pre-signed URL</li>
-            <li class="step-pill" id="step2">S3 Upload</li>
-            <li class="step-pill" id="step3">UUID Assignment</li>
-            <li class="step-pill" id="step4">Lambda Trigger</li>
-            <li class="step-pill" id="step5">AI Analysis</li>
-            <li class="step-pill" id="step6">SNS Notify</li>
-          </ol>
-        </div>
-
-        <!-- Session info -->
-        <div class="session-info" id="sessionInfo" aria-hidden="true">
-          <dl>
-            <div class="session-row">
-              <dt class="label">session_uuid</dt>
-              <dd class="val" id="sessionUuid"></dd>
-            </div>
-            <div class="session-row">
-              <dt class="label">player_uuid</dt>
-              <dd class="val" id="playerUuid"></dd>
-            </div>
-            <div class="session-row">
-              <dt class="label">s3_key</dt>
-              <dd class="val" id="s3Key"></dd>
-            </div>
-            <div class="session-row">
-              <dt class="label">jersey</dt>
-              <dd class="val" id="sessionJersey">—</dd>
-            </div>
-            <div class="session-row">
-              <dt class="label">status</dt>
-              <dd class="val" id="statusVal">processing</dd>
-            </div>
-          </dl>
-          <p class="pii-note" role="note">
-            ✓ No player names or birthdates stored — UUIDs + jersey number only (PII compliant)
-          </p>
-        </div>
-
-        <!-- Post-pipeline CTA + waitlist form -->
-        <div id="dashCta" class="dash-cta" aria-hidden="true" style="display:none">
-
-          <div class="cta-report">
-            <p>Analysis complete — your scout report is ready.</p>
-            <button class="select-btn" id="goToDashBtn" type="button">View Report →</button>
-          </div>
-
-          <div class="waitlist-divider" aria-hidden="true"></div>
-
-          <div class="waitlist-wrap">
-            <p class="waitlist-heading">Want this for your team?</p>
-            <p class="waitlist-sub">Join the early access list — we'll reach out before the fall season.</p>
-            <form
-              id="waitlistForm"
-              class="waitlist-form"
-              action="https://formspree.io/f/mvzvjkgg"
-              method="POST"
-              novalidate
-              aria-label="Early access waitlist signup"
-            >
-              <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
-              <input type="hidden" name="_subject" value="New Scout AI waitlist signup" />
-              <div class="waitlist-fields">
-                <div class="wf-group">
-                  <label for="wl-name" class="wf-label">Your name</label>
-                  <input type="text" id="wl-name" name="name"
-                    placeholder="Coach name" autocomplete="name" class="wf-input" />
-                </div>
-                <div class="wf-group">
-                  <label for="wl-email" class="wf-label">Email address</label>
-                  <input type="email" id="wl-email" name="email"
-                    placeholder="you@club.com" autocomplete="email" required class="wf-input" />
-                </div>
-                <div class="wf-group">
-                  <label for="wl-club" class="wf-label">Club or team</label>
-                  <input type="text" id="wl-club" name="club"
-                    placeholder="e.g. Miami FC Academy" class="wf-input" />
-                </div>
-              </div>
-              <div class="wf-footer">
-                <button type="submit" class="wf-submit" id="wlSubmit">Get early access</button>
-                <p class="wf-privacy">No spam. No PII stored. Unsubscribe any time.</p>
-              </div>
-              <div id="wlSuccess" class="wl-success" role="status" aria-live="polite"
-                hidden style="display:none">
-                <span aria-hidden="true">✓</span>
-                You're on the list — we'll be in touch before the fall season.
-              </div>
-              <div id="wlError" class="wl-error" role="alert" aria-live="assertive"
-                hidden style="display:none">
-                Something went wrong. Please try again or email us directly.
-              </div>
-            </form>
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- ════════════════════════════════════════════════
-           DASHBOARD VIEW
-      ════════════════════════════════════════════════ -->
-      <section id="view-dashboard" class="view" role="tabpanel"
-        aria-labelledby="tab-dashboard" tabindex="-1" aria-hidden="true">
-
-        <!-- Personalised player context card — populated from session memory -->
-        <div class="player-context-card" id="playerContextCard" aria-label="Player session details">
-          <div class="pccard-jersey" id="pcJersey" aria-label="Jersey number">#7</div>
-          <div class="pccard-details">
-            <div class="pccard-tags" id="pcTags">
-              <span class="pccard-tag" id="pcPosition">Midfielder</span>
-              <span class="pccard-tag" id="pcAge">U16</span>
-              <span class="pccard-tag" id="pcFoot">Right foot</span>
-              <span class="pccard-tag" id="pcMatch">League</span>
-            </div>
-            <p class="pccard-uuid">
-              <span class="sr-only">Player UUID: </span>
-              <span id="pcUuid">player_uuid: a7f3e2b1-9c84-4d12-8e56-2f0a1b3c4d5e</span>
-            </p>
-          </div>
-          <div class="pccard-pii-badge" title="PII compliant — no name stored">
-            <span aria-hidden="true">🔐</span>
-            <span>PII safe</span>
-          </div>
-        </div>
-
-        <header class="dash-header">
-          <h1>Tactical Analysis</h1>
-          <p id="dashReportMeta">AI Scout Report — Session completed</p>
-        </header>
-
-        <div class="grade-hero" id="gradeHero" aria-label="Overall scout grade">
-          <p class="grade-label" aria-hidden="true">Technical Scout Grade</p>
-          <p class="grade-value" aria-hidden="true" id="gradeValue">B+</p>
-          <p class="grade-sub" id="gradeSub">Exceeds baseline — potential flagged for further review</p>
-        </div>
-
-        <section class="metrics-grid" aria-label="Performance metrics">
-          <article class="metric-card">
-            <h2 class="m-label">Scanning Rate</h2>
-            <p class="m-value" aria-label="87 out of 100">87<span class="m-unit" aria-hidden="true">/100</span></p>
-            <div class="m-bar" role="progressbar" aria-valuenow="87" aria-valuemin="0" aria-valuemax="100" aria-label="Scanning rate 87%">
-              <div class="m-fill" id="bar1" style="background:var(--accent)"></div>
-            </div>
-            <p class="m-caption">Pre-receive head checks per minute: 4.2</p>
-          </article>
-          <article class="metric-card">
-            <h2 class="m-label">Positioning IQ</h2>
-            <p class="m-value" aria-label="79 out of 100">79<span class="m-unit" aria-hidden="true">/100</span></p>
-            <div class="m-bar" role="progressbar" aria-valuenow="79" aria-valuemin="0" aria-valuemax="100" aria-label="Positioning IQ 79%">
-              <div class="m-fill" id="bar2" style="background:#61dafb"></div>
-            </div>
-            <p class="m-caption" id="posCaption">Optimal zone occupancy: 68% of possession</p>
-          </article>
-          <article class="metric-card">
-            <h2 class="m-label">First Touch</h2>
-            <p class="m-value" aria-label="91 out of 100">91<span class="m-unit" aria-hidden="true">/100</span></p>
-            <div class="m-bar" role="progressbar" aria-valuenow="91" aria-valuemin="0" aria-valuemax="100" aria-label="First touch 91%">
-              <div class="m-fill" id="bar3" style="background:var(--accent2)"></div>
-            </div>
-            <p class="m-caption" id="touchCaption">Clean control: 34/37 attempts</p>
-          </article>
-          <article class="metric-card">
-            <h2 class="m-label">Decision Speed</h2>
-            <p class="m-value" aria-label="1.4 seconds average">1.4<span class="m-unit" aria-hidden="true">s avg</span></p>
-            <div class="m-bar" role="progressbar" aria-valuenow="67" aria-valuemin="0" aria-valuemax="100" aria-label="Decision speed score 67%">
-              <div class="m-fill" id="bar4" style="background:#f9c74f"></div>
-            </div>
-            <p class="m-caption">vs 2.1s positional average</p>
-          </article>
-        </section>
-
-        <section class="scan-meter" aria-label="Scanning activity chart">
-          <h2 class="scan-meter-heading">Scanning Activity — 90 min match</h2>
-          <div class="scan-timeline" id="scanTimeline" role="img"
-            aria-label="Bar chart showing scanning frequency across match. Activity peaks in second half."></div>
-        </section>
-
-        <section class="ai-feed" aria-label="AI scout observations">
-          <h2 class="ai-feed-heading">AI Scout Observations</h2>
-          <ul class="feed-list" id="feedList">
-            <li class="feed-item">
-              <span class="feed-dot" aria-hidden="true" style="background:var(--accent)"></span>
-              <div>
-                <p class="feed-text" id="feed1">Exceptional pre-receive scanning in final third — identifies runs behind defensive line consistently</p>
-                <p class="feed-time"><span class="sr-only">Time window: </span>45′ – 90′</p>
-              </div>
-            </li>
-            <li class="feed-item">
-              <span class="feed-dot" aria-hidden="true" style="background:#61dafb"></span>
-              <div>
-                <p class="feed-text" id="feed2">Positional discipline breaks down when team loses shape — drifts wide unnecessarily in 23rd minute</p>
-                <p class="feed-time"><span class="sr-only">Time window: </span>18′ – 28′</p>
-              </div>
-            </li>
-            <li class="feed-item">
-              <span class="feed-dot" aria-hidden="true" style="background:var(--accent2)"></span>
-              <div>
-                <p class="feed-text" id="feed3">Left-foot distribution below right-foot baseline by 22% — recommend targeted training focus</p>
-                <p class="feed-time"><span class="sr-only">Scope: </span>Full match analysis</p>
-              </div>
-            </li>
-            <li class="feed-item">
-              <span class="feed-dot" aria-hidden="true" style="background:#f9c74f"></span>
-              <div>
-                <p class="feed-text" id="feed4">High-pressure scenario response: 7/9 correct decisions — notable composure for age bracket</p>
-                <p class="feed-time"><span class="sr-only">Scope: </span>High press moments</p>
-              </div>
-            </li>
-          </ul>
-        </section>
-
-      </section>
-
-
-      <!-- ════════════════════════════════════════════════
-           ARCHITECTURE VIEW
-      ════════════════════════════════════════════════ -->
-      <section id="view-arch" class="view" role="tabpanel"
-        aria-labelledby="tab-arch" tabindex="-1" aria-hidden="true">
-
-        <header class="arch-header">
-          <h1>System Architecture</h1>
-          <p>Production-ready AWS serverless stack with PII security controls</p>
-        </header>
-
-        <section class="arch-layer" aria-label="Frontend stack">
-          <h2 class="arch-layer-title"><span aria-hidden="true">◈</span> Frontend</h2>
-          <ul class="arch-chips">
-            <li class="arch-chip"><span class="dot" style="background:#61dafb" aria-hidden="true"></span>React + Vite</li>
-            <li class="arch-chip"><span class="dot" style="background:#38bdf8" aria-hidden="true"></span>Tailwind CSS</li>
-            <li class="arch-chip"><span class="dot" style="background:var(--accent2)" aria-hidden="true"></span>Mobile-first</li>
-            <li class="arch-chip"><span class="dot" style="background:var(--accent)" aria-hidden="true"></span>S3 Hosted</li>
-            <li class="arch-chip"><span class="dot" style="background:#a78bfa" aria-hidden="true"></span>CloudFront CDN</li>
-          </ul>
-        </section>
-        <section class="arch-layer" aria-label="API layer">
-          <h2 class="arch-layer-title"><span aria-hidden="true">◈</span> API Layer</h2>
-          <ul class="arch-chips">
-            <li class="arch-chip"><span class="dot" style="background:#ff9900" aria-hidden="true"></span>API Gateway</li>
-            <li class="arch-chip"><span class="dot" style="background:#ff9900" aria-hidden="true"></span>Lambda (Python 3.12)</li>
-            <li class="arch-chip"><span class="dot" style="background:var(--accent)" aria-hidden="true"></span>Provisioned Concurrency</li>
-            <li class="arch-chip"><span class="dot" style="background:#f9c74f" aria-hidden="true"></span>Request Middleware</li>
-          </ul>
-        </section>
-        <section class="arch-layer" aria-label="Storage and data">
-          <h2 class="arch-layer-title"><span aria-hidden="true">◈</span> Storage &amp; Data</h2>
-          <ul class="arch-chips">
-            <li class="arch-chip"><span class="dot" style="background:#ff9900" aria-hidden="true"></span>S3 + Transfer Accel</li>
-            <li class="arch-chip"><span class="dot" style="background:#ff9900" aria-hidden="true"></span>DynamoDB (UUID keys)</li>
-            <li class="arch-chip"><span class="dot" style="background:var(--accent)" aria-hidden="true"></span>AES-256 at rest</li>
-            <li class="arch-chip"><span class="dot" style="background:#61dafb" aria-hidden="true"></span>TLS 1.3 in transit</li>
-          </ul>
-        </section>
-        <section class="arch-layer" aria-label="AI and notifications">
-          <h2 class="arch-layer-title"><span aria-hidden="true">◈</span> AI &amp; Notifications</h2>
-          <ul class="arch-chips">
-            <li class="arch-chip"><span class="dot" style="background:#4285f4" aria-hidden="true"></span>Gemini Vision / GPT-4o</li>
-            <li class="arch-chip"><span class="dot" style="background:#ff9900" aria-hidden="true"></span>AWS SNS (SMS)</li>
-            <li class="arch-chip"><span class="dot" style="background:#ff9900" aria-hidden="true"></span>AWS SES (Email)</li>
-            <li class="arch-chip"><span class="dot" style="background:var(--accent)" aria-hidden="true"></span>Technical Scout Prompt</li>
-          </ul>
-        </section>
-
-        <section class="security-grid" aria-label="Security design highlights">
-          <article class="sec-item">
-            <h2>PII Scrubbing</h2>
-            <p>player_uuid + jersey number in DynamoDB only. No names, no DOB ever written.</p>
-          </article>
-          <article class="sec-item">
-            <h2>Cold Start Fix</h2>
-            <p>Provisioned Concurrency on AI Lambda — zero cold start for the analysis function.</p>
-          </article>
-          <article class="sec-item">
-            <h2>Secure Upload</h2>
-            <p>Pre-signed S3 URLs with 15-min expiry + Transfer Acceleration for large videos.</p>
-          </article>
-          <article class="sec-item">
-            <h2>IaC Ready</h2>
-            <p>AWS SAM template defines all resources — Lambda, DynamoDB, S3, SNS, SES.</p>
-          </article>
-        </section>
-
-        <figure class="code-snippet" aria-label="Lambda handler code example">
-          <figcaption class="sr-only">Python Lambda handler — jersey-aware prompt, UUID-only storage</figcaption>
-          <pre><code><span class="cm"># Lambda: AI Analysis Handler — jersey-aware prompt</span>
-<span class="kw">def</span> <span class="fn">handler</span>(event, context):
-    session_uuid = event[<span class="str">'session_uuid'</span>]
-    player_uuid  = event[<span class="str">'player_uuid'</span>]
-    jersey       = event[<span class="str">'jersey_number'</span>]   <span class="cm"># e.g. "7"</span>
-    position     = event[<span class="str">'position'</span>]        <span class="cm"># e.g. "CM"</span>
-
-    prompt = SCOUT_PROMPT.<span class="fn">format</span>(
-        jersey=jersey, position=position
-    )
-    <span class="cm"># e.g. "Analyse player #7 (CM) in this footage…"</span>
-
-    presigned = s3.<span class="fn">generate_presigned_url</span>(
-        <span class="str">'get_object'</span>,
-        Params={<span class="str">'Bucket'</span>: BUCKET, <span class="str">'Key'</span>: event[<span class="str">'s3_key'</span>]},
-        ExpiresIn=<span class="str">300</span>
-    )
-    result = vision_model.<span class="fn">analyze</span>(presigned, prompt=prompt)
-    dynamodb.<span class="fn">put_item</span>(TableName=TABLE, Item={
-        <span class="str">'session_uuid'</span>: {<span class="str">'S'</span>: session_uuid},
-        <span class="str">'player_uuid'</span>:  {<span class="str">'S'</span>: player_uuid},
-        <span class="str">'jersey'</span>:       {<span class="str">'N'</span>: jersey},
-        <span class="str">'position'</span>:     {<span class="str">'S'</span>: position},
-        <span class="str">'analysis'</span>:     {<span class="str">'S'</span>: result}
-    })
-    sns.<span class="fn">publish</span>(TopicArn=SNS_TOPIC, Message=<span class="str">'Analysis complete'</span>)</code></pre>
-        </figure>
-
-      </section>
-    </main>
+  <!-- Uploading state -->
+  <div class="state" id="state-uploading" style="display:none;">
+    <div class="spinner"></div>
+    <h2>Uploading…</h2>
+    <div class="progress-wrap">
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-label" id="progress-label">0%</div>
+    </div>
   </div>
 
-  <script src="js/app.js"></script>
+  <!-- Success state -->
+  <div class="state" id="state-success" style="display:none;">
+    <div class="success-icon">✓</div>
+    <h2>Video received</h2>
+    <p>Your clip is being analyzed. You'll receive your scout report at <strong id="success-email" style="color:var(--green);"></strong> in about 2 minutes.</p>
+  </div>
+
+  <!-- Error state -->
+  <div class="state" id="state-error" style="display:none;">
+    <div class="state-icon">⚠️</div>
+    <h2>Report not found</h2>
+    <p>This report may have expired or the link is incorrect. Contact your scout for a new link.</p>
+  </div>
+
+  <!-- Report (populated by JS) -->
+  <div id="report-content" style="display:none;">
+    <div class="report-eyebrow" id="report-eyebrow">PitchScout Analysis</div>
+
+    <div class="report-header">
+      <div class="report-left">
+        <div class="report-title">
+          Scout<br>
+          <span class="highlight" id="report-title-line">Report</span>
+        </div>
+        <div class="report-meta" id="report-meta"></div>
+      </div>
+      <div class="grade-block">
+        <div class="grade-value" id="report-grade">—</div>
+        <div class="grade-label">Overall grade</div>
+      </div>
+    </div>
+
+    <div id="demo-banner" class="demo-banner" style="display:none;">
+      <span>⚡</span>
+      <span><strong>Demo report.</strong> This is a sample generated from a real analysis run. Player identity is anonymous.</span>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-label">Scout summary</div>
+      <div class="summary-text" id="report-summary"></div>
+    </div>
+
+    <div class="feedback-heading">Skill observations</div>
+    <div class="feedback-grid" id="feedback-grid"></div>
+  </div>
+
+</div>
+
+<div class="report-footer">
+  <a href="/" class="footer-logo">PitchScout AI</a>
+  <div class="footer-legal">Report is confidential. Player data anonymised. © 2026 PitchScout AI.</div>
+</div>
+
+<script>
+  const API_BASE = 'https://mdvmhkrsc3.execute-api.us-east-1.amazonaws.com';
+
+  function show(id) { document.getElementById(id).style.display = id.startsWith('state') ? 'flex' : 'block'; }
+  function hide(id) { document.getElementById(id).style.display = 'none'; }
+
+  const RATING_MAP = {
+    green:  { cls: 'positive', prefix: '✦ Strength' },
+    yellow: { cls: 'neutral',  prefix: '◈ Developing' },
+    red:    { cls: 'negative', prefix: '▼ Needs work' },
+  };
+
+  function gradeColor(g) {
+    if (!g) return 'var(--green)';
+    const f = g[0].toUpperCase();
+    if (f === 'A') return '#00e676';
+    if (f === 'B') return '#00b85a';
+    if (f === 'C') return '#ffd166';
+    return '#ff6b6b';
+  }
+
+  function renderReport(data, isDemo) {
+    const gradeEl = document.getElementById('report-grade');
+    gradeEl.textContent = data.overall_grade || '—';
+    gradeEl.style.color = gradeColor(data.overall_grade);
+    document.getElementById('report-summary').textContent = data.summary || '';
+
+    const grid = document.getElementById('feedback-grid');
+    grid.innerHTML = '';
+    (data.feedback || []).forEach(item => {
+      const map = RATING_MAP[item.rating] || RATING_MAP.yellow;
+      const card = document.createElement('div');
+      card.className = `obs-card ${map.cls}`;
+      card.innerHTML = `
+        <div class="obs-tag">${map.prefix} — ${item.category || ''}</div>
+        <div class="obs-text">${item.comment || ''}</div>
+      `;
+      grid.appendChild(card);
+    });
+
+    if (isDemo) {
+      show('demo-banner');
+      document.getElementById('report-eyebrow').textContent = 'Sample Report';
+      document.getElementById('report-title-line').textContent = 'Demo';
+    }
+
+    hide('state-loading');
+    show('report-content');
+  }
+
+  // ── Upload form logic ──
+  let selectedFile = null;
+
+  function validateForm() {
+    const email    = document.getElementById('input-email').value.trim();
+    const jersey   = document.getElementById('input-jersey').value.trim();
+    const position = document.getElementById('input-position').value;
+    const foot     = document.getElementById('input-foot').value;
+    const age      = document.getElementById('input-age').value;
+    const match    = document.getElementById('input-match').value;
+    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+      && jersey && position && foot && age && match
+      && selectedFile !== null;
+    document.getElementById('btn-submit').disabled = !valid;
+  }
+
+  ['input-email','input-jersey','input-position','input-foot','input-age','input-match']
+    .forEach(id => document.getElementById(id).addEventListener('change', validateForm));
+  document.getElementById('input-email').addEventListener('input', validateForm);
+  document.getElementById('input-jersey').addEventListener('input', validateForm);
+
+  const fileInput = document.getElementById('input-file');
+  const fileDrop  = document.getElementById('file-drop');
+
+  function onFileChosen(file) {
+    if (!file) return;
+    if (!file.type.startsWith('video/')) {
+      showUploadError('Please select a video file (MP4, MOV, AVI, etc.)');
+      return;
+    }
+    if (file.size > 500 * 1024 * 1024) {
+      showUploadError('File exceeds 500 MB limit. Please trim or compress the clip.');
+      return;
+    }
+    selectedFile = file;
+    const display = document.getElementById('file-name-display');
+    display.textContent = `${file.name}  (${(file.size / 1024 / 1024).toFixed(1)} MB)`;
+    display.style.display = 'block';
+    hide('upload-error');
+    validateForm();
+  }
+
+  fileInput.addEventListener('change', () => onFileChosen(fileInput.files[0]));
+  fileDrop.addEventListener('dragover', e => { e.preventDefault(); fileDrop.classList.add('dragover'); });
+  fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('dragover'));
+  fileDrop.addEventListener('drop', e => {
+    e.preventDefault();
+    fileDrop.classList.remove('dragover');
+    onFileChosen(e.dataTransfer.files[0]);
+  });
+
+  function showUploadError(msg) {
+    const el = document.getElementById('upload-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  document.getElementById('btn-submit').addEventListener('click', async () => {
+    const email = document.getElementById('input-email').value.trim();
+    if (!selectedFile || !email) return;
+
+    hide('state-upload');
+    show('state-uploading');
+
+    try {
+      const res = await fetch(`${API_BASE}/upload-url`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          filename:       selectedFile.name,
+          content_type:   selectedFile.type || 'video/mp4',
+          jersey_number:  document.getElementById('input-jersey').value.trim(),
+          position:       document.getElementById('input-position').value,
+          dominant_foot:  document.getElementById('input-foot').value,
+          age_bracket:    document.getElementById('input-age').value,
+          match_type:     document.getElementById('input-match').value,
+        }),
+      });
+      if (!res.ok) throw new Error('Could not get upload URL');
+      const { upload_url } = await res.json();
+
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', upload_url);
+        xhr.setRequestHeader('Content-Type', selectedFile.type || 'video/mp4');
+
+        xhr.upload.addEventListener('progress', e => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            document.getElementById('progress-fill').style.width = `${pct}%`;
+            document.getElementById('progress-label').textContent = `${pct}%`;
+          }
+        });
+
+        xhr.addEventListener('load', () => xhr.status < 300 ? resolve() : reject(new Error(`S3 ${xhr.status}`)));
+        xhr.addEventListener('error', () => reject(new Error('Upload failed')));
+        xhr.send(selectedFile);
+      });
+
+      hide('state-uploading');
+      document.getElementById('success-email').textContent = email;
+      show('state-success');
+
+    } catch (err) {
+      hide('state-uploading');
+      show('state-upload');
+      showUploadError('Upload failed — please try again. ' + err.message);
+    }
+  });
+
+  // ── Init: route by ?session_id ──
+  async function init() {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+
+    if (!sessionId) {
+      hide('state-loading');
+      show('state-upload');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/report?session_id=${encodeURIComponent(sessionId)}`);
+      if (!res.ok) throw new Error('not found');
+      renderReport(await res.json(), false);
+    } catch {
+      hide('state-loading');
+      show('state-error');
+    }
+  }
+
+  init();
+</script>
 </body>
 </html>
