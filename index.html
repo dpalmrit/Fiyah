@@ -580,7 +580,7 @@
           <input type="file" id="input-file" accept="video/*" />
           <div class="file-drop-icon">🎬</div>
           <div class="file-drop-label"><strong>Choose video</strong> or drag & drop</div>
-          <div class="file-drop-label" style="margin-top:4px;font-size:0.78rem;">MP4, MOV, AVI · max 500 MB</div>
+          <div class="file-drop-label" style="margin-top:4px;font-size:0.78rem;">MP4, MOV, AVI · max 4 GB</div>
         </div>
         <div class="file-selected" id="file-name-display" style="display:none;"></div>
       </div>
@@ -755,8 +755,8 @@
       showUploadError('Please select a video file (MP4, MOV, AVI, etc.)');
       return;
     }
-    if (file.size > 500 * 1024 * 1024) {
-      showUploadError('File exceeds 500 MB limit. Please trim or compress the clip.');
+    if (file.size > 4 * 1024 * 1024 * 1024) {
+      showUploadError('File exceeds 4 GB limit. Please trim or compress the clip.');
       return;
     }
     selectedFile = file;
