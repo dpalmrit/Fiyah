@@ -278,6 +278,19 @@
     color: var(--text);
   }
 
+  .obs-timestamp {
+    display: inline-block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--dark);
+    background: var(--muted);
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+
   /* ─── FOOTER ─── */
   .report-footer {
     position: relative;
@@ -691,12 +704,17 @@
 
     const grid = document.getElementById('feedback-grid');
     grid.innerHTML = '';
+    const isGame = ['League', 'Tournament', 'Friendly'].includes(data.match_type);
     (data.feedback || []).forEach(item => {
       const map = RATING_MAP[item.rating] || RATING_MAP.yellow;
       const card = document.createElement('div');
       card.className = `obs-card ${map.cls}`;
+      const tsHtml = (isGame && item.timestamp)
+        ? `<div class="obs-timestamp">⏱ ${item.timestamp}</div>`
+        : '';
       card.innerHTML = `
         <div class="obs-tag">${map.prefix} — ${item.category || ''}</div>
+        ${tsHtml}
         <div class="obs-text">${item.comment || ''}</div>
       `;
       grid.appendChild(card);
