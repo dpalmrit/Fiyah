@@ -278,6 +278,20 @@
     color: var(--text);
   }
 
+  .obs-timestamp {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    background: rgba(0,230,118,0.07);
+    border: 1px solid rgba(0,230,118,0.15);
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-left: 8px;
+    vertical-align: middle;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+
   /* ─── FOOTER ─── */
   .report-footer {
     position: relative;
@@ -496,7 +510,7 @@
 
 <nav>
   <a href="/" class="nav-logo">Pitch<span>Scout</span> AI</a>
-  <div class="nav-badge">Scout Report</div>
+  <div class="nav-badge">Analysis Report</div>
 </nav>
 
 <div class="page">
@@ -512,7 +526,7 @@
   <div class="state" id="state-upload" style="display:none;">
     <div class="upload-card">
       <h2>Submit your <span>pitch</span></h2>
-      <p class="sub">Upload a video clip of your play. Our AI scout will analyze your technique and email you a full report in about 2 minutes.</p>
+      <p class="sub">Upload a video clip of your play. Our AI scout will analyze your technique and email you a full report.</p>
 
       <div class="form-group">
         <label class="form-label" for="input-email">Your email</label>
@@ -607,7 +621,7 @@
   <div class="state" id="state-success" style="display:none;">
     <div class="success-icon">✓</div>
     <h2>Video received</h2>
-    <p>Your clip is being analyzed. You'll receive your scout report at <strong id="success-email" style="color:var(--green);"></strong> in about 2 minutes.</p>
+    <p>Your clip is being analyzed. You'll receive your Analysis Report at <strong id="success-email" style="color:var(--green);"></strong> — keep an eye on your inbox.</p>
   </div>
 
   <!-- Error state -->
@@ -624,7 +638,7 @@
     <div class="report-header">
       <div class="report-left">
         <div class="report-title">
-          Scout<br>
+          Player<br>
           <span class="highlight" id="report-title-line">Report</span>
         </div>
         <div class="report-meta" id="report-meta"></div>
@@ -641,7 +655,7 @@
     </div>
 
     <div class="summary-card">
-      <div class="summary-label">Scout summary</div>
+      <div class="summary-label">Analysis summary</div>
       <div class="summary-text" id="report-summary"></div>
     </div>
 
@@ -708,8 +722,9 @@
       const map = RATING_MAP[item.rating] || RATING_MAP.yellow;
       const card = document.createElement('div');
       card.className = `obs-card ${map.cls}`;
+      const ts = item.timestamp ? `<span class="obs-timestamp">⏱ ${item.timestamp}</span>` : '';
       card.innerHTML = `
-        <div class="obs-tag">${map.prefix} — ${item.category || ''}</div>
+        <div class="obs-tag">${map.prefix} — ${item.category || ''}${ts}</div>
         <div class="obs-text">${item.comment || ''}</div>
       `;
       grid.appendChild(card);
