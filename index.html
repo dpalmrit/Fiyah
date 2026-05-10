@@ -279,6 +279,13 @@
     color: var(--text);
   }
 
+  .obs-timestamps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+  }
+
   .obs-timestamp {
     font-size: 0.68rem;
     font-weight: 600;
@@ -287,9 +294,7 @@
     background: rgba(0,230,118,0.07);
     border: 1px solid rgba(0,230,118,0.15);
     border-radius: 4px;
-    padding: 1px 6px;
-    margin-left: 8px;
-    vertical-align: middle;
+    padding: 2px 7px;
     font-family: 'Barlow Condensed', sans-serif;
   }
 
@@ -755,10 +760,14 @@
       const map = RATING_MAP[item.rating] || RATING_MAP.yellow;
       const card = document.createElement('div');
       card.className = `obs-card ${map.cls}`;
-      const ts = item.timestamp ? `<span class="obs-timestamp">⏱ ${item.timestamp}</span>` : '';
+      const tsList = item.timestamps || (item.timestamp ? [item.timestamp] : []);
+      const tsHtml = tsList.length
+        ? `<div class="obs-timestamps">${tsList.map(t => `<span class="obs-timestamp">⏱ ${t}</span>`).join('')}</div>`
+        : '';
       card.innerHTML = `
-        <div class="obs-tag">${map.prefix} — ${item.category || ''}${ts}</div>
+        <div class="obs-tag">${map.prefix} — ${item.category || ''}</div>
         <div class="obs-text">${item.comment || ''}</div>
+        ${tsHtml}
       `;
       grid.appendChild(card);
     });
@@ -1001,10 +1010,11 @@
       ink(...cfg.c); font('bold', 6);
       doc.text(`${cfg.label} — ${item.category || ''}`, x + 4, y + 5.5);
 
-      // Timestamp (plain text, right-aligned in card)
-      if (item.timestamp) {
+      // Timestamps (array or legacy single string)
+      const tsList = item.timestamps || (item.timestamp ? [item.timestamp] : []);
+      if (tsList.length) {
         ink(...C.muted); font('normal', 5.5);
-        doc.text(`[${item.timestamp}]`, x + colW - 3, y + 5.5, { align: 'right' });
+        doc.text(tsList.map(t => `[${t}]`).join('  '), x + colW - 3, y + 5.5, { align: 'right' });
       }
 
       // Comment
