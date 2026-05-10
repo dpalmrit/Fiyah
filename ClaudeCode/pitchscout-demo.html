@@ -321,6 +321,38 @@
 
   .demo-banner strong { color: var(--green); }
 
+  /* ─── TAB TOGGLE ─── */
+  .tab-row {
+    display: flex;
+    gap: 0;
+    margin-bottom: 28px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 10px 0;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .tab-btn.active {
+    background: rgba(0,230,118,0.12);
+    color: var(--green);
+  }
+
+  .tab-btn:first-child { border-right: 1px solid var(--border); }
+
   /* ─── UPLOAD FORM ─── */
   .upload-card {
     background: var(--surface);
@@ -512,27 +544,46 @@
   <div class="state" id="state-upload" style="display:none;">
     <div class="upload-card">
       <h2>Submit your <span>pitch</span></h2>
-      <p class="sub">Upload a video clip of your play. Our AI scout will analyze your technique and email you a full report in about 2 minutes.</p>
+      <p class="sub">Our AI scout will analyze your technique and email you a full report once analysis has been completed.</p>
 
+      <!-- Tab toggle -->
+      <div class="tab-row">
+        <button class="tab-btn active" id="tab-upload" onclick="switchTab('upload')">Upload File</button>
+        <button class="tab-btn" id="tab-link" onclick="switchTab('link')">Submit Link</button>
+      </div>
+
+      <!-- Shared email -->
       <div class="form-group">
         <label class="form-label" for="input-email">Your email</label>
         <input class="form-input" type="email" id="input-email" placeholder="you@example.com" autocomplete="email" />
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Video clip</label>
-        <div class="file-drop" id="file-drop">
-          <input type="file" id="input-file" accept="video/*" />
-          <div class="file-drop-icon">🎬</div>
-          <div class="file-drop-label"><strong>Choose video</strong> or drag & drop</div>
-          <div class="file-drop-label" style="margin-top:4px;font-size:0.78rem;">MP4, MOV, AVI · max 500 MB</div>
+      <!-- Upload panel -->
+      <div id="panel-upload">
+        <div class="form-group">
+          <label class="form-label">Video clip</label>
+          <div class="file-drop" id="file-drop">
+            <input type="file" id="input-file" accept="video/*" />
+            <div class="file-drop-icon">🎬</div>
+            <div class="file-drop-label"><strong>Choose video</strong> or drag & drop</div>
+            <div class="file-drop-label" style="margin-top:4px;font-size:0.78rem;">MP4, MOV, AVI · max 2 GB</div>
+          </div>
+          <div class="file-selected" id="file-name-display" style="display:none;"></div>
         </div>
-        <div class="file-selected" id="file-name-display" style="display:none;"></div>
+        <div id="upload-error" style="display:none;font-size:0.85rem;color:var(--red);margin-bottom:12px;"></div>
+        <button class="btn-submit" id="btn-submit" disabled>Analyze my pitch →</button>
       </div>
 
-      <div id="upload-error" style="display:none;font-size:0.85rem;color:var(--red);margin-bottom:12px;"></div>
-
-      <button class="btn-submit" id="btn-submit" disabled>Analyze my pitch →</button>
+      <!-- Link panel -->
+      <div id="panel-link" style="display:none;">
+        <div class="form-group">
+          <label class="form-label" for="input-link">Video URL</label>
+          <input class="form-input" type="url" id="input-link" placeholder="Google Drive, Dropbox, or direct video link" />
+          <div style="font-size:0.75rem;color:var(--muted);margin-top:6px;">Google Drive and Dropbox share links are automatically converted. YouTube is not supported.</div>
+        </div>
+        <div id="link-error" style="display:none;font-size:0.85rem;color:var(--red);margin-bottom:12px;"></div>
+        <button class="btn-submit" id="btn-link-submit" disabled>Analyze my pitch →</button>
+      </div>
     </div>
   </div>
 
@@ -546,13 +597,23 @@
       </div>
       <div class="progress-label" id="progress-label">0%</div>
     </div>
+    <p style="margin-top:16px;font-size:0.82rem;color:var(--muted);max-width:320px;text-align:center;">
+      Keep this tab open while uploading. Your report will be emailed regardless — but closing the tab will cancel the upload.
+    </p>
+  </div>
+
+  <!-- Link submitting state -->
+  <div class="state" id="state-submitting" style="display:none;">
+    <div class="spinner"></div>
+    <h2>Submitting…</h2>
+    <p>Sending your video link for analysis.</p>
   </div>
 
   <!-- Success state -->
   <div class="state" id="state-success" style="display:none;">
     <div class="success-icon">✓</div>
     <h2>Video received</h2>
-    <p>Your clip is being analyzed. You'll receive your scout report at <strong id="success-email" style="color:var(--green);"></strong> in about 2 minutes.</p>
+    <p>Your clip is being analyzed. You'll receive your Analysis Report at <strong id="success-email" style="color:var(--green);"></strong> once analysis has been completed.</p>
   </div>
 
   <!-- Error state -->
@@ -651,16 +712,38 @@
     show('report-content');
   }
 
-  // ── Upload form logic ──
-  let selectedFile = null;
+  // ── Tab toggle ──
+  let activeTab = 'upload';
 
-  function validateForm() {
-    const email = document.getElementById('input-email').value.trim();
-    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && selectedFile !== null;
-    document.getElementById('btn-submit').disabled = !valid;
+  function switchTab(tab) {
+    activeTab = tab;
+    document.getElementById('panel-upload').style.display = tab === 'upload' ? 'block' : 'none';
+    document.getElementById('panel-link').style.display   = tab === 'link'   ? 'block' : 'none';
+    document.getElementById('tab-upload').classList.toggle('active', tab === 'upload');
+    document.getElementById('tab-link').classList.toggle('active',   tab === 'link');
   }
 
-  document.getElementById('input-email').addEventListener('input', validateForm);
+  // ── Shared email validation ──
+  const emailValid = () => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+    document.getElementById('input-email').value.trim()
+  );
+
+  function validateUploadBtn() {
+    document.getElementById('btn-submit').disabled = !(emailValid() && selectedFile !== null);
+  }
+
+  function validateLinkBtn() {
+    const url = document.getElementById('input-link').value.trim();
+    document.getElementById('btn-link-submit').disabled = !(emailValid() && url.length > 8);
+  }
+
+  document.getElementById('input-email').addEventListener('input', () => {
+    validateUploadBtn();
+    validateLinkBtn();
+  });
+
+  // ── File upload logic ──
+  let selectedFile = null;
 
   const fileInput = document.getElementById('input-file');
   const fileDrop  = document.getElementById('file-drop');
@@ -671,8 +754,8 @@
       showUploadError('Please select a video file (MP4, MOV, AVI, etc.)');
       return;
     }
-    if (file.size > 500 * 1024 * 1024) {
-      showUploadError('File exceeds 500 MB limit. Please trim or compress the clip.');
+    if (file.size > 2 * 1024 * 1024 * 1024) {
+      showUploadError('File exceeds 2 GB limit. Please use Submit Link for larger files.');
       return;
     }
     selectedFile = file;
@@ -680,7 +763,7 @@
     display.textContent = `${file.name}  (${(file.size / 1024 / 1024).toFixed(1)} MB)`;
     display.style.display = 'block';
     hide('upload-error');
-    validateForm();
+    validateUploadBtn();
   }
 
   fileInput.addEventListener('change', () => onFileChosen(fileInput.files[0]));
@@ -698,6 +781,19 @@
     el.style.display = 'block';
   }
 
+  document.getElementById('input-link').addEventListener('input', validateLinkBtn);
+
+  // ── ETA formatter ──
+  function formatETA(bytesLoaded, bytesTotal, elapsedMs) {
+    if (elapsedMs < 2000 || bytesLoaded === 0) return '';
+    const bps = bytesLoaded / (elapsedMs / 1000);
+    const secsLeft = (bytesTotal - bytesLoaded) / bps;
+    if (secsLeft < 5) return 'almost done';
+    if (secsLeft < 60) return `~${Math.round(secsLeft)}s left`;
+    return `~${Math.round(secsLeft / 60)}m left`;
+  }
+
+  // ── File upload submit ──
   document.getElementById('btn-submit').addEventListener('click', async () => {
     const email = document.getElementById('input-email').value.trim();
     if (!selectedFile || !email) return;
@@ -713,11 +809,13 @@
           email,
           filename: selectedFile.name,
           content_type: selectedFile.type || 'video/mp4',
+          file_size: selectedFile.size,
         }),
       });
       if (!res.ok) throw new Error('Could not get upload URL');
       const { upload_url } = await res.json();
 
+      const startTime = Date.now();
       await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open('PUT', upload_url);
@@ -726,8 +824,9 @@
         xhr.upload.addEventListener('progress', e => {
           if (e.lengthComputable) {
             const pct = Math.round((e.loaded / e.total) * 100);
+            const eta = formatETA(e.loaded, e.total, Date.now() - startTime);
             document.getElementById('progress-fill').style.width = `${pct}%`;
-            document.getElementById('progress-label').textContent = `${pct}%`;
+            document.getElementById('progress-label').textContent = eta ? `${pct}% — ${eta}` : `${pct}%`;
           }
         });
 
@@ -744,6 +843,38 @@
       hide('state-uploading');
       show('state-upload');
       showUploadError('Upload failed — please try again. ' + err.message);
+    }
+  });
+
+  // ── Link submit ──
+  document.getElementById('btn-link-submit').addEventListener('click', async () => {
+    const email     = document.getElementById('input-email').value.trim();
+    const video_url = document.getElementById('input-link').value.trim();
+    if (!email || !video_url) return;
+
+    hide('state-upload');
+    show('state-submitting');
+
+    try {
+      const res = await fetch(`${API_BASE}/submit-link`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, video_url }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Submission failed');
+
+      hide('state-submitting');
+      document.getElementById('success-email').textContent = email;
+      show('state-success');
+
+    } catch (err) {
+      hide('state-submitting');
+      show('state-upload');
+      const el = document.getElementById('link-error');
+      el.textContent = 'Submission failed — ' + err.message;
+      el.style.display = 'block';
+      switchTab('link');
     }
   });
 
