@@ -151,6 +151,28 @@
     .btn-retry { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-size: 0.75rem; padding: 4px 10px; }
     .btn-retry:hover { border-color: var(--green); color: var(--green); }
 
+    /* ── Stalls section ── */
+    .stall-section { margin-top: 24px; }
+    .stall-heading { font-size: 0.72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--yellow); margin-bottom: 10px; }
+    .stall-row { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--yellow); border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr auto; align-items: start; gap: 12px; padding: 12px 16px; font-size: 0.85rem; margin-bottom: 8px; }
+    .stall-row.proc { border-left-color: #40c4ff; }
+    .stall-reason { color: var(--muted); font-size: 0.75rem; font-style: italic; margin-top: 4px; }
+
+    /* ── Beta requests section ── */
+    .requests-section { margin-top: 28px; }
+    .req-row { background: var(--card); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; margin-bottom: 8px; }
+    .req-email { font-size: 0.9rem; font-weight: 500; }
+    .req-meta  { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+    .req-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .btn-approve { background: rgba(0,230,118,.15); border: 1px solid rgba(0,230,118,.4); border-radius: 6px; color: var(--green); font-size: 0.78rem; font-weight: 600; padding: 5px 14px; }
+    .btn-approve:hover { background: rgba(0,230,118,.25); }
+    .btn-decline { background: rgba(239,83,80,.1); border: 1px solid rgba(239,83,80,.35); border-radius: 6px; color: var(--red); font-size: 0.78rem; font-weight: 600; padding: 5px 14px; }
+    .btn-decline:hover { background: rgba(239,83,80,.2); }
+    .status-chip { display: inline-block; border-radius: 4px; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; text-transform: uppercase; letter-spacing: .04em; }
+    .chip-approved { background: rgba(0,230,118,.12); color: var(--green); }
+    .chip-declined { background: rgba(239,83,80,.1); color: var(--red); }
+    .chip-pending  { background: rgba(255,214,0,.1); color: var(--yellow); }
+
     @media (max-width: 600px) {
       .failure-row { grid-template-columns: 1fr; }
       .form-row { flex-direction: column; }
@@ -216,6 +238,14 @@
       <span class="count" id="user-count">—</span>
     </div>
     <div class="user-list" id="user-list"><div class="empty">Loading…</div></div>
+
+    <div class="requests-section">
+      <div class="list-header" style="margin-bottom:12px">
+        <div class="section-title" style="margin:0">Beta access requests</div>
+        <span class="count" id="req-count">—</span>
+      </div>
+      <div id="req-list"><div class="empty">Loading…</div></div>
+    </div>
   </div>
 
   <!-- ── Tab: Spending ── -->
@@ -294,8 +324,6 @@ const SESSION_KEY = 'ps_admin_jwt';
 const COGNITO_DOMAIN = 'https://pitchscout.auth.us-east-1.amazoncognito.com';
 const CLIENT_ID      = '65brgla25g237lk7ajrm7kptm8';
 const REDIRECT_URI   = window.location.origin + '/admin.html';
-
-const FULL_ADMINS = new Set(['scout.logi@gmail.com', 'lizzyp24@gmail.com', 'dpalmer.it@gmail.com']);
 
 let jwt      = '';
 let myEmail  = '';
@@ -378,15 +406,18 @@ async function verifyAndShow(token) {
   const email = _decodeEmail(token);
   if (!email) return false;
 
-  // Verify the token is accepted by the API
-  const resp = await fetch(`${API_BASE}/admin/allowlist`, {
-    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-  }).catch(() => null);
-  if (!resp || resp.status === 403) return false;
+  jwt = token; // needed so authHeaders() works for the /admin/me call
 
-  jwt     = token;
+  const resp = await fetch(`${API_BASE}/admin/me`, {
+    headers: authHeaders(),
+  }).catch(() => null);
+  if (!resp || resp.status === 403) { jwt = ''; return false; }
+
+  const data = await resp.json().catch(() => null);
+  if (!data || !data.role) { jwt = ''; return false; }
+
   myEmail = email;
-  myRole  = FULL_ADMINS.has(email) ? 'admin' : 'superuser';
+  myRole  = data.role;
   return true;
 }
 
@@ -425,14 +456,75 @@ async function loadAllowlist() {
   list.innerHTML = users.map(u => `
     <div class="user-row">
       <div>
-        <div class="user-email">${u.email}</div>
-        <div class="user-meta">${u.note ? u.note + ' · ' : ''}Added ${u.added || '—'}</div>
+        <div class="user-email">${esc(u.email)}</div>
+        <div class="user-meta">${u.note ? esc(u.note) + ' · ' : ''}Added ${esc((u.added || u.added_at || '—').slice(0,10))}</div>
       </div>
-      <button class="btn-danger" data-remove="${u.email}">Remove</button>
+      <button class="btn-danger" data-remove="${esc(u.email)}">Remove</button>
     </div>
   `).join('');
   list.querySelectorAll('[data-remove]').forEach(btn =>
     btn.addEventListener('click', () => removeUser(btn.dataset.remove)));
+}
+
+async function loadRequests() {
+  const resp = await fetch(`${API_BASE}/admin/requests`, { headers: authHeaders() });
+  if (!resp.ok) {
+    document.getElementById('req-list').innerHTML = '<div class="empty">Could not load requests.</div>';
+    return;
+  }
+  const data = await resp.json();
+  const reqs = data.requests || [];
+  const pending = reqs.filter(r => r.status === 'pending');
+  const others  = reqs.filter(r => r.status !== 'pending');
+
+  document.getElementById('req-count').textContent =
+    pending.length ? `${pending.length} pending` : reqs.length + ' total';
+
+  if (!reqs.length) {
+    document.getElementById('req-list').innerHTML = '<div class="empty">No access requests yet.</div>';
+    return;
+  }
+
+  const STATUS_CHIP = {
+    pending:  '<span class="status-chip chip-pending">Pending</span>',
+    approved: '<span class="status-chip chip-approved">Approved</span>',
+    declined: '<span class="status-chip chip-declined">Declined</span>',
+  };
+
+  const rows = [...pending, ...others].map(r => `
+    <div class="req-row" id="req-${esc(r.email.replace(/[@.]/g,'-'))}">
+      <div>
+        <div class="req-email">${esc(r.email)}</div>
+        <div class="req-meta">Requested ${esc(r.requested_at)} ${STATUS_CHIP[r.status] || ''}</div>
+      </div>
+      ${r.status === 'pending' ? `
+        <div class="req-actions">
+          <button class="btn-approve" data-req-approve="${esc(r.email)}">Approve</button>
+          <button class="btn-decline" data-req-decline="${esc(r.email)}">Decline</button>
+        </div>` : ''}
+    </div>`).join('');
+
+  document.getElementById('req-list').innerHTML = rows;
+
+  document.querySelectorAll('[data-req-approve]').forEach(btn =>
+    btn.addEventListener('click', () => handleRequest(btn.dataset.reqApprove, 'approve')));
+  document.querySelectorAll('[data-req-decline]').forEach(btn =>
+    btn.addEventListener('click', () => handleRequest(btn.dataset.reqDecline, 'decline')));
+}
+
+async function handleRequest(email, action) {
+  const resp = await fetch(`${API_BASE}/admin/requests`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body:    JSON.stringify({ email, action }),
+  });
+  if (resp.ok) {
+    await loadRequests();
+    if (action === 'approve') await loadAllowlist();
+  } else {
+    const d = await resp.json().catch(() => ({}));
+    alert(d.error || 'Failed.');
+  }
 }
 
 document.getElementById('add-btn').addEventListener('click', async () => {
@@ -622,12 +714,49 @@ async function loadFailures() {
             </div>
             <div class="failure-meta">${esc(f.position || '—')} · #${esc(f.jersey_number || '—')} · ${esc(f.match_type || '—')}</div>
             <div><span class="failure-badge ${b.cls}">${b.label}</span></div>
-            <a href="/?token=${esc(f.session_id)}" target="_blank" style="text-decoration:none">
+            <a href="/?session_id=${esc(f.session_id)}" target="_blank" style="text-decoration:none">
               <button class="btn-retry">View</button>
             </a>
           </div>`;
       }).join('')
     : '<div class="empty">No session failures in the last 30 days.</div>';
+
+  const staleUploads    = data.stale_uploads    || [];
+  const staleProcessing = data.stale_processing || [];
+
+  const staleUploadSection = staleUploads.length ? `
+    <div class="stall-section">
+      <div class="stall-heading">⚠ Stalled uploads (pending_upload >2 h) — ${staleUploads.length}</div>
+      ${staleUploads.map(f => `
+        <div class="stall-row">
+          <div>
+            <div class="failure-email">${esc(f.email)}</div>
+            <div class="failure-meta">${esc(f.created_at.slice(0,10))} · ${esc(f.video_filename || '—')}</div>
+            <div class="stall-reason">${esc(f.stall_reason)}</div>
+          </div>
+          <div class="failure-meta">${esc(f.position || '—')} · #${esc(f.jersey_number || '—')} · ${esc(f.match_type || '—')}</div>
+          <a href="/?session_id=${esc(f.session_id)}" target="_blank" style="text-decoration:none">
+            <button class="btn-retry">View</button>
+          </a>
+        </div>`).join('')}
+    </div>` : '';
+
+  const staleProcSection = staleProcessing.length ? `
+    <div class="stall-section">
+      <div class="stall-heading" style="color:var(--blue)">⚠ Stalled processing (>30 min) — ${staleProcessing.length}</div>
+      ${staleProcessing.map(f => `
+        <div class="stall-row proc">
+          <div>
+            <div class="failure-email">${esc(f.email)}</div>
+            <div class="failure-meta">${esc((f.updated_at || '').slice(0,10))} · ${esc(f.task_id || '—')}</div>
+            <div class="stall-reason">${esc(f.stall_reason)}</div>
+          </div>
+          <div class="failure-meta">${esc(f.position || '—')} · ${esc(f.match_type || '—')}</div>
+          <a href="/?session_id=${esc(f.session_id)}" target="_blank" style="text-decoration:none">
+            <button class="btn-retry">View</button>
+          </a>
+        </div>`).join('')}
+    </div>` : '';
 
   const preSection = preErrors.length ? `
     <div class="pre-errors-section">
@@ -640,7 +769,7 @@ async function loadFailures() {
         </div>`).join('')}
     </div>` : '';
 
-  list.innerHTML = sessionRows + preSection;
+  list.innerHTML = sessionRows + staleUploadSection + staleProcSection + preSection;
 }
 
 // ── Admin Users ───────────────────────────────────────────────────────────────
@@ -650,13 +779,13 @@ async function loadAdminUsers() {
   const data = await resp.json();
 
   const fullAdmins = data.full_admins || [];
-  document.getElementById('full-admins-list').innerHTML = fullAdmins.map(email => `
+  document.getElementById('full-admins-list').innerHTML = fullAdmins.map(u => `
     <div class="admin-row">
       <div>
-        <div class="admin-email">${esc(email)}</div>
+        <div class="admin-email">${esc(u.email)}</div>
         <div class="admin-meta">Full admin</div>
       </div>
-      <span class="admin-locked">Hardcoded — cannot remove</span>
+      <span class="admin-locked">Protected — contact Dee to change</span>
     </div>
   `).join('') || '<div class="empty">None.</div>';
 
@@ -825,6 +954,7 @@ function showApp() {
   }
 
   loadAllowlist();
+  loadRequests();
   loadStats();
   loadFailures().then(() => {
     fetch(`${API_BASE}/admin/failures`, { headers: authHeaders() })
