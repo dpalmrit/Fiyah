@@ -434,6 +434,13 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
 
     hide('state-uploading');
     document.getElementById('success-email').textContent = email;
+
+    // Build report link using the unguessable token
+    const reportLink = document.getElementById('report-link');
+    if (reportLink && uploadData.report_token) {
+      reportLink.href = `/?token=${uploadData.report_token}`;
+    }
+
     show('state-success');
   } catch (err) {
     hide('state-uploading');
@@ -445,16 +452,21 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
 
 async function init() {
   const params = new URLSearchParams(window.location.search);
-  const id = params.get('session_id') || params.get('id');
+  const token     = params.get('token');
+  const sessionId = params.get('session_id') || params.get('id');
 
-  if (!id) {
+  if (!token && !sessionId) {
     hide('state-loading');
     show('state-upload');
     return;
   }
 
+  const query = token
+    ? 'token=' + encodeURIComponent(token)
+    : 'session_id=' + encodeURIComponent(sessionId);
+
   try {
-    const resp = await fetch(API_BASE + '/report?session_id=' + encodeURIComponent(id));
+    const resp = await fetch(API_BASE + '/report?' + query);
 
     if (resp.status === 404) {
       hide('state-loading');
