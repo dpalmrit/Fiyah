@@ -336,6 +336,22 @@ function generatePDF() {
   doc.save(fname);
 }
 
+// ── Error reporting ───────────────────────────────────────────────────────────
+
+function reportError({ sessionId, reportToken, errorType, errorMessage, stage }) {
+  fetch(API_BASE + '/session-error', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      session_id:    sessionId    || undefined,
+      report_token:  reportToken  || undefined,
+      error_type:    errorType    || 'unknown',
+      error_message: String(errorMessage || '').slice(0, 500),
+      stage:         stage        || 'unknown',
+    }),
+  }).catch(() => {/* fire-and-forget */});
+}
+
 // ── Upload form ───────────────────────────────────────────────────────────────
 
 let selectedFile = null;
@@ -403,47 +419,71 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
     return;
   }
 
+  hide('state-upload');
   hide('upload-error');
   show('state-uploading');
 
+  let sessionId    = null;
+  let reportToken  = null;
+
   try {
-    const urlResp = await fetch(API_BASE + '/upload-url', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + jwt,
-      },
-      body: JSON.stringify({
-        filename:      selectedFile.name,
-        content_type:  selectedFile.type || 'video/mp4',
-        file_size:     selectedFile.size,
-        jersey_number: document.getElementById('input-jersey').value.trim(),
-        position:      document.getElementById('input-position').value,
-        dominant_foot: document.getElementById('input-foot').value,
-        age_bracket:   document.getElementById('input-age').value,
-        match_type:    document.getElementById('input-match').value,
-        kit_colour:    document.getElementById('input-kit').value,
-      }),
-    });
+    let urlResp;
+    try {
+      urlResp = await fetch(API_BASE + '/upload-url', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + jwt,
+        },
+        body: JSON.stringify({
+          filename:      selectedFile.name,
+          content_type:  selectedFile.type || 'video/mp4',
+          file_size:     selectedFile.size,
+          jersey_number: document.getElementById('input-jersey').value.trim(),
+          position:      document.getElementById('input-position').value,
+          dominant_foot: document.getElementById('input-foot').value,
+          age_bracket:   document.getElementById('input-age').value,
+          match_type:    document.getElementById('input-match').value,
+          kit_colour:    document.getElementById('input-kit').value,
+        }),
+      });
+    } catch (netErr) {
+      reportError({ errorType: 'network_error', errorMessage: netErr.message, stage: 'upload_url' });
+      throw netErr;
+    }
 
     if (!urlResp.ok) {
       const errData = await urlResp.json().catch(() => ({}));
-      if (urlResp.status === 403 && errData.error === 'not_on_beta_list') {
+      const errMsg  = errData.error || `HTTP ${urlResp.status}`;
+      const errType = urlResp.status === 403 ? 'allowlist_rejected'
+                    : urlResp.status === 401 ? 'auth_error'
+                    : urlResp.status === 429 ? 'rate_limited'
+                    : 'upload_failed';
+      reportError({ errorType: errType, errorMessage: errMsg, stage: 'upload_url' });
+      if (errType === 'allowlist_rejected') {
         throw new Error('Your account isn\'t on the beta list yet. Contact us at pitchscout.ai to request access.');
       }
-      throw new Error(errData.error || `Server error (${urlResp.status})`);
+      throw new Error(errMsg);
     }
+
     const uploadData = await urlResp.json();
+    sessionId   = uploadData.session_id   || null;
+    reportToken = uploadData.report_token || null;
 
     const setProgress = pct => {
       document.getElementById('progress-fill').style.width = pct + '%';
       document.getElementById('progress-label').textContent = pct + '%';
     };
 
-    if (uploadData.multipart) {
-      await uploadMultipart(uploadData, selectedFile, p => setProgress(Math.round(p * 100)), jwt);
-    } else {
-      await uploadSinglePut(uploadData.upload_url, selectedFile, p => setProgress(Math.round(p * 100)));
+    try {
+      if (uploadData.multipart) {
+        await uploadMultipart(uploadData, selectedFile, p => setProgress(Math.round(p * 100)), jwt);
+      } else {
+        await uploadSinglePut(uploadData.upload_url, selectedFile, p => setProgress(Math.round(p * 100)));
+      }
+    } catch (s3Err) {
+      reportError({ sessionId, reportToken, errorType: 'upload_failed', errorMessage: s3Err.message, stage: 's3_upload' });
+      throw s3Err;
     }
 
     hide('state-uploading');
@@ -451,8 +491,8 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
     document.getElementById('success-email').textContent = userEmail || 'your inbox';
 
     const reportLink = document.getElementById('report-link');
-    if (reportLink && uploadData.report_token) {
-      reportLink.href = `/?token=${uploadData.report_token}`;
+    if (reportLink && reportToken) {
+      reportLink.href = `/?token=${reportToken}`;
     }
 
     show('state-success');

@@ -104,11 +104,20 @@
     .failure-list { display: flex; flex-direction: column; gap: 8px; }
     .failure-row { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; align-items: center; gap: 12px; padding: 12px 16px; font-size: 0.85rem; }
     .failure-row.analysis_failed { border-left-color: var(--yellow); }
+    .failure-row.upload_failed   { border-left-color: #ff9800; }
     .failure-email { font-weight: 500; }
     .failure-meta  { color: var(--muted); font-size: 0.78rem; }
+    .failure-detail { color: var(--muted); font-size: 0.76rem; margin-top: 3px; font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px; }
     .failure-badge { display: inline-block; border-radius: 4px; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; text-transform: uppercase; letter-spacing: .04em; }
     .badge-failed   { background: rgba(239,83,80,.15); color: var(--red); }
     .badge-analysis { background: rgba(255,214,0,.12); color: var(--yellow); }
+    .badge-upload   { background: rgba(255,152,0,.15); color: #ff9800; }
+    .pre-errors-section { margin-top: 24px; }
+    .pre-errors-heading { font-size: 0.72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .pre-error-row { background: var(--card); border: 1px solid var(--border); border-left: 3px solid #9e9e9e; border-radius: 8px; display: flex; align-items: center; gap: 12px; padding: 10px 14px; font-size: 0.82rem; }
+    .pre-error-type { font-weight: 600; color: #bbb; min-width: 140px; }
+    .pre-error-msg  { color: var(--muted); font-size: 0.78rem; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pre-error-date { color: var(--muted); font-size: 0.75rem; white-space: nowrap; }
     .btn-retry { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-size: 0.75rem; padding: 4px 10px; }
     .btn-retry:hover { border-color: var(--green); color: var(--green); }
 
@@ -426,40 +435,61 @@ function roundRect(ctx, x, y, w, h, r) {
 async function loadFailures() {
   const resp = await fetch(`${API_BASE}/admin/failures`, { headers: { 'x-api-key': apiKey } });
   const data = await resp.json();
-  const failures = data.failures || [];
+  const failures  = data.failures   || [];
+  const preErrors = data.pre_errors || [];
 
-  const count = failures.length;
-  document.getElementById('failure-count').textContent = count + ' failures';
-  // Update tab badge
+  const total = failures.length + preErrors.length;
+  document.getElementById('failure-count').textContent = total + ' failure' + (total !== 1 ? 's' : '');
   const badge = document.getElementById('failure-badge');
-  if (count > 0) badge.textContent = ` (${count})`;
+  if (total > 0) badge.textContent = ` (${total})`;
 
   const list = document.getElementById('failure-list');
-  if (!failures.length) {
-    list.innerHTML = '<div class="empty">No failures in the last 30 days.</div>';
-    return;
-  }
 
-  list.innerHTML = failures.map(f => {
-    const isAnalysis = f.job_status === 'analysis_failed';
-    return `
-      <div class="failure-row ${isAnalysis ? 'analysis_failed' : ''}">
-        <div>
-          <div class="failure-email">${f.email}</div>
-          <div class="failure-meta">${f.created_at} · ${f.video_filename || '—'}</div>
-        </div>
-        <div class="failure-meta">${f.position || '—'} · #${f.jersey_number || '—'} · ${f.match_type || '—'}</div>
-        <div>
-          <span class="failure-badge ${isAnalysis ? 'badge-analysis' : 'badge-failed'}">
-            ${isAnalysis ? 'Analysis failed' : 'Failed'}
-          </span>
-        </div>
-        <a href="?debug=${f.session_id}" style="text-decoration:none">
-          <button class="btn-retry">View</button>
-        </a>
-      </div>
-    `;
-  }).join('');
+  const BADGE = {
+    failed:          { cls: 'badge-failed',    label: 'TwelveLabs failed' },
+    analysis_failed: { cls: 'badge-analysis',  label: 'Analysis failed'   },
+    upload_failed:   { cls: 'badge-upload',    label: 'Upload failed'     },
+  };
+
+  const sessionRows = failures.length
+    ? failures.map(f => {
+        const b = BADGE[f.job_status] || BADGE.failed;
+        const detail = f.error_detail
+          ? `<div class="failure-detail" title="${esc(f.error_detail)}">${esc(f.error_detail)}</div>`
+          : '';
+        return `
+          <div class="failure-row ${f.job_status}">
+            <div>
+              <div class="failure-email">${esc(f.email)}</div>
+              <div class="failure-meta">${esc(f.created_at)} · ${esc(f.video_filename || '—')}</div>
+              ${detail}
+            </div>
+            <div class="failure-meta">${esc(f.position || '—')} · #${esc(f.jersey_number || '—')} · ${esc(f.match_type || '—')}</div>
+            <div><span class="failure-badge ${b.cls}">${b.label}</span></div>
+            <a href="/?token=${esc(f.session_id)}" target="_blank" style="text-decoration:none">
+              <button class="btn-retry">View</button>
+            </a>
+          </div>`;
+      }).join('')
+    : '<div class="empty">No session failures in the last 30 days.</div>';
+
+  const preSection = preErrors.length ? `
+    <div class="pre-errors-section">
+      <div class="pre-errors-heading">Pre-session errors (CORS / auth / allowlist) — ${preErrors.length}</div>
+      ${preErrors.map(e => `
+        <div class="pre-error-row">
+          <span class="pre-error-type">${esc(e.error_type)}</span>
+          <span class="pre-error-msg" title="${esc(e.error_message)}">${esc(e.error_message || '—')}</span>
+          <span class="pre-error-date">${esc(e.stage || '')} · ${esc(e.occurred_at)}</span>
+        </div>`).join('')}
+    </div>` : '';
+
+  list.innerHTML = sessionRows + preSection;
+}
+
+function esc(str) {
+  return String(str ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
