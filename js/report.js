@@ -445,7 +445,7 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
 
 async function init() {
   const params = new URLSearchParams(window.location.search);
-  const id = params.get('id');
+  const id = params.get('session_id') || params.get('id');
 
   if (!id) {
     hide('state-loading');
@@ -454,13 +454,61 @@ async function init() {
   }
 
   try {
-    const resp = await fetch(API_BASE + '/report?id=' + encodeURIComponent(id));
-    if (!resp.ok) throw new Error('not found');
-    renderReport(await resp.json(), false);
+    const resp = await fetch(API_BASE + '/report?session_id=' + encodeURIComponent(id));
+
+    if (resp.status === 404) {
+      hide('state-loading');
+      show('state-error');
+      return;
+    }
+
+    const data = await resp.json();
+    const status = data.job_status;
+
+    if (status === 'complete') {
+      renderReport(data, false);
+      return;
+    }
+
+    hide('state-loading');
+
+    if (status === 'failed' || status === 'analysis_failed') {
+      showFailedState(status);
+    } else {
+      // pending_upload, submitted, processing — still in progress
+      showProcessingState();
+    }
   } catch {
     hide('state-loading');
     show('state-error');
   }
+}
+
+function showProcessingState() {
+  const el = document.getElementById('state-error');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="state-icon">⏳</div>
+    <h2>Analysis in progress</h2>
+    <p>Your video is being analyzed. This typically takes 5–15 minutes.<br>
+    Check back soon or keep an eye on your inbox — we'll email you when it's ready.</p>
+  `;
+  show('state-error');
+}
+
+function showFailedState(status) {
+  const el = document.getElementById('state-error');
+  if (!el) return;
+  const detail = status === 'analysis_failed'
+    ? 'The video was received but the analysis could not be completed.'
+    : 'There was a problem processing your video.';
+  el.innerHTML = `
+    <div class="state-icon">⚠️</div>
+    <h2>Analysis unavailable</h2>
+    <p>${detail}<br>
+    Please contact us at <a href="mailto:support@pitchscout.ai" style="color:var(--green)">support@pitchscout.ai</a> and we'll sort it out.</p>
+  `;
+  show('state-error');
 }
 
 document.getElementById('btn-pdf')?.addEventListener('click', generatePDF);
