@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PitchScout — Beta Admin</title>
+  <title>PitchScout — Admin</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -17,168 +17,106 @@
       --muted:   #6a9b78;
       --red:     #ef5350;
       --yellow:  #ffd600;
+      --blue:    #40c4ff;
     }
 
-    body {
-      background: var(--dark);
-      color: var(--text);
-      font-family: 'Inter', system-ui, sans-serif;
-      min-height: 100vh;
-    }
+    body { background: var(--dark); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; }
 
-    /* ── Auth screen ── */
-    #auth-screen {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
-
-    .auth-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 40px;
-      width: 360px;
-      text-align: center;
-    }
-
+    /* ── Auth ── */
+    #auth-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .auth-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 40px; width: 360px; text-align: center; }
     .auth-card h1 { font-size: 1.4rem; margin-bottom: 6px; }
     .auth-card p  { color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; }
+    .logo { color: var(--green); font-size: 1.6rem; font-weight: 800; margin-bottom: 10px; }
+    .auth-input { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 0.9rem; padding: 10px 14px; outline: none; width: 100%; margin-bottom: 12px; transition: border-color .15s; }
+    .auth-input:focus { border-color: var(--green); }
+    .auth-input::placeholder { color: var(--muted); }
+    .auth-btn { width: 100%; background: var(--green); border: none; border-radius: 7px; color: var(--dark); cursor: pointer; font-size: 0.95rem; font-weight: 700; padding: 11px; }
+    .auth-btn:hover { opacity: .85; }
+    .auth-err { color: var(--red); font-size: 0.82rem; margin-top: 10px; min-height: 18px; }
 
-    /* ── Admin app ── */
-    #app { display: none; max-width: 760px; margin: 0 auto; padding: 40px 20px; }
+    /* ── App shell ── */
+    #app { display: none; max-width: 900px; margin: 0 auto; padding: 40px 20px; }
 
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 32px;
-    }
-
+    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
     header h1 { font-size: 1.3rem; }
     header h1 span { color: var(--green); }
+    .btn-signout { background: none; border: 1px solid var(--border); border-radius: 20px; color: var(--muted); cursor: pointer; font-size: 0.75rem; padding: 4px 14px; }
+    .btn-signout:hover { color: var(--red); border-color: var(--red); }
 
-    .badge {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      font-size: 0.75rem;
-      color: var(--muted);
-      padding: 4px 12px;
-      cursor: pointer;
-    }
-    .badge:hover { color: var(--red); border-color: var(--red); }
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
+    .tab { background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); cursor: pointer; font-size: 0.88rem; font-weight: 500; padding: 10px 18px; margin-bottom: -1px; transition: color .15s, border-color .15s; }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--green); border-bottom-color: var(--green); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
 
-    /* ── Add form ── */
-    .add-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 24px;
-      margin-bottom: 28px;
-    }
-
-    .add-card h2 { font-size: 0.95rem; color: var(--muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.06em; }
-
-    .form-row { display: flex; gap: 10px; }
-
-    input[type="email"], input[type="text"] {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      color: var(--text);
-      font-size: 0.9rem;
-      padding: 10px 14px;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    input[type="email"] { flex: 1; }
-    input[type="text"]  { flex: 0 0 180px; }
+    /* ── Shared components ── */
+    button { cursor: pointer; }
+    input[type="email"], input[type="text"] { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 0.9rem; padding: 10px 14px; outline: none; transition: border-color .15s; }
     input:focus { border-color: var(--green); }
     input::placeholder { color: var(--muted); }
-
-    button {
-      background: var(--green);
-      border: none;
-      border-radius: 7px;
-      color: var(--dark);
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 700;
-      padding: 10px 20px;
-      transition: opacity 0.15s;
-      white-space: nowrap;
-    }
-    button:hover { opacity: 0.85; }
-    button:disabled { opacity: 0.4; cursor: not-allowed; }
-    button.btn-danger { background: var(--red); color: #fff; font-size: 0.8rem; padding: 6px 14px; }
-
-    .msg {
-      font-size: 0.82rem;
-      margin-top: 10px;
-      min-height: 18px;
-    }
+    .btn-primary { background: var(--green); border: none; border-radius: 7px; color: var(--dark); font-size: 0.9rem; font-weight: 700; padding: 10px 20px; transition: opacity .15s; }
+    .btn-primary:hover { opacity: .85; }
+    .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-danger { background: var(--red); border: none; border-radius: 7px; color: #fff; font-size: 0.8rem; font-weight: 600; padding: 6px 14px; }
+    .msg { font-size: 0.82rem; margin-top: 10px; min-height: 18px; }
     .msg.ok  { color: var(--green); }
     .msg.err { color: var(--red); }
+    .section-title { color: var(--muted); font-size: 0.82rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 14px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+    .empty { color: var(--muted); font-size: 0.88rem; text-align: center; padding: 32px 0; }
 
-    /* ── User list ── */
-    .list-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
-    .list-header h2 { font-size: 0.95rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
-    .count { color: var(--green); font-weight: 700; font-size: 0.9rem; }
-
+    /* ── Allowlist tab ── */
+    .form-row { display: flex; gap: 10px; }
+    .form-row input[type="email"] { flex: 1; }
+    .form-row input[type="text"]  { flex: 0 0 180px; }
+    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .count { color: var(--green); font-weight: 700; font-size: 0.88rem; }
     .user-list { display: flex; flex-direction: column; gap: 8px; }
-
-    .user-row {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-    }
-
+    .user-row { background: var(--card); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; }
     .user-email { font-size: 0.9rem; font-weight: 500; }
     .user-meta  { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
 
-    .empty { color: var(--muted); font-size: 0.88rem; text-align: center; padding: 32px 0; }
+    /* ── Stats tab ── */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+    .stat-label { color: var(--muted); font-size: 0.75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 8px; }
+    .stat-value { font-size: 1.8rem; font-weight: 800; line-height: 1; }
+    .stat-value.green  { color: var(--green); }
+    .stat-value.yellow { color: var(--yellow); }
+    .stat-value.red    { color: var(--red); }
+    .stat-value.blue   { color: var(--blue); }
+    .stat-sub { color: var(--muted); font-size: 0.78rem; margin-top: 4px; }
 
-    /* ── Auth input repurposed ── */
-    .auth-input {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      color: var(--text);
-      font-size: 0.9rem;
-      padding: 10px 14px;
-      outline: none;
-      width: 100%;
-      margin-bottom: 12px;
-      transition: border-color 0.15s;
-    }
-    .auth-input:focus { border-color: var(--green); }
-    .auth-input::placeholder { color: var(--muted); }
-    .auth-btn {
-      width: 100%;
-      background: var(--green);
-      border: none;
-      border-radius: 7px;
-      color: var(--dark);
-      cursor: pointer;
-      font-size: 0.95rem;
-      font-weight: 700;
-      padding: 11px;
-    }
-    .auth-btn:hover { opacity: 0.85; }
-    .auth-err { color: var(--red); font-size: 0.82rem; margin-top: 10px; min-height: 18px; }
+    .cost-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    .cost-table th { color: var(--muted); font-size: 0.75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; text-align: left; padding: 0 0 10px; }
+    .cost-table td { padding: 10px 0; border-top: 1px solid var(--border); }
+    .cost-table td:last-child { text-align: right; color: var(--green); font-weight: 600; }
+    .billing-note { color: var(--muted); font-size: 0.75rem; margin-top: 14px; font-style: italic; }
 
-    .logo { color: var(--green); font-size: 1.6rem; font-weight: 800; margin-bottom: 10px; }
+    /* ── Sparkline ── */
+    .sparkline-wrap { margin-top: 4px; }
+    .sparkline-wrap canvas { display: block; width: 100%; }
+
+    /* ── Failures tab ── */
+    .failure-list { display: flex; flex-direction: column; gap: 8px; }
+    .failure-row { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; align-items: center; gap: 12px; padding: 12px 16px; font-size: 0.85rem; }
+    .failure-row.analysis_failed { border-left-color: var(--yellow); }
+    .failure-email { font-weight: 500; }
+    .failure-meta  { color: var(--muted); font-size: 0.78rem; }
+    .failure-badge { display: inline-block; border-radius: 4px; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; text-transform: uppercase; letter-spacing: .04em; }
+    .badge-failed   { background: rgba(239,83,80,.15); color: var(--red); }
+    .badge-analysis { background: rgba(255,214,0,.12); color: var(--yellow); }
+    .btn-retry { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-size: 0.75rem; padding: 4px 10px; }
+    .btn-retry:hover { border-color: var(--green); color: var(--green); }
+
+    @media (max-width: 600px) {
+      .failure-row { grid-template-columns: 1fr; }
+      .form-row { flex-direction: column; }
+      .form-row input[type="text"] { flex: unset; }
+    }
   </style>
 </head>
 <body>
@@ -198,183 +136,350 @@
 <!-- Admin app -->
 <div id="app">
   <header>
-    <h1>PitchScout <span>Beta Admin</span></h1>
-    <div class="badge" id="signout-btn">Sign out</div>
+    <h1>PitchScout <span>Admin</span></h1>
+    <button class="btn-signout" id="signout-btn">Sign out</button>
   </header>
 
-  <div class="add-card">
-    <h2>Add beta tester</h2>
-    <div class="form-row">
-      <input type="email" id="add-email" placeholder="email@example.com" />
-      <input type="text"  id="add-note"  placeholder="Note (optional)" maxlength="80" />
-      <button id="add-btn">Add</button>
+  <nav class="tabs">
+    <button class="tab active" data-tab="allowlist">Beta Testers</button>
+    <button class="tab" data-tab="stats">Spending</button>
+    <button class="tab" data-tab="failures">Failures <span id="failure-badge"></span></button>
+  </nav>
+
+  <!-- ── Tab: Allowlist ── -->
+  <div class="tab-panel active" id="tab-allowlist">
+    <div class="card">
+      <div class="section-title">Add beta tester</div>
+      <div class="form-row">
+        <input type="email" id="add-email" placeholder="email@example.com" />
+        <input type="text"  id="add-note"  placeholder="Note (optional)" maxlength="80" />
+        <button class="btn-primary" id="add-btn">Add</button>
+      </div>
+      <div class="msg" id="add-msg"></div>
     </div>
-    <div class="msg" id="add-msg"></div>
+
+    <div class="list-header">
+      <div class="section-title" style="margin:0">Approved testers</div>
+      <span class="count" id="user-count">—</span>
+    </div>
+    <div class="user-list" id="user-list"><div class="empty">Loading…</div></div>
   </div>
 
-  <div class="list-header">
-    <h2>Approved testers</h2>
-    <span class="count" id="user-count">—</span>
+  <!-- ── Tab: Spending ── -->
+  <div class="tab-panel" id="tab-stats">
+    <div class="stat-grid" id="stat-grid"><div class="empty">Loading…</div></div>
+
+    <div class="card">
+      <div class="section-title">Cost breakdown — last 30 days</div>
+      <table class="cost-table" id="cost-table">
+        <thead><tr><th>Match type</th><th>Sessions</th><th>Unit cost</th><th>Subtotal</th></tr></thead>
+        <tbody id="cost-body"></tbody>
+      </table>
+      <p class="billing-note" id="billing-note"></p>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Daily completions (last 30 days)</div>
+      <div class="sparkline-wrap"><canvas id="sparkline" height="60"></canvas></div>
+    </div>
   </div>
-  <div class="user-list" id="user-list">
-    <div class="empty">Loading…</div>
+
+  <!-- ── Tab: Failures ── -->
+  <div class="tab-panel" id="tab-failures">
+    <div class="list-header" style="margin-bottom:16px">
+      <div class="section-title" style="margin:0">Failed sessions — last 30 days</div>
+      <span class="count" id="failure-count">—</span>
+    </div>
+    <div class="failure-list" id="failure-list"><div class="empty">Loading…</div></div>
   </div>
 </div>
 
 <script>
-  const API_BASE = 'https://mdvmhkrsc3.execute-api.us-east-1.amazonaws.com';
-  const SESSION_KEY = 'ps_admin_key';
+const API_BASE   = 'https://mdvmhkrsc3.execute-api.us-east-1.amazonaws.com';
+const SESSION_KEY = 'ps_admin_key';
+let apiKey = '';
 
-  let apiKey = '';
+// ── Auth ──────────────────────────────────────────────────────────────────────
 
-  // ── Auth ──────────────────────────────────────────────────────────────────
+async function tryAuth(key) {
+  const resp = await fetch(`${API_BASE}/admin/allowlist`, { headers: { 'x-api-key': key } });
+  return resp.status !== 403;
+}
 
-  async function tryAuth(key) {
-    const resp = await fetch(`${API_BASE}/admin/allowlist`, {
-      headers: { 'x-api-key': key },
-    });
-    return resp.status !== 403;
+document.getElementById('auth-btn').addEventListener('click', async () => {
+  const key = document.getElementById('auth-key').value.trim();
+  const errEl = document.getElementById('auth-err');
+  if (!key) return;
+  document.getElementById('auth-btn').disabled = true;
+  errEl.textContent = '';
+  const ok = await tryAuth(key).catch(() => false);
+  if (ok) {
+    sessionStorage.setItem(SESSION_KEY, key);
+    apiKey = key;
+    showApp();
+  } else {
+    errEl.textContent = 'Invalid API key.';
+    document.getElementById('auth-btn').disabled = false;
   }
+});
 
-  document.getElementById('auth-btn').addEventListener('click', async () => {
-    const key = document.getElementById('auth-key').value.trim();
-    const errEl = document.getElementById('auth-err');
-    if (!key) return;
+document.getElementById('auth-key').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('auth-btn').click(); });
 
-    document.getElementById('auth-btn').disabled = true;
-    errEl.textContent = '';
+document.getElementById('signout-btn').addEventListener('click', () => {
+  sessionStorage.removeItem(SESSION_KEY);
+  apiKey = '';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('auth-key').value = '';
+});
 
-    const ok = await tryAuth(key).catch(() => false);
-    if (ok) {
-      sessionStorage.setItem(SESSION_KEY, key);
-      apiKey = key;
-      showApp();
-    } else {
-      errEl.textContent = 'Invalid API key.';
-      document.getElementById('auth-btn').disabled = false;
-    }
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
   });
+});
 
-  document.getElementById('auth-key').addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('auth-btn').click();
-  });
+// ── Allowlist ────────────────────────────────────────────────────────────────
 
-  document.getElementById('signout-btn').addEventListener('click', () => {
-    sessionStorage.removeItem(SESSION_KEY);
-    apiKey = '';
-    document.getElementById('app').style.display = 'none';
-    document.getElementById('auth-screen').style.display = 'flex';
-    document.getElementById('auth-key').value = '';
-  });
-
-  // ── Load list ─────────────────────────────────────────────────────────────
-
-  async function loadList() {
-    const resp = await fetch(`${API_BASE}/admin/allowlist`, {
-      headers: { 'x-api-key': apiKey },
-    });
-    const data = await resp.json();
-    const users = data.users || [];
-
-    document.getElementById('user-count').textContent = users.length + ' approved';
-
-    const list = document.getElementById('user-list');
-    if (!users.length) {
-      list.innerHTML = '<div class="empty">No beta testers yet.</div>';
-      return;
-    }
-
-    list.innerHTML = users.map(u => `
-      <div class="user-row" data-email="${u.email}">
-        <div>
-          <div class="user-email">${u.email}</div>
-          <div class="user-meta">${u.note ? u.note + ' · ' : ''}Added ${u.added || '—'}</div>
-        </div>
-        <button class="btn-danger" data-remove="${u.email}">Remove</button>
+async function loadAllowlist() {
+  const resp = await fetch(`${API_BASE}/admin/allowlist`, { headers: { 'x-api-key': apiKey } });
+  const data = await resp.json();
+  const users = data.users || [];
+  document.getElementById('user-count').textContent = users.length + ' approved';
+  const list = document.getElementById('user-list');
+  if (!users.length) { list.innerHTML = '<div class="empty">No beta testers yet.</div>'; return; }
+  list.innerHTML = users.map(u => `
+    <div class="user-row">
+      <div>
+        <div class="user-email">${u.email}</div>
+        <div class="user-meta">${u.note ? u.note + ' · ' : ''}Added ${u.added || '—'}</div>
       </div>
-    `).join('');
+      <button class="btn-danger" data-remove="${u.email}">Remove</button>
+    </div>
+  `).join('');
+  list.querySelectorAll('[data-remove]').forEach(btn =>
+    btn.addEventListener('click', () => removeUser(btn.dataset.remove)));
+}
 
-    list.querySelectorAll('[data-remove]').forEach(btn => {
-      btn.addEventListener('click', () => removeUser(btn.dataset.remove));
-    });
-  }
-
-  // ── Add user ──────────────────────────────────────────────────────────────
-
-  document.getElementById('add-btn').addEventListener('click', async () => {
-    const email = document.getElementById('add-email').value.trim().toLowerCase();
-    const note  = document.getElementById('add-note').value.trim();
-    const msgEl = document.getElementById('add-msg');
-
-    if (!email || !email.includes('@')) {
-      msgEl.className = 'msg err';
-      msgEl.textContent = 'Enter a valid email address.';
-      return;
-    }
-
-    document.getElementById('add-btn').disabled = true;
-    msgEl.className = 'msg';
-    msgEl.textContent = '';
-
-    const resp = await fetch(`${API_BASE}/admin/allowlist`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
-      body: JSON.stringify({ email, note }),
-    });
-    const data = await resp.json();
-
-    if (resp.ok) {
-      msgEl.className = 'msg ok';
-      msgEl.textContent = `${email} added.`;
-      document.getElementById('add-email').value = '';
-      document.getElementById('add-note').value = '';
-      await loadList();
-    } else {
-      msgEl.className = 'msg err';
-      msgEl.textContent = data.error || 'Failed to add user.';
-    }
-    document.getElementById('add-btn').disabled = false;
+document.getElementById('add-btn').addEventListener('click', async () => {
+  const email = document.getElementById('add-email').value.trim().toLowerCase();
+  const note  = document.getElementById('add-note').value.trim();
+  const msgEl = document.getElementById('add-msg');
+  if (!email || !email.includes('@')) { msgEl.className = 'msg err'; msgEl.textContent = 'Enter a valid email.'; return; }
+  document.getElementById('add-btn').disabled = true;
+  msgEl.className = 'msg'; msgEl.textContent = '';
+  const resp = await fetch(`${API_BASE}/admin/allowlist`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+    body: JSON.stringify({ email, note }),
   });
+  const data = await resp.json();
+  if (resp.ok) {
+    msgEl.className = 'msg ok'; msgEl.textContent = `${email} added.`;
+    document.getElementById('add-email').value = '';
+    document.getElementById('add-note').value = '';
+    await loadAllowlist();
+  } else {
+    msgEl.className = 'msg err'; msgEl.textContent = data.error || 'Failed.';
+  }
+  document.getElementById('add-btn').disabled = false;
+});
 
-  document.getElementById('add-email').addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('add-btn').click();
+document.getElementById('add-email').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('add-btn').click(); });
+
+async function removeUser(email) {
+  if (!confirm(`Remove ${email}?`)) return;
+  const resp = await fetch(`${API_BASE}/admin/allowlist`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+    body: JSON.stringify({ email }),
   });
+  if (resp.ok) await loadAllowlist();
+  else { const d = await resp.json(); alert(d.error || 'Failed.'); }
+}
 
-  // ── Remove user ───────────────────────────────────────────────────────────
+// ── Stats ─────────────────────────────────────────────────────────────────────
 
-  async function removeUser(email) {
-    if (!confirm(`Remove ${email} from the beta list?`)) return;
+async function loadStats() {
+  const resp = await fetch(`${API_BASE}/admin/stats`, { headers: { 'x-api-key': apiKey } });
+  const d = await resp.json();
 
-    const resp = await fetch(`${API_BASE}/admin/allowlist`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
-      body: JSON.stringify({ email }),
-    });
+  const sc = d.status_counts || {};
+  const complete  = sc.complete  || 0;
+  const failed    = (sc.failed   || 0) + (sc.analysis_failed || 0);
+  const pending   = (sc.pending_upload || 0) + (sc.submitted || 0) + (sc.processing || 0);
+  const total     = Object.values(sc).reduce((a, b) => a + b, 0);
 
-    if (resp.ok) {
-      await loadList();
-    } else {
-      const data = await resp.json();
-      alert(data.error || 'Failed to remove user.');
-    }
+  document.getElementById('stat-grid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Est. spend (30d)</div>
+      <div class="stat-value green">$${d.total_cost.toFixed(2)}</div>
+      <div class="stat-sub">TwelveLabs estimated</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Completed</div>
+      <div class="stat-value blue">${complete}</div>
+      <div class="stat-sub">Full reports delivered</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">In progress</div>
+      <div class="stat-value yellow">${pending}</div>
+      <div class="stat-sub">Pending / processing</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Failed</div>
+      <div class="stat-value ${failed > 0 ? 'red' : 'green'}">${failed}</div>
+      <div class="stat-sub">Last 30 days</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total sessions</div>
+      <div class="stat-value">${total}</div>
+      <div class="stat-sub">All statuses</div>
+    </div>
+  `;
+
+  // Cost breakdown table
+  const tbody = document.getElementById('cost-body');
+  const cb = d.cost_by_type || {};
+  if (!Object.keys(cb).length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);padding:12px 0">No completed sessions yet.</td></tr>';
+  } else {
+    tbody.innerHTML = Object.entries(cb).map(([type, v]) => `
+      <tr>
+        <td>${type}</td>
+        <td>${v.count}</td>
+        <td style="color:var(--muted)">$${v.unit_cost.toFixed(2)}</td>
+        <td>$${v.subtotal.toFixed(2)}</td>
+      </tr>
+    `).join('') + `
+      <tr>
+        <td colspan="3" style="font-weight:700;padding-top:14px">Total</td>
+        <td style="padding-top:14px">$${d.total_cost.toFixed(2)}</td>
+      </tr>
+    `;
+  }
+  document.getElementById('billing-note').textContent = d.billing_note || '';
+
+  // Sparkline
+  drawSparkline(d.daily || []);
+}
+
+function drawSparkline(daily) {
+  const canvas = document.getElementById('sparkline');
+  const ctx    = canvas.getContext('2d');
+  const dpr    = window.devicePixelRatio || 1;
+  const w = canvas.offsetWidth || 800;
+  const h = 60;
+  canvas.width  = w * dpr;
+  canvas.height = h * dpr;
+  ctx.scale(dpr, dpr);
+
+  if (!daily.length) {
+    ctx.fillStyle = '#6a9b78';
+    ctx.font = '13px Inter, system-ui';
+    ctx.fillText('No data yet', 10, 34);
+    return;
   }
 
-  // ── Init ──────────────────────────────────────────────────────────────────
+  const maxVal = Math.max(...daily.map(d => d.count), 1);
+  const padX = 4;
+  const barW = Math.max(4, Math.floor((w - padX * 2) / daily.length) - 2);
 
-  function showApp() {
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    loadList();
+  daily.forEach((d, i) => {
+    const barH = Math.max(3, (d.count / maxVal) * (h - 20));
+    const x    = padX + i * ((w - padX * 2) / daily.length);
+    const y    = h - barH - 4;
+    ctx.fillStyle = '#00e676';
+    ctx.globalAlpha = 0.75;
+    roundRect(ctx, x, y, barW, barH, 2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+
+  // Date labels: first and last
+  ctx.fillStyle = '#6a9b78';
+  ctx.font = '10px Inter, system-ui';
+  ctx.fillText(daily[0].date.slice(5), padX, h);
+  const lastLabel = daily[daily.length - 1].date.slice(5);
+  ctx.fillText(lastLabel, w - ctx.measureText(lastLabel).width - padX, h);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h);
+  ctx.lineTo(x, y + h);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+// ── Failures ──────────────────────────────────────────────────────────────────
+
+async function loadFailures() {
+  const resp = await fetch(`${API_BASE}/admin/failures`, { headers: { 'x-api-key': apiKey } });
+  const data = await resp.json();
+  const failures = data.failures || [];
+
+  const count = failures.length;
+  document.getElementById('failure-count').textContent = count + ' failures';
+  // Update tab badge
+  const badge = document.getElementById('failure-badge');
+  if (count > 0) badge.textContent = ` (${count})`;
+
+  const list = document.getElementById('failure-list');
+  if (!failures.length) {
+    list.innerHTML = '<div class="empty">No failures in the last 30 days.</div>';
+    return;
   }
 
-  const saved = sessionStorage.getItem(SESSION_KEY);
-  if (saved) {
-    apiKey = saved;
-    tryAuth(saved).then(ok => {
-      if (ok) showApp();
-      else sessionStorage.removeItem(SESSION_KEY);
-    });
-  }
+  list.innerHTML = failures.map(f => {
+    const isAnalysis = f.job_status === 'analysis_failed';
+    return `
+      <div class="failure-row ${isAnalysis ? 'analysis_failed' : ''}">
+        <div>
+          <div class="failure-email">${f.email}</div>
+          <div class="failure-meta">${f.created_at} · ${f.video_filename || '—'}</div>
+        </div>
+        <div class="failure-meta">${f.position || '—'} · #${f.jersey_number || '—'} · ${f.match_type || '—'}</div>
+        <div>
+          <span class="failure-badge ${isAnalysis ? 'badge-analysis' : 'badge-failed'}">
+            ${isAnalysis ? 'Analysis failed' : 'Failed'}
+          </span>
+        </div>
+        <a href="?debug=${f.session_id}" style="text-decoration:none">
+          <button class="btn-retry">View</button>
+        </a>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+
+function showApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  loadAllowlist();
+  loadStats();
+  loadFailures();
+}
+
+const saved = sessionStorage.getItem(SESSION_KEY);
+if (saved) {
+  apiKey = saved;
+  tryAuth(saved).then(ok => {
+    if (ok) showApp();
+    else sessionStorage.removeItem(SESSION_KEY);
+  });
+}
 </script>
 </body>
 </html>
