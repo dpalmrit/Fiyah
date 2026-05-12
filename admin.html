@@ -393,9 +393,9 @@ async function handleOAuthCallback() {
     document.getElementById('auth-err').textContent = 'Sign-in failed. Please try again.';
     return false;
   }
-  const { id_token } = await resp.json();
-  sessionStorage.setItem(SESSION_KEY, id_token);
-  return id_token;
+  const tokens = await resp.json();
+  sessionStorage.setItem(SESSION_KEY, tokens.access_token);
+  return tokens.access_token;
 }
 
 function authHeaders() {
@@ -403,10 +403,7 @@ function authHeaders() {
 }
 
 async function verifyAndShow(token) {
-  const email = _decodeEmail(token);
-  if (!email) return false;
-
-  jwt = token; // needed so authHeaders() works for the /admin/me call
+  jwt = token;
 
   const resp = await fetch(`${API_BASE}/admin/me`, {
     headers: authHeaders(),
@@ -414,9 +411,9 @@ async function verifyAndShow(token) {
   if (!resp || resp.status === 403) { jwt = ''; return false; }
 
   const data = await resp.json().catch(() => null);
-  if (!data || !data.role) { jwt = ''; return false; }
+  if (!data || !data.role || !data.email) { jwt = ''; return false; }
 
-  myEmail = email;
+  myEmail = data.email;
   myRole  = data.role;
   return true;
 }
