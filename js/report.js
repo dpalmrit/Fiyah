@@ -40,7 +40,7 @@ function uploadPart(url, chunk, partNumber, onPartProgress) {
   });
 }
 
-async function uploadMultipart(uploadData, file, onProgress) {
+async function uploadMultipart(uploadData, file, onProgress, jwt) {
   const { upload_id, part_urls, part_size, total_parts, s3_key } = uploadData;
   const partProgress = new Array(total_parts).fill(0);
 
@@ -68,9 +68,12 @@ async function uploadMultipart(uploadData, file, onProgress) {
   await Promise.all(workers);
   parts.sort((a, b) => a.PartNumber - b.PartNumber);
 
+  const headers = { 'Content-Type': 'application/json' };
+  if (jwt) headers['Authorization'] = 'Bearer ' + jwt;
+
   const resp = await fetch(`${API_BASE}/complete-upload`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ upload_id, s3_key, parts }),
   });
   if (!resp.ok) throw new Error(`complete-upload failed: ${resp.status}`);
@@ -96,9 +99,9 @@ function gradeColor(grade) {
 }
 
 const RATING_MAP = {
-  green:  { cls: 'obs-card--green',  label: 'STRENGTH' },
-  yellow: { cls: 'obs-card--yellow', label: 'MONITOR' },
-  red:    { cls: 'obs-card--red',    label: 'IMPROVE' },
+  green:  { cls: 'positive', label: 'STRENGTH' },
+  yellow: { cls: 'neutral',  label: 'MONITOR'  },
+  red:    { cls: 'negative', label: 'IMPROVE'  },
 };
 
 const MATCH_TYPE_LABEL = {
@@ -149,13 +152,12 @@ function renderReport(data, isUploadFlow) {
 
     const timestamps = item.timestamps || (item.timestamp ? [item.timestamp] : []);
     const tsHtml = timestamps.length
-      ? '<div class="obs-timestamps">' + timestamps.map(t => `<span class="ts-badge">${esc(t)}</span>`).join('') + '</div>'
+      ? '<div class="obs-timestamps">' + timestamps.map(t => `<span class="obs-timestamp">${esc(t)}</span>`).join('') + '</div>'
       : '';
 
     card.innerHTML =
-      `<div class="obs-rating-label">${rating.label}</div>` +
-      `<div class="obs-category">${esc(item.category || '')}</div>` +
-      `<div class="obs-comment">${esc(item.comment || '')}</div>` +
+      `<div class="obs-tag">${rating.label} · ${esc(item.category || '')}</div>` +
+      `<div class="obs-text">${esc(item.comment || '')}</div>` +
       tsHtml +
       '</div>';
     grid.appendChild(card);
@@ -334,12 +336,11 @@ function generatePDF() {
   doc.save(fname);
 }
 
-// ── Upload form (index.html) ──────────────────────────────────────────────────
+// ── Upload form ───────────────────────────────────────────────────────────────
 
 let selectedFile = null;
 
 function validateForm() {
-  const email    = document.getElementById('input-email').value.trim();
   const jersey   = document.getElementById('input-jersey').value.trim();
   const position = document.getElementById('input-position').value;
   const foot     = document.getElementById('input-foot').value;
@@ -347,14 +348,12 @@ function validateForm() {
   const matchT   = document.getElementById('input-match').value;
   const kit      = document.getElementById('input-kit').value;
 
-  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
-    jersey && position && foot && age && matchT && kit && selectedFile !== null;
+  const valid = jersey && position && foot && age && matchT && kit && selectedFile !== null;
   document.getElementById('btn-submit').disabled = !valid;
 }
 
 ['input-jersey', 'input-position', 'input-foot', 'input-age', 'input-match', 'input-kit'].forEach(id =>
   document.getElementById(id).addEventListener('change', validateForm));
-document.getElementById('input-email').addEventListener('input', validateForm);
 document.getElementById('input-jersey').addEventListener('input', validateForm);
 
 const fileInput = document.getElementById('input-file');
@@ -394,8 +393,15 @@ function showUploadError(msg) {
 }
 
 document.getElementById('btn-submit').addEventListener('click', async () => {
-  const email = document.getElementById('input-email').value.trim();
-  if (!selectedFile || !email) return;
+  if (!selectedFile) return;
+
+  const jwt = await Auth.getToken();
+  if (!jwt) {
+    hide('state-upload');
+    showAuthScreen('auth-signin');
+    show('state-auth');
+    return;
+  }
 
   hide('upload-error');
   show('state-uploading');
@@ -403,9 +409,11 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
   try {
     const urlResp = await fetch(API_BASE + '/upload-url', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + jwt,
+      },
       body: JSON.stringify({
-        email,
         filename:      selectedFile.name,
         content_type:  selectedFile.type || 'video/mp4',
         file_size:     selectedFile.size,
@@ -418,7 +426,13 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
       }),
     });
 
-    if (!urlResp.ok) throw new Error('Failed to get upload URL');
+    if (!urlResp.ok) {
+      const errData = await urlResp.json().catch(() => ({}));
+      if (urlResp.status === 403 && errData.error === 'not_on_beta_list') {
+        throw new Error('Your account isn\'t on the beta list yet. Contact us at pitchscout.ai to request access.');
+      }
+      throw new Error(errData.error || `Server error (${urlResp.status})`);
+    }
     const uploadData = await urlResp.json();
 
     const setProgress = pct => {
@@ -427,15 +441,15 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
     };
 
     if (uploadData.multipart) {
-      await uploadMultipart(uploadData, selectedFile, p => setProgress(Math.round(p * 100)));
+      await uploadMultipart(uploadData, selectedFile, p => setProgress(Math.round(p * 100)), jwt);
     } else {
       await uploadSinglePut(uploadData.upload_url, selectedFile, p => setProgress(Math.round(p * 100)));
     }
 
     hide('state-uploading');
-    document.getElementById('success-email').textContent = email;
+    const userEmail = await Auth.getEmail();
+    document.getElementById('success-email').textContent = userEmail || 'your inbox';
 
-    // Build report link using the unguessable token
     const reportLink = document.getElementById('report-link');
     if (reportLink && uploadData.report_token) {
       reportLink.href = `/?token=${uploadData.report_token}`;
@@ -444,20 +458,28 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
     show('state-success');
   } catch (err) {
     hide('state-uploading');
+    show('state-upload');
     showUploadError('Upload failed — please try again. ' + err.message);
   }
 });
 
-// ── Report page (report.html / ?id=) ─────────────────────────────────────────
+// ── Report page ───────────────────────────────────────────────────────────────
 
 async function init() {
-  const params = new URLSearchParams(window.location.search);
+  const params    = new URLSearchParams(window.location.search);
   const token     = params.get('token');
   const sessionId = params.get('session_id') || params.get('id');
 
   if (!token && !sessionId) {
+    const jwt = await Auth.getToken();
     hide('state-loading');
-    show('state-upload');
+    if (jwt) {
+      await showSignedIn();
+      show('state-upload');
+    } else {
+      showAuthScreen('auth-signin');
+      show('state-auth');
+    }
     return;
   }
 
@@ -487,13 +509,19 @@ async function init() {
     if (status === 'failed' || status === 'analysis_failed') {
       showFailedState(status);
     } else {
-      // pending_upload, submitted, processing — still in progress
       showProcessingState();
     }
   } catch {
     hide('state-loading');
     show('state-error');
   }
+}
+
+async function showSignedIn() {
+  const email = await Auth.getEmail();
+  if (email) document.getElementById('nav-email').textContent = email;
+  document.getElementById('nav-badge').style.display = 'none';
+  document.getElementById('nav-user').style.display = 'flex';
 }
 
 function showProcessingState() {
@@ -524,5 +552,175 @@ function showFailedState(status) {
 }
 
 document.getElementById('btn-pdf')?.addEventListener('click', generatePDF);
+
+// ── Auth UI handlers ──────────────────────────────────────────────────────────
+
+let pendingVerifyEmail = '';
+
+function showAuthScreen(screenId) {
+  ['auth-signin', 'auth-signup', 'auth-verify', 'auth-forgot'].forEach(id => {
+    document.getElementById(id).style.display = id === screenId ? '' : 'none';
+  });
+}
+
+function setAuthError(errorId, msg, isSuccess) {
+  const el = document.getElementById(errorId);
+  el.textContent = msg;
+  el.style.color = isSuccess ? 'var(--green)' : 'var(--red)';
+  el.style.display = msg ? 'block' : 'none';
+}
+
+async function afterSignIn() {
+  await showSignedIn();
+  hide('state-auth');
+  show('state-upload');
+}
+
+document.getElementById('btn-signin').addEventListener('click', async () => {
+  const email = document.getElementById('auth-si-email').value.trim();
+  const pass  = document.getElementById('auth-si-pass').value;
+  setAuthError('auth-si-error', '');
+  if (!email || !pass) return setAuthError('auth-si-error', 'Email and password required.');
+
+  const btn = document.getElementById('btn-signin');
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+  const res = await Auth.signIn(email, pass);
+  btn.disabled = false;
+  btn.textContent = 'Sign in →';
+
+  if (res.ok) return afterSignIn();
+  if (res.needsVerification) {
+    pendingVerifyEmail = res.email;
+    document.getElementById('auth-verify-sub').textContent =
+      `We sent a code to ${res.email}. Enter it below to verify your account.`;
+    showAuthScreen('auth-verify');
+    return;
+  }
+  setAuthError('auth-si-error', friendlyAuthError(res.error));
+});
+
+document.getElementById('btn-signup').addEventListener('click', async () => {
+  const email = document.getElementById('auth-su-email').value.trim();
+  const pass  = document.getElementById('auth-su-pass').value;
+  const pass2 = document.getElementById('auth-su-pass2').value;
+  setAuthError('auth-su-error', '');
+  if (!email || !pass) return setAuthError('auth-su-error', 'Email and password required.');
+  if (pass.length < 8)  return setAuthError('auth-su-error', 'Password must be at least 8 characters.');
+  if (pass !== pass2)   return setAuthError('auth-su-error', 'Passwords do not match.');
+
+  const btn = document.getElementById('btn-signup');
+  btn.disabled = true;
+  btn.textContent = 'Creating account…';
+  const res = await Auth.signUp(email, pass);
+  btn.disabled = false;
+  btn.textContent = 'Create account →';
+
+  if (!res.ok) return setAuthError('auth-su-error', friendlyAuthError(res.error));
+  pendingVerifyEmail = email;
+  document.getElementById('auth-verify-sub').textContent =
+    `We sent a 6-digit code to ${email}. Enter it below.`;
+  showAuthScreen('auth-verify');
+});
+
+document.getElementById('btn-verify').addEventListener('click', async () => {
+  const code = document.getElementById('auth-code').value.trim();
+  setAuthError('auth-verify-error', '');
+  if (!code) return setAuthError('auth-verify-error', 'Enter the verification code.');
+
+  const btn = document.getElementById('btn-verify');
+  btn.disabled = true;
+  btn.textContent = 'Verifying…';
+  const res = await Auth.confirmSignUp(pendingVerifyEmail, code);
+  btn.disabled = false;
+  btn.textContent = 'Verify →';
+
+  if (!res.ok) return setAuthError('auth-verify-error', friendlyAuthError(res.error));
+  document.getElementById('auth-si-email').value = pendingVerifyEmail;
+  setAuthError('auth-si-error', 'Account verified! Sign in below.', true);
+  showAuthScreen('auth-signin');
+});
+
+document.getElementById('link-resend').addEventListener('click', async e => {
+  e.preventDefault();
+  const res = await Auth.resendCode(pendingVerifyEmail);
+  setAuthError('auth-verify-error', res.ok ? 'Code resent — check your inbox.' : res.error, res.ok);
+});
+
+document.getElementById('btn-forgot').addEventListener('click', async () => {
+  const email   = document.getElementById('auth-fp-email').value.trim();
+  const isReset = document.getElementById('auth-fp-new-wrap').style.display !== 'none';
+  const btn     = document.getElementById('btn-forgot');
+  setAuthError('auth-fp-error', '');
+
+  if (isReset) {
+    const code    = document.getElementById('auth-fp-code').value.trim();
+    const newPass = document.getElementById('auth-fp-pass').value;
+    if (!code || !newPass) return setAuthError('auth-fp-error', 'Code and new password required.');
+
+    btn.disabled = true;
+    btn.textContent = 'Resetting…';
+    const res = await Auth.confirmNewPassword(email, code, newPass);
+    btn.disabled = false;
+    btn.textContent = 'Reset password →';
+
+    if (!res.ok) return setAuthError('auth-fp-error', friendlyAuthError(res.error));
+    document.getElementById('auth-si-email').value = email;
+    setAuthError('auth-si-error', 'Password reset! Sign in with your new password.', true);
+    showAuthScreen('auth-signin');
+    return;
+  }
+
+  if (!email) return setAuthError('auth-fp-error', 'Enter your email address.');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  const res = await Auth.forgotPassword(email);
+  btn.disabled = false;
+  btn.textContent = 'Reset password →';
+
+  if (!res.ok) return setAuthError('auth-fp-error', friendlyAuthError(res.error));
+  document.getElementById('auth-fp-new-wrap').style.display = '';
+  document.getElementById('auth-forgot-sub').textContent =
+    `Code sent to ${email}. Enter it below with your new password.`;
+  btn.textContent = 'Set new password →';
+});
+
+document.getElementById('btn-signout').addEventListener('click', () => {
+  Auth.signOut();
+  document.getElementById('nav-badge').style.display = '';
+  document.getElementById('nav-user').style.display = 'none';
+  hide('state-upload');
+  showAuthScreen('auth-signin');
+  show('state-auth');
+});
+
+document.getElementById('link-to-signup').addEventListener('click', e => { e.preventDefault(); showAuthScreen('auth-signup'); });
+document.getElementById('link-to-signin').addEventListener('click', e => { e.preventDefault(); showAuthScreen('auth-signin'); });
+document.getElementById('link-to-forgot').addEventListener('click', e => { e.preventDefault(); showAuthScreen('auth-forgot'); });
+document.getElementById('link-fp-signin').addEventListener('click', e => { e.preventDefault(); showAuthScreen('auth-signin'); });
+
+// Enter-key shortcuts on auth forms
+document.getElementById('auth-si-pass')?.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-signin').click(); });
+document.getElementById('auth-su-pass2')?.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-signup').click(); });
+document.getElementById('auth-code')?.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-verify').click(); });
+
+function friendlyAuthError(msg) {
+  if (!msg) return 'Something went wrong. Please try again.';
+  if (msg.includes('UserNotFoundException') || msg.includes('Incorrect username or password'))
+    return 'Incorrect email or password.';
+  if (msg.includes('UsernameExistsException'))
+    return 'An account with this email already exists.';
+  if (msg.includes('InvalidPasswordException'))
+    return 'Password must be at least 8 characters.';
+  if (msg.includes('CodeMismatchException'))
+    return 'Invalid code — check your email and try again.';
+  if (msg.includes('ExpiredCodeException'))
+    return 'Code has expired. Request a new one.';
+  if (msg.includes('LimitExceededException'))
+    return 'Too many attempts. Please wait a few minutes.';
+  if (msg.includes('NotAuthorizedException'))
+    return 'Incorrect email or password.';
+  return msg;
+}
 
 init();

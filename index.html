@@ -81,6 +81,84 @@
     color: var(--green);
   }
 
+  .nav-user {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .nav-email {
+    font-size: 0.78rem;
+    color: var(--muted);
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .btn-signout {
+    background: transparent;
+    border: 1px solid rgba(0,230,118,0.25);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .btn-signout:hover { border-color: var(--green); color: var(--green); }
+
+  /* ─── AUTH CARD ─── */
+  .auth-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 48px 40px;
+    max-width: 420px;
+    width: 100%;
+    text-align: left;
+  }
+
+  .auth-card h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 8px;
+  }
+
+  .auth-card h2 span { color: var(--green); }
+
+  .auth-card .sub {
+    color: var(--muted);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+
+  .auth-card .sub a { color: var(--green); text-decoration: none; }
+  .auth-card .sub a:hover { text-decoration: underline; }
+
+  .auth-link {
+    display: block;
+    text-align: center;
+    margin-top: 14px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .auth-link:hover { color: var(--green); }
+
+  @media (max-width: 480px) { .auth-card { padding: 32px 24px; } }
+
   /* ─── PAGE ─── */
   .page {
     position: relative;
@@ -541,7 +619,13 @@
 
 <nav>
   <a href="/" class="nav-logo">Pitch<span>Scout</span> AI</a>
-  <div class="nav-badge">Analysis Report</div>
+  <div id="nav-right">
+    <div class="nav-badge" id="nav-badge">Beta</div>
+    <div class="nav-user" id="nav-user" style="display:none;">
+      <span class="nav-email" id="nav-email"></span>
+      <button class="btn-signout" id="btn-signout">Sign out</button>
+    </div>
+  </div>
 </nav>
 
 <div class="page">
@@ -553,16 +637,89 @@
     <p>Fetching your scouting report.</p>
   </div>
 
+  <!-- Auth state -->
+  <div class="state" id="state-auth" style="display:none;">
+
+    <!-- Sign-in screen -->
+    <div id="auth-signin" class="auth-card">
+      <h2>Sign in to <span>PitchScout</span></h2>
+      <p class="sub">Beta access required. <a href="#" id="link-to-signup">Create account →</a></p>
+      <div class="form-group">
+        <label class="form-label" for="auth-si-email">Email</label>
+        <input class="form-input" type="email" id="auth-si-email" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="auth-si-pass">Password</label>
+        <input class="form-input" type="password" id="auth-si-pass" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <div id="auth-si-error" style="display:none;font-size:0.85rem;color:var(--red);margin-bottom:12px;"></div>
+      <button class="btn-submit" id="btn-signin">Sign in →</button>
+      <a class="auth-link" id="link-to-forgot">Forgot password?</a>
+    </div>
+
+    <!-- Sign-up screen -->
+    <div id="auth-signup" class="auth-card" style="display:none;">
+      <h2>Create your <span>account</span></h2>
+      <p class="sub">Already have one? <a href="#" id="link-to-signin">Sign in →</a></p>
+      <div class="form-group">
+        <label class="form-label" for="auth-su-email">Email</label>
+        <input class="form-input" type="email" id="auth-su-email" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="auth-su-pass">Password <span style="color:var(--muted);font-weight:400;">(min 8 characters)</span></label>
+        <input class="form-input" type="password" id="auth-su-pass" placeholder="••••••••" autocomplete="new-password" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="auth-su-pass2">Confirm password</label>
+        <input class="form-input" type="password" id="auth-su-pass2" placeholder="••••••••" autocomplete="new-password" />
+      </div>
+      <div id="auth-su-error" style="display:none;font-size:0.85rem;color:var(--red);margin-bottom:12px;"></div>
+      <button class="btn-submit" id="btn-signup">Create account →</button>
+    </div>
+
+    <!-- Verify email screen -->
+    <div id="auth-verify" class="auth-card" style="display:none;">
+      <h2>Check your <span>email</span></h2>
+      <p class="sub" id="auth-verify-sub">We sent a verification code to your email address.</p>
+      <div class="form-group">
+        <label class="form-label" for="auth-code">Verification code</label>
+        <input class="form-input" type="text" id="auth-code" placeholder="123456" maxlength="6" inputmode="numeric" autocomplete="one-time-code" />
+      </div>
+      <div id="auth-verify-error" style="display:none;font-size:0.85rem;color:var(--red);margin-bottom:12px;"></div>
+      <button class="btn-submit" id="btn-verify">Verify →</button>
+      <a class="auth-link" id="link-resend">Resend code</a>
+    </div>
+
+    <!-- Forgot password screen -->
+    <div id="auth-forgot" class="auth-card" style="display:none;">
+      <h2>Reset your <span>password</span></h2>
+      <p class="sub" id="auth-forgot-sub">Enter your email and we'll send a reset code.</p>
+      <div class="form-group">
+        <label class="form-label" for="auth-fp-email">Email</label>
+        <input class="form-input" type="email" id="auth-fp-email" placeholder="you@example.com" />
+      </div>
+      <div id="auth-fp-new-wrap" style="display:none;">
+        <div class="form-group">
+          <label class="form-label" for="auth-fp-code">Reset code</label>
+          <input class="form-input" type="text" id="auth-fp-code" placeholder="123456" maxlength="6" inputmode="numeric" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="auth-fp-pass">New password</label>
+          <input class="form-input" type="password" id="auth-fp-pass" placeholder="••••••••" />
+        </div>
+      </div>
+      <div id="auth-fp-error" style="display:none;font-size:0.85rem;color:var(--red);margin-bottom:12px;"></div>
+      <button class="btn-submit" id="btn-forgot">Send reset code →</button>
+      <a class="auth-link" id="link-fp-signin">Back to sign in</a>
+    </div>
+
+  </div>
+
   <!-- Upload form state -->
   <div class="state" id="state-upload" style="display:none;">
     <div class="upload-card">
       <h2>Submit your <span>pitch</span></h2>
       <p class="sub">Upload a video clip of your play. Our AI scout will analyze your technique and email you a full report.</p>
-
-      <div class="form-group">
-        <label class="form-label" for="input-email">Your email</label>
-        <input class="form-input" type="email" id="input-email" placeholder="you@example.com" autocomplete="email" />
-      </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div class="form-group" style="margin-bottom:0;">
@@ -707,6 +864,8 @@
   <div class="footer-legal">Report is confidential. Player data anonymised. © 2026 PitchScout AI.</div>
 </div>
 
+<script src="https://unpkg.com/amazon-cognito-identity-js@6.3.12/dist/amazon-cognito-identity.min.js" crossorigin="anonymous"></script>
+<script src="js/auth.js"></script>
 <script src="js/report.js"></script>
 </body>
 </html>
