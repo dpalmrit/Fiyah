@@ -26,21 +26,25 @@
     #auth-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
     .auth-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 40px; width: 360px; text-align: center; }
     .auth-card h1 { font-size: 1.4rem; margin-bottom: 6px; }
-    .auth-card p  { color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; }
+    .auth-card p  { color: var(--muted); font-size: 0.85rem; margin-bottom: 28px; }
     .logo { color: var(--green); font-size: 1.6rem; font-weight: 800; margin-bottom: 10px; }
-    .auth-input { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 0.9rem; padding: 10px 14px; outline: none; width: 100%; margin-bottom: 12px; transition: border-color .15s; }
-    .auth-input:focus { border-color: var(--green); }
-    .auth-input::placeholder { color: var(--muted); }
-    .auth-btn { width: 100%; background: var(--green); border: none; border-radius: 7px; color: var(--dark); cursor: pointer; font-size: 0.95rem; font-weight: 700; padding: 11px; }
-    .auth-btn:hover { opacity: .85; }
-    .auth-err { color: var(--red); font-size: 0.82rem; margin-top: 10px; min-height: 18px; }
+    .btn-google { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; background: #fff; border: none; border-radius: 7px; color: #3c4043; cursor: pointer; font-size: 0.95rem; font-weight: 600; padding: 11px 16px; transition: box-shadow .15s; }
+    .btn-google:hover { box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+    .btn-google svg { flex-shrink: 0; }
+    .auth-err { color: var(--red); font-size: 0.82rem; margin-top: 14px; min-height: 18px; }
 
     /* ── App shell ── */
     #app { display: none; max-width: 900px; margin: 0 auto; padding: 40px 20px; }
 
-    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 10px; }
     header h1 { font-size: 1.3rem; }
     header h1 span { color: var(--green); }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .user-badge { font-size: 0.78rem; color: var(--muted); }
+    .user-badge strong { color: var(--text); }
+    .role-chip { display: inline-block; border-radius: 20px; font-size: 0.7rem; font-weight: 700; letter-spacing: .05em; padding: 2px 10px; text-transform: uppercase; }
+    .role-admin { background: rgba(0,230,118,.15); color: var(--green); border: 1px solid rgba(0,230,118,.3); }
+    .role-superuser { background: rgba(64,196,255,.12); color: var(--blue); border: 1px solid rgba(64,196,255,.25); }
     .btn-signout { background: none; border: 1px solid var(--border); border-radius: 20px; color: var(--muted); cursor: pointer; font-size: 0.75rem; padding: 4px 14px; }
     .btn-signout:hover { color: var(--red); border-color: var(--red); }
 
@@ -79,6 +83,13 @@
     .user-email { font-size: 0.9rem; font-weight: 500; }
     .user-meta  { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
 
+    /* ── Admin Users tab ── */
+    .admin-section { margin-bottom: 28px; }
+    .admin-row { background: var(--card); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; margin-bottom: 8px; }
+    .admin-email { font-size: 0.9rem; font-weight: 500; }
+    .admin-meta  { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+    .admin-locked { color: var(--muted); font-size: 0.75rem; font-style: italic; }
+
     /* ── Stats tab ── */
     .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
     .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
@@ -100,21 +111,24 @@
     .sparkline-wrap { margin-top: 4px; }
     .sparkline-wrap canvas { display: block; width: 100%; }
 
-    /* ── Access requests ── */
-    .req-row { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: 8px; display: flex; align-items: center; gap: 14px; padding: 12px 16px; font-size: 0.85rem; margin-bottom: 6px; }
-    .req-row.declined { border-left-color: #555; opacity: 0.55; }
-    .req-row.approved { border-left-color: #555; opacity: 0.55; }
-    .req-email  { flex: 1; font-weight: 500; }
-    .req-date   { color: var(--muted); font-size: 0.78rem; white-space: nowrap; }
-    .req-status { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
-    .req-status.pending  { background: rgba(0,230,118,.12); color: var(--green); }
-    .req-status.approved { background: rgba(100,100,100,.15); color: #888; }
-    .req-status.declined { background: rgba(100,100,100,.15); color: #888; }
-    .req-actions { display: flex; gap: 6px; }
-    .btn-approve { background: var(--green); color: var(--bg); border: none; border-radius: 6px; padding: 5px 14px; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
-    .btn-approve:hover { background: #00c060; }
-    .btn-decline { background: none; border: 1px solid #555; border-radius: 6px; padding: 5px 10px; font-size: 0.78rem; color: var(--muted); cursor: pointer; }
-    .btn-decline:hover { border-color: var(--red); color: var(--red); }
+    /* ── Failure alert widget ── */
+    .alert-widget { display: none; background: rgba(239,83,80,.08); border: 1px solid rgba(239,83,80,.35); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; }
+    .alert-widget.visible { display: flex; align-items: center; gap: 14px; }
+    .alert-pulse { width: 10px; height: 10px; border-radius: 50%; background: var(--red); flex-shrink: 0; animation: pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(239,83,80,.6); }
+      50%      { box-shadow: 0 0 0 7px rgba(239,83,80,0); }
+    }
+    .alert-body { flex: 1; }
+    .alert-title { font-size: 0.9rem; font-weight: 700; color: var(--red); margin-bottom: 2px; }
+    .alert-sub   { font-size: 0.78rem; color: var(--muted); }
+    .alert-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .btn-dismiss { background: none; border: 1px solid rgba(239,83,80,.4); border-radius: 6px; color: var(--muted); font-size: 0.78rem; padding: 6px 12px; cursor: pointer; }
+    .btn-dismiss:hover { border-color: var(--muted); }
+    .notify-toggle { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-size: 0.75rem; padding: 4px 10px; cursor: pointer; white-space: nowrap; }
+    .notify-toggle.on  { border-color: var(--green); color: var(--green); }
+    .notify-toggle.off { border-color: var(--border); color: var(--muted); }
+    .poll-status { font-size: 0.72rem; color: var(--muted); margin-left: auto; white-space: nowrap; }
 
     /* ── Failures tab ── */
     .failure-list { display: flex; flex-direction: column; gap: 8px; }
@@ -151,9 +165,16 @@
   <div class="auth-card">
     <div class="logo">⚽</div>
     <h1>PitchScout Admin</h1>
-    <p>Enter your API key to continue</p>
-    <input class="auth-input" type="password" id="auth-key" placeholder="API key" autocomplete="off" />
-    <button class="auth-btn" id="auth-btn">Sign in</button>
+    <p>Sign in with your Google account to continue</p>
+    <button class="btn-google" id="auth-google-btn">
+      <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+        <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+        <path d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
+        <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+      </svg>
+      Continue with Google
+    </button>
     <div class="auth-err" id="auth-err"></div>
   </div>
 </div>
@@ -162,28 +183,26 @@
 <div id="app">
   <header>
     <h1>PitchScout <span>Admin</span></h1>
-    <button class="btn-signout" id="signout-btn">Sign out</button>
+    <div class="header-right">
+      <div class="user-badge">
+        <strong id="header-email"></strong>
+        <span id="header-role-chip"></span>
+      </div>
+      <button class="btn-signout" id="signout-btn">Sign out</button>
+    </div>
   </header>
 
-  <nav class="tabs">
+  <nav class="tabs" id="tab-nav">
     <button class="tab active" data-tab="allowlist">Beta Testers</button>
     <button class="tab" data-tab="stats">Spending</button>
     <button class="tab" data-tab="failures">Failures <span id="failure-badge"></span></button>
+    <button class="tab" data-tab="users" id="tab-users-btn" style="display:none">Admin Users</button>
   </nav>
 
   <!-- ── Tab: Allowlist ── -->
   <div class="tab-panel active" id="tab-allowlist">
-
-    <!-- Access Requests -->
-    <div class="list-header" style="margin-bottom:12px;">
-      <div class="section-title" style="margin:0;">Access requests <span id="requests-badge" style="display:none;background:rgba(0,230,118,.15);color:var(--green);border-radius:100px;padding:2px 10px;font-size:0.75rem;font-weight:700;margin-left:8px;"></span></div>
-      <button class="btn-primary" id="refresh-requests-btn" style="padding:5px 14px;font-size:0.8rem;">Refresh</button>
-    </div>
-    <div id="requests-list" style="margin-bottom:28px;"><div class="empty">Loading…</div></div>
-
-    <!-- Manual add -->
     <div class="card">
-      <div class="section-title">Add tester manually</div>
+      <div class="section-title">Add beta tester</div>
       <div class="form-row">
         <input type="email" id="add-email" placeholder="email@example.com" />
         <input type="text"  id="add-note"  placeholder="Note (optional)" maxlength="80" />
@@ -220,51 +239,167 @@
 
   <!-- ── Tab: Failures ── -->
   <div class="tab-panel" id="tab-failures">
-    <div class="list-header" style="margin-bottom:16px">
+
+    <!-- Notification widget -->
+    <div class="alert-widget" id="alert-widget">
+      <div class="alert-pulse"></div>
+      <div class="alert-body">
+        <div class="alert-title" id="alert-title">New failures detected</div>
+        <div class="alert-sub" id="alert-sub"></div>
+      </div>
+      <div class="alert-actions">
+        <button class="btn-dismiss" id="alert-dismiss">Dismiss</button>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="list-header" style="margin-bottom:16px;align-items:center">
       <div class="section-title" style="margin:0">Failed sessions — last 30 days</div>
-      <span class="count" id="failure-count">—</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="poll-status" id="poll-status"></span>
+        <button class="notify-toggle off" id="notify-toggle" title="Browser notifications">🔔 Notify</button>
+        <span class="count" id="failure-count">—</span>
+      </div>
     </div>
     <div class="failure-list" id="failure-list"><div class="empty">Loading…</div></div>
+  </div>
+
+  <!-- ── Tab: Admin Users (full admin only) ── -->
+  <div class="tab-panel" id="tab-users">
+    <div class="admin-section">
+      <div class="section-title">Full admins</div>
+      <div id="full-admins-list"><div class="empty">Loading…</div></div>
+    </div>
+
+    <div class="admin-section">
+      <div class="section-title">Superusers</div>
+      <div id="superusers-list"><div class="empty">Loading…</div></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Add superuser</div>
+      <div class="form-row">
+        <input type="email" id="su-email" placeholder="email@example.com" />
+        <button class="btn-primary" id="su-add-btn">Add superuser</button>
+      </div>
+      <div class="msg" id="su-msg"></div>
+    </div>
   </div>
 </div>
 
 <script>
-const API_BASE   = 'https://mdvmhkrsc3.execute-api.us-east-1.amazonaws.com';
-const SESSION_KEY = 'ps_admin_key';
-let apiKey = '';
+const API_BASE    = 'https://mdvmhkrsc3.execute-api.us-east-1.amazonaws.com';
+const SESSION_KEY = 'ps_admin_jwt';
 
-// ── Auth ──────────────────────────────────────────────────────────────────────
+const COGNITO_DOMAIN = 'https://pitchscout.auth.us-east-1.amazoncognito.com';
+const CLIENT_ID      = '65brgla25g237lk7ajrm7kptm8';
+const REDIRECT_URI   = window.location.origin + '/admin.html';
 
-async function tryAuth(key) {
-  const resp = await fetch(`${API_BASE}/admin/allowlist`, { headers: { 'x-api-key': key } });
-  return resp.status !== 403;
+const FULL_ADMINS = new Set(['scout.logi@gmail.com', 'lizzyp24@gmail.com', 'dpalmer.it@gmail.com']);
+
+let jwt      = '';
+let myEmail  = '';
+let myRole   = '';
+
+// ── PKCE helpers ─────────────────────────────────────────────────────────────
+
+function _pkceVerifier() {
+  const arr = new Uint8Array(32);
+  crypto.getRandomValues(arr);
+  return btoa(String.fromCharCode(...arr)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
 }
 
-document.getElementById('auth-btn').addEventListener('click', async () => {
-  const key = document.getElementById('auth-key').value.trim();
-  const errEl = document.getElementById('auth-err');
-  if (!key) return;
-  document.getElementById('auth-btn').disabled = true;
-  errEl.textContent = '';
-  const ok = await tryAuth(key).catch(() => false);
-  if (ok) {
-    sessionStorage.setItem(SESSION_KEY, key);
-    apiKey = key;
-    showApp();
-  } else {
-    errEl.textContent = 'Invalid API key.';
-    document.getElementById('auth-btn').disabled = false;
-  }
-});
+async function _pkceChallenge(verifier) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
+  return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
 
-document.getElementById('auth-key').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('auth-btn').click(); });
+function _decodeEmail(token) {
+  try {
+    const b64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    const payload = JSON.parse(atob(b64 + '=='.slice((b64.length + 3) % 4 ? 0 : 2)));
+    return (payload.email || '').trim().toLowerCase();
+  } catch { return ''; }
+}
+
+// ── OAuth flow ────────────────────────────────────────────────────────────────
+
+async function startGoogleSignIn() {
+  const verifier   = _pkceVerifier();
+  const challenge  = await _pkceChallenge(verifier);
+  sessionStorage.setItem('pkce_verifier', verifier);
+  const params = new URLSearchParams({
+    response_type: 'code',
+    client_id:     CLIENT_ID,
+    redirect_uri:  REDIRECT_URI,
+    identity_provider: 'Google',
+    scope: 'openid email profile',
+    code_challenge: challenge,
+    code_challenge_method: 'S256',
+  });
+  window.location.href = `${COGNITO_DOMAIN}/oauth2/authorize?${params}`;
+}
+
+async function handleOAuthCallback() {
+  const code = new URLSearchParams(window.location.search).get('code');
+  if (!code) return false;
+  window.history.replaceState({}, '', window.location.pathname);
+
+  const verifier = sessionStorage.getItem('pkce_verifier');
+  sessionStorage.removeItem('pkce_verifier');
+
+  const body = new URLSearchParams({
+    grant_type:   'authorization_code',
+    client_id:    CLIENT_ID,
+    code,
+    redirect_uri: REDIRECT_URI,
+  });
+  if (verifier) body.set('code_verifier', verifier);
+
+  const resp = await fetch(`${COGNITO_DOMAIN}/oauth2/token`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  });
+  if (!resp.ok) {
+    document.getElementById('auth-err').textContent = 'Sign-in failed. Please try again.';
+    return false;
+  }
+  const { id_token } = await resp.json();
+  sessionStorage.setItem(SESSION_KEY, id_token);
+  return id_token;
+}
+
+function authHeaders() {
+  return { 'Authorization': 'Bearer ' + jwt };
+}
+
+async function verifyAndShow(token) {
+  const email = _decodeEmail(token);
+  if (!email) return false;
+
+  // Verify the token is accepted by the API
+  const resp = await fetch(`${API_BASE}/admin/allowlist`, {
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+  }).catch(() => null);
+  if (!resp || resp.status === 403) return false;
+
+  jwt     = token;
+  myEmail = email;
+  myRole  = FULL_ADMINS.has(email) ? 'admin' : 'superuser';
+  return true;
+}
+
+// ── Auth UI ───────────────────────────────────────────────────────────────────
+
+document.getElementById('auth-google-btn').addEventListener('click', startGoogleSignIn);
 
 document.getElementById('signout-btn').addEventListener('click', () => {
   sessionStorage.removeItem(SESSION_KEY);
-  apiKey = '';
+  jwt = myEmail = myRole = '';
   document.getElementById('app').style.display = 'none';
   document.getElementById('auth-screen').style.display = 'flex';
-  document.getElementById('auth-key').value = '';
+  document.getElementById('auth-err').textContent = '';
 });
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
@@ -278,10 +413,10 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-// ── Allowlist ────────────────────────────────────────────────────────────────
+// ── Allowlist ─────────────────────────────────────────────────────────────────
 
 async function loadAllowlist() {
-  const resp = await fetch(`${API_BASE}/admin/allowlist`, { headers: { 'x-api-key': apiKey } });
+  const resp = await fetch(`${API_BASE}/admin/allowlist`, { headers: authHeaders() });
   const data = await resp.json();
   const users = data.users || [];
   document.getElementById('user-count').textContent = users.length + ' approved';
@@ -308,9 +443,9 @@ document.getElementById('add-btn').addEventListener('click', async () => {
   document.getElementById('add-btn').disabled = true;
   msgEl.className = 'msg'; msgEl.textContent = '';
   const resp = await fetch(`${API_BASE}/admin/allowlist`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
-    body: JSON.stringify({ email, note }),
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body:    JSON.stringify({ email, note }),
   });
   const data = await resp.json();
   if (resp.ok) {
@@ -329,25 +464,25 @@ document.getElementById('add-email').addEventListener('keydown', e => { if (e.ke
 async function removeUser(email) {
   if (!confirm(`Remove ${email}?`)) return;
   const resp = await fetch(`${API_BASE}/admin/allowlist`, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
-    body: JSON.stringify({ email }),
+    method:  'DELETE',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body:    JSON.stringify({ email }),
   });
   if (resp.ok) await loadAllowlist();
   else { const d = await resp.json(); alert(d.error || 'Failed.'); }
 }
 
-// ── Stats ─────────────────────────────────────────────────────────────────────
+// ── Stats ──────────────────────────────────────────────────────────────────────
 
 async function loadStats() {
-  const resp = await fetch(`${API_BASE}/admin/stats`, { headers: { 'x-api-key': apiKey } });
+  const resp = await fetch(`${API_BASE}/admin/stats`, { headers: authHeaders() });
   const d = await resp.json();
 
   const sc = d.status_counts || {};
-  const complete  = sc.complete  || 0;
-  const failed    = (sc.failed   || 0) + (sc.analysis_failed || 0);
-  const pending   = (sc.pending_upload || 0) + (sc.submitted || 0) + (sc.processing || 0);
-  const total     = Object.values(sc).reduce((a, b) => a + b, 0);
+  const complete = sc.complete || 0;
+  const failed   = (sc.failed || 0) + (sc.analysis_failed || 0);
+  const pending  = (sc.pending_upload || 0) + (sc.submitted || 0) + (sc.processing || 0);
+  const total    = Object.values(sc).reduce((a, b) => a + b, 0);
 
   document.getElementById('stat-grid').innerHTML = `
     <div class="stat-card">
@@ -377,7 +512,6 @@ async function loadStats() {
     </div>
   `;
 
-  // Cost breakdown table
   const tbody = document.getElementById('cost-body');
   const cb = d.cost_by_type || {};
   if (!Object.keys(cb).length) {
@@ -398,8 +532,6 @@ async function loadStats() {
     `;
   }
   document.getElementById('billing-note').textContent = d.billing_note || '';
-
-  // Sparkline
   drawSparkline(d.daily || []);
 }
 
@@ -435,7 +567,6 @@ function drawSparkline(daily) {
   });
   ctx.globalAlpha = 1;
 
-  // Date labels: first and last
   ctx.fillStyle = '#6a9b78';
   ctx.font = '10px Inter, system-ui';
   ctx.fillText(daily[0].date.slice(5), padX, h);
@@ -458,7 +589,7 @@ function roundRect(ctx, x, y, w, h, r) {
 // ── Failures ──────────────────────────────────────────────────────────────────
 
 async function loadFailures() {
-  const resp = await fetch(`${API_BASE}/admin/failures`, { headers: { 'x-api-key': apiKey } });
+  const resp = await fetch(`${API_BASE}/admin/failures`, { headers: authHeaders() });
   const data = await resp.json();
   const failures  = data.failures   || [];
   const preErrors = data.pre_errors || [];
@@ -471,9 +602,9 @@ async function loadFailures() {
   const list = document.getElementById('failure-list');
 
   const BADGE = {
-    failed:          { cls: 'badge-failed',    label: 'TwelveLabs failed' },
-    analysis_failed: { cls: 'badge-analysis',  label: 'Analysis failed'   },
-    upload_failed:   { cls: 'badge-upload',    label: 'Upload failed'     },
+    failed:          { cls: 'badge-failed',   label: 'TwelveLabs failed' },
+    analysis_failed: { cls: 'badge-analysis', label: 'Analysis failed'   },
+    upload_failed:   { cls: 'badge-upload',   label: 'Upload failed'     },
   };
 
   const sessionRows = failures.length
@@ -512,86 +643,219 @@ async function loadFailures() {
   list.innerHTML = sessionRows + preSection;
 }
 
+// ── Admin Users ───────────────────────────────────────────────────────────────
+
+async function loadAdminUsers() {
+  const resp = await fetch(`${API_BASE}/admin/users`, { headers: authHeaders() });
+  const data = await resp.json();
+
+  const fullAdmins = data.full_admins || [];
+  document.getElementById('full-admins-list').innerHTML = fullAdmins.map(email => `
+    <div class="admin-row">
+      <div>
+        <div class="admin-email">${esc(email)}</div>
+        <div class="admin-meta">Full admin</div>
+      </div>
+      <span class="admin-locked">Hardcoded — cannot remove</span>
+    </div>
+  `).join('') || '<div class="empty">None.</div>';
+
+  const superusers = data.superusers || [];
+  document.getElementById('superusers-list').innerHTML = superusers.length
+    ? superusers.map(u => `
+        <div class="admin-row">
+          <div>
+            <div class="admin-email">${esc(u.email)}</div>
+            <div class="admin-meta">Added by ${esc(u.added_by || '—')} · ${esc((u.added_at || '').slice(0,10))}</div>
+          </div>
+          <button class="btn-danger" data-remove-su="${esc(u.email)}">Remove</button>
+        </div>
+      `).join('')
+    : '<div class="empty">No superusers yet.</div>';
+
+  document.querySelectorAll('[data-remove-su]').forEach(btn =>
+    btn.addEventListener('click', () => removeSuperuser(btn.dataset.removeSu)));
+}
+
+document.getElementById('su-add-btn').addEventListener('click', async () => {
+  const email = document.getElementById('su-email').value.trim().toLowerCase();
+  const msgEl = document.getElementById('su-msg');
+  if (!email || !email.includes('@')) { msgEl.className = 'msg err'; msgEl.textContent = 'Enter a valid email.'; return; }
+  document.getElementById('su-add-btn').disabled = true;
+  msgEl.className = 'msg'; msgEl.textContent = '';
+  const resp = await fetch(`${API_BASE}/admin/users`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body:    JSON.stringify({ email }),
+  });
+  const data = await resp.json();
+  if (resp.ok) {
+    msgEl.className = 'msg ok'; msgEl.textContent = `${email} added as superuser.`;
+    document.getElementById('su-email').value = '';
+    await loadAdminUsers();
+  } else {
+    msgEl.className = 'msg err'; msgEl.textContent = data.error || 'Failed.';
+  }
+  document.getElementById('su-add-btn').disabled = false;
+});
+
+async function removeSuperuser(email) {
+  if (!confirm(`Remove superuser ${email}?`)) return;
+  const resp = await fetch(`${API_BASE}/admin/users`, {
+    method:  'DELETE',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body:    JSON.stringify({ email }),
+  });
+  if (resp.ok) await loadAdminUsers();
+  else { const d = await resp.json(); alert(d.error || 'Failed.'); }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
 function esc(str) {
   return String(str ?? '')
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── Access Requests ───────────────────────────────────────────────────────────
+// ── Failure polling + notifications ───────────────────────────────────────────
 
-async function loadRequests() {
-  const resp = await fetch(`${API_BASE}/admin/requests`, { headers: { 'x-api-key': apiKey } });
-  const data = await resp.json();
-  const reqs = data.requests || [];
+let _lastFailureKey = null;
+let _pollInterval   = null;
+let _notifyEnabled  = false;
+const POLL_MS       = 60_000;
 
-  const pending = reqs.filter(r => r.status === 'pending');
-  const badge   = document.getElementById('requests-badge');
-  if (pending.length) {
-    badge.textContent = pending.length + ' pending';
-    badge.style.display = 'inline';
-  } else {
-    badge.style.display = 'none';
+function _failureFingerprint(data) {
+  const ids = (data.failures || []).map(f => f.session_id + ':' + f.job_status).sort();
+  return ids.join('|') + '|total:' + (data.total || 0);
+}
+
+function _formatAlertSub(data) {
+  const n      = data.total || 0;
+  const stalls = (data.stale_uploads || []).length + (data.stale_processing || []).length;
+  const parts  = [];
+  if (n)      parts.push(`${n} failed session${n !== 1 ? 's' : ''}`);
+  if (stalls) parts.push(`${stalls} stalled`);
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return parts.join(', ') + ` — detected at ${now}`;
+}
+
+function _showAlert(data) {
+  const widget = document.getElementById('alert-widget');
+  const n      = data.total || 0;
+  document.getElementById('alert-title').textContent = n === 1 ? '1 new failure detected' : `${n} failures detected`;
+  document.getElementById('alert-sub').textContent   = _formatAlertSub(data);
+  widget.classList.add('visible');
+  document.getElementById('failure-badge').textContent = n > 0 ? ` (${n})` : '';
+
+  if (_notifyEnabled && document.hidden) {
+    new Notification('PitchScout — Failures', {
+      body: document.getElementById('alert-sub').textContent,
+      icon: '/favicon.ico',
+      tag:  'ps-failure',
+    });
   }
+}
 
-  const list = document.getElementById('requests-list');
-  if (!reqs.length) {
-    list.innerHTML = '<div class="empty">No access requests yet.</div>';
+function _updatePollStatus() {
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('poll-status').textContent = `Last checked ${now}`;
+}
+
+async function pollFailures() {
+  if (!jwt) return;
+  try {
+    const resp = await fetch(`${API_BASE}/admin/failures`, { headers: authHeaders() });
+    if (!resp.ok) return;
+    const data = await resp.json();
+    const key  = _failureFingerprint(data);
+    _updatePollStatus();
+    if (_lastFailureKey !== null && key !== _lastFailureKey && (data.total || 0) > 0) {
+      _showAlert(data);
+      await loadFailures();
+    }
+    _lastFailureKey = key;
+  } catch (_) {}
+}
+
+function startPolling() {
+  if (_pollInterval) return;
+  _pollInterval = setInterval(pollFailures, POLL_MS);
+}
+
+document.getElementById('notify-toggle').addEventListener('click', async () => {
+  const btn = document.getElementById('notify-toggle');
+  if (_notifyEnabled) {
+    _notifyEnabled  = false;
+    btn.textContent = '🔔 Notify';
+    btn.className   = 'notify-toggle off';
     return;
   }
-
-  list.innerHTML = reqs.map(r => `
-    <div class="req-row ${r.status}" data-email="${esc(r.email)}">
-      <span class="req-email">${esc(r.email)}</span>
-      <span class="req-date">${esc(r.requested_at)}</span>
-      <span class="req-status ${r.status}">${r.status}</span>
-      ${r.status === 'pending' ? `
-        <div class="req-actions">
-          <button class="btn-approve" onclick="handleRequest('${esc(r.email)}','approve',this)">Approve</button>
-          <button class="btn-decline" onclick="handleRequest('${esc(r.email)}','decline',this)">Decline</button>
-        </div>` : ''}
-    </div>`).join('');
-}
-
-async function handleRequest(email, action, btn) {
-  btn.disabled = true;
-  btn.textContent = action === 'approve' ? 'Approving…' : 'Declining…';
-
-  const resp = await fetch(`${API_BASE}/admin/requests`, {
-    method: 'POST',
-    headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, action }),
-  });
-
-  if (resp.ok) {
-    await loadRequests();
-    if (action === 'approve') await loadAllowlist();
+  if (!('Notification' in window)) { alert('Browser notifications are not supported.'); return; }
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    _notifyEnabled  = true;
+    btn.textContent = '🔔 On';
+    btn.className   = 'notify-toggle on';
   } else {
-    btn.disabled = false;
-    btn.textContent = action === 'approve' ? 'Approve' : 'Decline';
+    btn.textContent = '🔕 Blocked';
+    btn.className   = 'notify-toggle off';
   }
-}
+});
 
-document.getElementById('refresh-requests-btn').addEventListener('click', loadRequests);
+document.getElementById('alert-dismiss').addEventListener('click', () => {
+  document.getElementById('alert-widget').classList.remove('visible');
+});
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 function showApp() {
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
-  loadRequests();
+
+  document.getElementById('header-email').textContent = myEmail;
+  const chip = document.getElementById('header-role-chip');
+  if (myRole === 'admin') {
+    chip.innerHTML = ' <span class="role-chip role-admin">Full Admin</span>';
+  } else {
+    chip.innerHTML = ' <span class="role-chip role-superuser">Superuser</span>';
+  }
+
+  if (myRole === 'admin') {
+    document.getElementById('tab-users-btn').style.display = '';
+  }
+
   loadAllowlist();
   loadStats();
-  loadFailures();
-}
-
-const saved = sessionStorage.getItem(SESSION_KEY);
-if (saved) {
-  apiKey = saved;
-  tryAuth(saved).then(ok => {
-    if (ok) showApp();
-    else sessionStorage.removeItem(SESSION_KEY);
+  loadFailures().then(() => {
+    fetch(`${API_BASE}/admin/failures`, { headers: authHeaders() })
+      .then(r => r.json()).then(d => { _lastFailureKey = _failureFingerprint(d); _updatePollStatus(); });
+    startPolling();
   });
 }
+
+async function init() {
+  // Handle OAuth callback
+  const code = new URLSearchParams(window.location.search).get('code');
+  if (code) {
+    const token = await handleOAuthCallback();
+    if (token) {
+      const ok = await verifyAndShow(token);
+      if (ok) { showApp(); return; }
+      document.getElementById('auth-err').textContent = 'Access denied. Admin accounts only.';
+    }
+    return;
+  }
+
+  // Restore from session
+  const saved = sessionStorage.getItem(SESSION_KEY);
+  if (saved) {
+    const ok = await verifyAndShow(saved);
+    if (ok) { showApp(); return; }
+    sessionStorage.removeItem(SESSION_KEY);
+  }
+}
+
+init();
 </script>
 </body>
 </html>
