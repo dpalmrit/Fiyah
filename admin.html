@@ -100,6 +100,22 @@
     .sparkline-wrap { margin-top: 4px; }
     .sparkline-wrap canvas { display: block; width: 100%; }
 
+    /* ── Access requests ── */
+    .req-row { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: 8px; display: flex; align-items: center; gap: 14px; padding: 12px 16px; font-size: 0.85rem; margin-bottom: 6px; }
+    .req-row.declined { border-left-color: #555; opacity: 0.55; }
+    .req-row.approved { border-left-color: #555; opacity: 0.55; }
+    .req-email  { flex: 1; font-weight: 500; }
+    .req-date   { color: var(--muted); font-size: 0.78rem; white-space: nowrap; }
+    .req-status { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+    .req-status.pending  { background: rgba(0,230,118,.12); color: var(--green); }
+    .req-status.approved { background: rgba(100,100,100,.15); color: #888; }
+    .req-status.declined { background: rgba(100,100,100,.15); color: #888; }
+    .req-actions { display: flex; gap: 6px; }
+    .btn-approve { background: var(--green); color: var(--bg); border: none; border-radius: 6px; padding: 5px 14px; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+    .btn-approve:hover { background: #00c060; }
+    .btn-decline { background: none; border: 1px solid #555; border-radius: 6px; padding: 5px 10px; font-size: 0.78rem; color: var(--muted); cursor: pointer; }
+    .btn-decline:hover { border-color: var(--red); color: var(--red); }
+
     /* ── Failures tab ── */
     .failure-list { display: flex; flex-direction: column; gap: 8px; }
     .failure-row { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; align-items: center; gap: 12px; padding: 12px 16px; font-size: 0.85rem; }
@@ -157,8 +173,17 @@
 
   <!-- ── Tab: Allowlist ── -->
   <div class="tab-panel active" id="tab-allowlist">
+
+    <!-- Access Requests -->
+    <div class="list-header" style="margin-bottom:12px;">
+      <div class="section-title" style="margin:0;">Access requests <span id="requests-badge" style="display:none;background:rgba(0,230,118,.15);color:var(--green);border-radius:100px;padding:2px 10px;font-size:0.75rem;font-weight:700;margin-left:8px;"></span></div>
+      <button class="btn-primary" id="refresh-requests-btn" style="padding:5px 14px;font-size:0.8rem;">Refresh</button>
+    </div>
+    <div id="requests-list" style="margin-bottom:28px;"><div class="empty">Loading…</div></div>
+
+    <!-- Manual add -->
     <div class="card">
-      <div class="section-title">Add beta tester</div>
+      <div class="section-title">Add tester manually</div>
       <div class="form-row">
         <input type="email" id="add-email" placeholder="email@example.com" />
         <input type="text"  id="add-note"  placeholder="Note (optional)" maxlength="80" />
@@ -492,11 +517,68 @@ function esc(str) {
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ── Access Requests ───────────────────────────────────────────────────────────
+
+async function loadRequests() {
+  const resp = await fetch(`${API_BASE}/admin/requests`, { headers: { 'x-api-key': apiKey } });
+  const data = await resp.json();
+  const reqs = data.requests || [];
+
+  const pending = reqs.filter(r => r.status === 'pending');
+  const badge   = document.getElementById('requests-badge');
+  if (pending.length) {
+    badge.textContent = pending.length + ' pending';
+    badge.style.display = 'inline';
+  } else {
+    badge.style.display = 'none';
+  }
+
+  const list = document.getElementById('requests-list');
+  if (!reqs.length) {
+    list.innerHTML = '<div class="empty">No access requests yet.</div>';
+    return;
+  }
+
+  list.innerHTML = reqs.map(r => `
+    <div class="req-row ${r.status}" data-email="${esc(r.email)}">
+      <span class="req-email">${esc(r.email)}</span>
+      <span class="req-date">${esc(r.requested_at)}</span>
+      <span class="req-status ${r.status}">${r.status}</span>
+      ${r.status === 'pending' ? `
+        <div class="req-actions">
+          <button class="btn-approve" onclick="handleRequest('${esc(r.email)}','approve',this)">Approve</button>
+          <button class="btn-decline" onclick="handleRequest('${esc(r.email)}','decline',this)">Decline</button>
+        </div>` : ''}
+    </div>`).join('');
+}
+
+async function handleRequest(email, action, btn) {
+  btn.disabled = true;
+  btn.textContent = action === 'approve' ? 'Approving…' : 'Declining…';
+
+  const resp = await fetch(`${API_BASE}/admin/requests`, {
+    method: 'POST',
+    headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, action }),
+  });
+
+  if (resp.ok) {
+    await loadRequests();
+    if (action === 'approve') await loadAllowlist();
+  } else {
+    btn.disabled = false;
+    btn.textContent = action === 'approve' ? 'Approve' : 'Decline';
+  }
+}
+
+document.getElementById('refresh-requests-btn').addEventListener('click', loadRequests);
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 function showApp() {
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
+  loadRequests();
   loadAllowlist();
   loadStats();
   loadFailures();
