@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PitchScout — Get Your Report</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:   #00e676;
+      --dark:    #080f0a;
+      --surface: #0d1a10;
+      --card:    #111e14;
+      --border:  #1e3324;
+      --text:    #e8f5e9;
+      --muted:   #6a9b78;
+      --red:     #ef5350;
+      --yellow:  #ffd600;
+    }
+
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    /* ── Header / branding ── */
+    .event-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .event-logo {
+      width: 72px;
+      height: 72px;
+      border-radius: 12px;
+      object-fit: contain;
+      margin: 0 auto 14px;
+      display: block;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    .event-logo-placeholder {
+      width: 72px;
+      height: 72px;
+      border-radius: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      margin: 0 auto 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+    }
+    .ps-brand {
+      color: var(--green);
+      font-family: 'Courier New', monospace;
+      font-size: 9px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .event-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      line-height: 1.2;
+    }
+    .event-date {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 4px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .card-sub {
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    /* ── Form ── */
+    .field { margin-bottom: 16px; }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    input[type="text"], input[type="email"] {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+      padding: 11px 14px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    input:focus { border-color: var(--green); }
+    input::placeholder { color: var(--muted); }
+
+    /* ── COPPA consent ── */
+    .coppa-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--yellow);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+    .coppa-box p {
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+    .coppa-box strong { color: var(--text); }
+    .consent-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .consent-row input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      accent-color: var(--green);
+    }
+    .consent-label {
+      font-size: 0.83rem;
+      line-height: 1.45;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    /* ── Submit ── */
+    .btn-submit {
+      width: 100%;
+      background: var(--green);
+      border: none;
+      border-radius: 8px;
+      color: var(--dark);
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: .04em;
+      padding: 13px 20px;
+      text-transform: uppercase;
+      transition: opacity .15s;
+      cursor: pointer;
+    }
+    .btn-submit:disabled { opacity: .35; cursor: not-allowed; }
+    .btn-submit:not(:disabled):hover { opacity: .88; }
+
+    .msg { font-size: 0.82rem; margin-top: 12px; min-height: 18px; }
+    .msg.ok  { color: var(--green); }
+    .msg.err { color: var(--red); }
+
+    /* ── Result states ── */
+    .result-card {
+      display: none;
+      text-align: center;
+      padding: 36px 28px;
+    }
+    .result-card.show { display: block; }
+    .result-icon { font-size: 3rem; margin-bottom: 16px; }
+    .result-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 10px; }
+    .result-body  { color: var(--muted); font-size: 0.88rem; line-height: 1.55; }
+    .result-body strong { color: var(--text); }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: .04em;
+    }
+    .footer a { color: var(--green); text-decoration: none; }
+
+    /* Loading skeleton */
+    .loading { opacity: 0.4; animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.7} }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- Branding header -->
+  <div class="event-header" id="event-header">
+    <div class="event-logo-placeholder loading" id="logo-wrap">⚽</div>
+    <div class="ps-brand">// PitchScout AI</div>
+    <div class="event-title loading" id="event-title">Loading…</div>
+    <div class="event-date" id="event-date"></div>
+  </div>
+
+  <!-- Claim form -->
+  <div class="card" id="claim-card">
+    <div class="card-title">Get Your Child's Report</div>
+    <div class="card-sub">Enter your child's jersey number and your email. We'll send you a link to their AI-generated performance report.</div>
+
+    <div class="field">
+      <label for="jersey">Jersey Number</label>
+      <input type="text" id="jersey" placeholder="e.g. 14" inputmode="numeric" maxlength="5" autocomplete="off" />
+    </div>
+
+    <div class="field">
+      <label for="email">Your Email Address</label>
+      <input type="email" id="email" placeholder="parent@example.com" autocomplete="email" />
+    </div>
+
+    <div class="coppa-box">
+      <p>
+        <strong>Privacy Notice (COPPA)</strong><br>
+        This event may include participants under 13 years of age. Under the Children's Online Privacy
+        Protection Act (COPPA), we require your explicit consent before we can share your child's
+        video analysis report. Your email is used solely to deliver the report and will not be shared
+        or used for marketing purposes.
+      </p>
+      <label class="consent-row" for="coppa-check">
+        <input type="checkbox" id="coppa-check" />
+        <span class="consent-label">
+          I am the parent or legal guardian of this player and I consent to receiving their
+          AI-generated performance report at the email address above.
+        </span>
+      </label>
+    </div>
+
+    <button class="btn-submit" id="submit-btn" disabled>Get Report Link</button>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <!-- Result: sent immediately -->
+  <div class="card result-card" id="result-sent">
+    <div class="result-icon">✅</div>
+    <div class="result-title">Report Sent!</div>
+    <div class="result-body">
+      We've sent your child's analysis report to <strong id="sent-email"></strong>.<br><br>
+      Check your inbox — it should arrive within a few minutes.
+      Check your spam folder if you don't see it.
+    </div>
+  </div>
+
+  <!-- Result: queued / pending -->
+  <div class="card result-card" id="result-queued">
+    <div class="result-icon">⏳</div>
+    <div class="result-title">You're on the List!</div>
+    <div class="result-body">
+      The AI analysis for Jersey <strong id="queued-jersey"></strong> is still processing.
+      We'll automatically email <strong id="queued-email"></strong> as soon as it's ready —
+      typically within 15–30 minutes.
+    </div>
+  </div>
+
+  <!-- Result: already claimed -->
+  <div class="card result-card" id="result-duplicate">
+    <div class="result-icon">📧</div>
+    <div class="result-title">Already Sent</div>
+    <div class="result-body">
+      A report link was already sent to this email address for Jersey <strong id="dup-jersey"></strong>.
+      Please check your inbox (and spam folder).
+    </div>
+  </div>
+
+  <!-- Result: not found -->
+  <div class="card result-card" id="result-notfound">
+    <div class="result-icon">🔍</div>
+    <div class="result-title">Not Found</div>
+    <div class="result-body" id="notfound-msg">
+      We couldn't find a video for that jersey number at this event.
+      Please double-check the number, or contact event staff.
+    </div>
+  </div>
+
+  <div class="footer">
+    Powered by <a href="https://pitchscout.ai" target="_blank">PitchScout AI</a> &nbsp;·&nbsp;
+    <a href="mailto:privacy@pitchscout.ai">Privacy</a>
+  </div>
+</div>
+
+<script>
+const API = 'https://mdvmhkrsc3.execute-api.us-east-1.amazonaws.com';
+const params = new URLSearchParams(window.location.search);
+const EVENT_ID = (params.get('id') || '').toLowerCase().trim();
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Load event info ───────────────────────────────────────────────────────────
+async function loadEventInfo() {
+  if (!EVENT_ID) {
+    document.getElementById('event-title').textContent = 'PitchScout Event';
+    document.getElementById('event-title').classList.remove('loading');
+    document.getElementById('logo-wrap').classList.remove('loading');
+    return;
+  }
+  try {
+    const r = await fetch(`${API}/event/info?id=${encodeURIComponent(EVENT_ID)}`);
+    if (!r.ok) throw new Error('not found');
+    const d = await r.json();
+
+    const title = document.getElementById('event-title');
+    title.textContent = d.event_name || EVENT_ID;
+    title.classList.remove('loading');
+    document.title = `PitchScout — ${d.event_name || 'Event Report'}`;
+
+    if (d.date) {
+      document.getElementById('event-date').textContent = d.date;
+    }
+
+    const logoWrap = document.getElementById('logo-wrap');
+    if (d.logo_url) {
+      const img = document.createElement('img');
+      img.src = d.logo_url;
+      img.className = 'event-logo';
+      img.alt = d.event_name;
+      img.onerror = () => { logoWrap.textContent = '⚽'; };
+      logoWrap.replaceWith(img);
+    } else {
+      logoWrap.classList.remove('loading');
+    }
+  } catch (_) {
+    document.getElementById('event-title').textContent = 'PitchScout Event';
+    document.getElementById('event-title').classList.remove('loading');
+    document.getElementById('logo-wrap').classList.remove('loading');
+  }
+}
+
+// ── Consent gate ──────────────────────────────────────────────────────────────
+const coppaCheck = document.getElementById('coppa-check');
+const submitBtn  = document.getElementById('submit-btn');
+
+coppaCheck.addEventListener('change', () => {
+  submitBtn.disabled = !coppaCheck.checked;
+});
+
+// ── Submit ────────────────────────────────────────────────────────────────────
+submitBtn.addEventListener('click', async () => {
+  const jersey = document.getElementById('jersey').value.trim();
+  const email  = document.getElementById('email').value.trim().toLowerCase();
+  const msg    = document.getElementById('msg');
+
+  if (!jersey) { msg.className = 'msg err'; msg.textContent = 'Please enter a jersey number.'; return; }
+  if (!email || !email.includes('@')) { msg.className = 'msg err'; msg.textContent = 'Please enter a valid email address.'; return; }
+  if (!coppaCheck.checked) { msg.className = 'msg err'; msg.textContent = 'Please confirm parental consent.'; return; }
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Sending…';
+  msg.className = 'msg'; msg.textContent = '';
+
+  try {
+    const r = await fetch(`${API}/event/claim`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        event_id:      EVENT_ID,
+        jersey_number: jersey,
+        parent_email:  email,
+        coppa_consent: true,
+      }),
+    });
+    const d = await r.json();
+
+    document.getElementById('claim-card').style.display = 'none';
+
+    if (d.status === 'sent') {
+      document.getElementById('sent-email').textContent = email;
+      document.getElementById('result-sent').classList.add('show');
+    } else if (d.status === 'queued') {
+      document.getElementById('queued-jersey').textContent = '#' + jersey;
+      document.getElementById('queued-email').textContent  = email;
+      document.getElementById('result-queued').classList.add('show');
+    } else if (d.status === 'already_claimed') {
+      document.getElementById('dup-jersey').textContent = '#' + jersey;
+      document.getElementById('result-duplicate').classList.add('show');
+    } else if (r.status === 404) {
+      document.getElementById('notfound-msg').textContent =
+        d.message || 'We couldn\'t find a video for that jersey number at this event.';
+      document.getElementById('result-notfound').classList.add('show');
+    } else {
+      // Generic error — re-show form
+      document.getElementById('claim-card').style.display = '';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Get Report Link';
+      msg.className = 'msg err';
+      msg.textContent = d.error || 'Something went wrong. Please try again.';
+    }
+  } catch (e) {
+    document.getElementById('claim-card').style.display = '';
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Get Report Link';
+    msg.className = 'msg err';
+    msg.textContent = 'Connection error. Please try again.';
+  }
+});
+
+// Enter key
+document.getElementById('email').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !submitBtn.disabled) submitBtn.click();
+});
+document.getElementById('jersey').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('email').focus();
+});
+
+loadEventInfo();
+</script>
+</body>
+</html>
