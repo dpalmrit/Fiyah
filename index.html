@@ -3,551 +3,264 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Jigga Jerk Joint — Authentic Caribbean Jerk</title>
-<meta name="description" content="Authentic Jamaican jerk chicken, pork, and seafood. Order on DoorDash or book catering for your next event." />
+<title>Jigga Jerk Joint — Authentic Caribbean Jerk · Miami, FL</title>
+<meta name="description" content="Authentic Jamaican jerk chicken, pork, salmon, and sides. Order on DoorDash or book catering for your next event. Miami, FL — 6200 NE 2 Ave." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="css/jjj.css" />
 <style>
-/* ── Hero ──────────────────────────────────────────────── */
-.hero {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
+.page-hero {
   position: relative;
+  padding: 130px 5% 60px;
+  text-align: center;
   overflow: hidden;
-  padding: 120px 5% 80px;
+  border-bottom: 3px solid var(--green);
 }
-
-.hero-bg-fallback {
+.page-hero-bg {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(160deg, rgba(255,255,255,0.88) 0%, rgba(244,253,247,0.82) 50%, rgba(255,254,245,0.80) 100%),
-    url('img/hero-bg.jpg') center/cover no-repeat;
+  background: url('img/main.avif') center/cover no-repeat;
+  z-index: 0;
 }
-
-.hero-content {
+.page-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.78);
+  z-index: 1;
+}
+.page-hero-content {
   position: relative;
   z-index: 2;
-  max-width: 1140px;
-  margin: 0 auto;
-  width: 100%;
 }
+.page-hero .section-title { color: var(--green); }
+.page-hero .section-subtitle { color: var(--ink-mid); }
 
-.hero-eyebrow {
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
+.menu-sticky {
+  position: sticky;
+  top: 66px;
+  z-index: 50;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0,155,58,0.15);
+  padding: 0 5%;
+}
+.menu-section-title {
+  font-family: 'Oswald', system-ui;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--green);
   text-transform: uppercase;
-  color: var(--green-bright);
-  margin-bottom: 16px;
+  letter-spacing: 0.06em;
+  margin-bottom: 1.2rem;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(0,155,58,0.20);
   display: flex;
   align-items: center;
   gap: 10px;
 }
-.hero-eyebrow::before {
-  content: '';
-  display: block;
-  width: 32px;
-  height: 2px;
-  background: var(--green-bright);
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 3rem;
 }
-
-.hero-title {
-  font-family: 'Oswald', system-ui;
-  font-size: clamp(3rem, 9vw, 7rem);
-  font-weight: 700;
-  text-transform: uppercase;
-  line-height: 1;
-  margin-bottom: 24px;
-}
-.hero-title .line-fire  { color: #111816; }
-.hero-title .line-jerk  { color: var(--gold-deep); }
-.hero-title .line-joint { color: var(--green); }
-
-.hero-sub {
-  font-size: clamp(1rem, 2vw, 1.2rem);
-  color: var(--ink-mid);
-  max-width: 520px;
-  line-height: 1.6;
-  margin-bottom: 40px;
-}
-
-.hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
-
-.hero-scroll {
-  position: absolute;
-  bottom: 36px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
+.menu-item {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  color: var(--green);
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  animation: bounce 2s 1.2s infinite both;
+  transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+  box-shadow: 0 1px 8px rgba(0,0,0,0.05);
 }
-.hero-scroll span { font-size: 1.2rem; }
-@keyframes bounce {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50%       { transform: translateX(-50%) translateY(6px); }
+.menu-item:hover {
+  border-color: rgba(0,155,58,0.30);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,155,58,0.12);
 }
-
-/* ── Open status pulse ──────────────────────────────────── */
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.5; transform: scale(1.4); }
-}
-
-/* ── Hero stagger-in ────────────────────────────────────── */
-@keyframes heroIn {
-  from { opacity: 0; transform: translateY(28px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.hero-eyebrow          { animation: heroIn 0.55s ease 0.05s both; }
-.hero-title .line-fire  { animation: heroIn 0.6s  ease 0.18s both; }
-.hero-title .line-jerk  { animation: heroIn 0.6s  ease 0.30s both; }
-.hero-title .line-joint { animation: heroIn 0.6s  ease 0.44s both; }
-.hero-sub              { animation: heroIn 0.6s  ease 0.58s both; }
-.hero-ctas             { animation: heroIn 0.55s ease 0.72s both; }
-
-/* ── Stats strip ────────────────────────────────────────── */
-.stats-strip {
-  background: linear-gradient(90deg, #007A2D 0%, #009B3A 40%, #00AA40 60%, #007A2D 100%);
-  padding: 22px 5%;
-  border-bottom: 4px solid var(--gold);
-  box-shadow: 0 4px 24px rgba(0,155,58,0.30);
-}
-.stats-inner {
-  max-width: 1140px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-.stat-item { text-align: center; }
-.stat-number {
-  font-family: 'Oswald', system-ui;
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--cream);
-  line-height: 1;
-}
-.stat-label { font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,248,240,0.75); margin-top: 3px; }
-
-/* ── Featured Grid ──────────────────────────────────────── */
-.featured-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1.5rem;
-}
-.card-img {
+.menu-item-photo {
   width: 100%;
-  height: 190px;
+  height: 180px;
   background-size: cover;
   background-position: center;
-  border-radius: var(--radius) var(--radius) 0 0;
+  flex-shrink: 0;
 }
-
-/* ── Catering Banner ────────────────────────────────────── */
-.catering-banner {
-  background: linear-gradient(135deg, #F9C74F 0%, #FFE260 35%, #FFC930 65%, #F9C74F 100%);
-  border: none;
-  border-radius: var(--radius-lg);
-  padding: 60px 40px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 8px 48px rgba(212,160,0,0.28);
-}
-.catering-banner::before {
-  content: '🔥';
-  position: absolute;
-  font-size: 8rem;
-  opacity: 0.18;
-  top: -20px; left: -20px;
-}
-.catering-banner::after {
-  content: '🔥';
-  position: absolute;
-  font-size: 8rem;
-  opacity: 0.18;
-  bottom: -20px; right: -20px;
-}
-.catering-banner h2 { margin-bottom: 12px; color: var(--dark-bg) !important; }
-.catering-banner p { font-size: 1rem; color: rgba(26,10,0,0.7); max-width: 560px; margin: 0 auto 28px; line-height: 1.6; }
-.catering-features {
+.menu-item-inner {
+  padding: 16px 18px;
   display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 24px;
-  margin-bottom: 32px;
+  gap: 14px;
+  align-items: flex-start;
+  flex: 1;
 }
-.catering-feat { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: rgba(26,10,0,0.65); }
-.catering-feat-icon { font-size: 1.3rem; }
+.menu-item-emoji {
+  font-size: 2rem;
+  flex-shrink: 0;
+  width: 44px;
+  text-align: center;
+}
+.menu-item-body { flex: 1; }
+.menu-item-name { font-size: 1rem; font-weight: 700; color: var(--ink); margin-bottom: 5px; }
+.menu-item-desc { font-size: 0.85rem; color: var(--ink-mid); line-height: 1.5; margin-bottom: 8px; }
+.menu-item-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.menu-item-price { font-size: 1.05rem; font-weight: 700; color: var(--pepper); }
+.menu-item-badges { display: flex; gap: 4px; flex-wrap: wrap; }
 
-/* ── Hours & Location ───────────────────────────────────── */
-.hours-location {
+/* ── Hours strip ────────────────────────────────────────── */
+.hours-strip {
+  background: var(--green-light);
+  padding: 48px 5%;
+  border-top: 3px solid var(--green);
+}
+.hours-strip-inner {
+  max-width: 1140px;
+  margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 3rem;
 }
-@media (max-width: 768px) { .hours-location { grid-template-columns: 1fr; } }
-
-.info-card {
+@media (max-width: 768px) { .hours-strip-inner { grid-template-columns: 1fr; } }
+.hours-card {
   background: #fff;
   border: 1px solid var(--border);
   border-top: 3px solid var(--green);
   border-radius: var(--radius-lg);
-  padding: 32px;
+  padding: 28px 32px;
   box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-  transition: transform var(--transition), box-shadow var(--transition);
 }
-.info-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,155,58,0.12); }
-.info-card-title {
+.hours-card-title {
   font-family: 'Oswald', system-ui;
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--pepper);
-  margin-bottom: 20px;
-}
-.hours-list { list-style: none; }
-.hours-list li {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 0.9rem;
-  color: var(--ink-mid);
-}
-.hours-list li:last-child { border-bottom: none; }
-.hours-list .day { color: var(--ink); font-weight: 600; }
-.location-address { font-size: 1.05rem; color: var(--ink); margin-bottom: 20px; line-height: 1.5; }
-.location-phone { font-size: 1rem; color: var(--ink-mid); margin-bottom: 20px; }
-.map-placeholder {
-  background: var(--smoke3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  height: 160px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ink-mid);
   font-size: 0.85rem;
-  gap: 8px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--green);
   margin-bottom: 16px;
 }
+.hours-list { list-style: none; }
+.hours-list li { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 0.88rem; color: var(--ink-mid); }
+.hours-list li:last-child { border-bottom: none; }
+.hours-list .day { color: var(--ink); font-weight: 600; }
 
-/* ── Reviews ────────────────────────────────────────────── */
-.reviews-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-}
-@media (max-width: 768px) { .reviews-grid { grid-template-columns: 1fr; } }
-
-.review-card {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-top: 3px solid var(--gold);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-  transition: transform var(--transition), box-shadow var(--transition);
-}
-.review-card:hover { transform: translateY(-4px); box-shadow: 0 10px 36px rgba(0,155,58,0.16); }
-.review-stars { color: #F59E0B; font-size: 0.9rem; letter-spacing: 2px; margin-bottom: 12px; }
-.review-text { font-size: 0.92rem; color: var(--ink-mid); line-height: 1.6; margin-bottom: 16px; font-style: italic; }
-.review-author { font-size: 0.82rem; font-weight: 700; color: var(--ink); }
-
-/* ── Newsletter ─────────────────────────────────────────── */
-.newsletter-section {
-  background: linear-gradient(135deg, #00A83E 0%, #00CC50 45%, #008A32 100%);
-  border: none;
-  text-align: center;
-  padding: 60px 5%;
-  color: #fff;
-}
-.newsletter-form {
+/* ── Order bar ──────────────────────────────────────────── */
+.order-cta-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--green);
+  padding: 14px 5%;
   display: flex;
-  gap: 10px;
-  max-width: 460px;
-  margin: 0 auto;
-}
-@media (max-width: 480px) { .newsletter-form { flex-direction: column; } }
-.newsletter-input {
-  flex: 1;
-  background: rgba(255,255,255,0.2);
-  border: 1.5px solid rgba(255,255,255,0.4);
-  border-radius: 50px;
-  color: #fff;
-  font-size: 0.95rem;
-  padding: 12px 20px;
-  outline: none;
-  transition: border-color var(--transition), background var(--transition);
-}
-.newsletter-input:focus { border-color: #fff; background: rgba(255,255,255,0.28); }
-.newsletter-input::placeholder { color: rgba(255,255,255,0.6); }
-
-/* ── About grid ─────────────────────────────────────────── */
-.about-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
   align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  z-index: 80;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
 }
-@media (max-width: 768px) { .about-grid { grid-template-columns: 1fr; } }
+.order-cta-bar.visible { transform: translateY(0); }
+.order-cta-bar-text { font-size: 0.95rem; font-weight: 600; color: var(--cream); }
+.order-cta-bar-text span { opacity: 0.8; font-weight: 400; font-size: 0.85rem; margin-left: 8px; }
+
+@media print {
+  .navbar, .menu-sticky, .order-cta-bar, .page-hero .btn { display: none !important; }
+  .page-hero { padding: 20px 5% 30px; }
+  body { background: white; color: black; }
+  .menu-item { border-color: #ccc; background: white; }
+  .menu-item-name, .menu-section-title { color: black; }
+  .menu-item-price { color: #8B0000; }
+  .menu-item-desc { color: #444; }
+  .section { padding: 30px 5%; }
+}
 </style>
 </head>
 <body>
 
-<!-- ── Nav ───────────────────────────────────────────────── -->
 <nav class="navbar">
   <a href="index.html" class="nav-logo">
     <img src="img/logo.jpg" alt="Jigga Jerk Joint" class="nav-logo-img" />
     <span class="logo-wordmark"><span class="fire">Jigga</span> <span class="gold">Jerk</span> <span class="grn">Joint</span></span>
   </a>
   <div class="nav-links" id="nav-links">
-    <a href="menu.html">Menu</a>
+    <a href="index.html" style="color:var(--gold)">Menu</a>
     <a href="catering.html">Catering</a>
     <a href="#hours">Hours</a>
-    <a href="#about">About</a>
     <a href="#" id="nav-doordash" class="nav-cta">🛵 Order Now</a>
   </div>
   <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle menu">
     <span></span><span></span><span></span>
   </button>
 </nav>
-
-<!-- Jamaica flag stripe below nav -->
 <div class="jamaica-stripe"></div>
 
 <!-- Mobile floating order button -->
 <a href="#" id="mobile-fab" class="mobile-fab">🛵 Order Now</a>
 
-<!-- ── Hero ──────────────────────────────────────────────── -->
-<section class="hero">
-  <div class="hero-bg-fallback"></div>
-  <div class="hero-content">
-    <div class="hero-eyebrow">Miami's Caribbean Jerk Spot · 305 🔥</div>
-    <h1 class="hero-title">
-      <div class="line-fire">Jigga</div>
-      <div class="line-jerk">Jerk</div>
-      <div class="line-joint">Joint</div>
-    </h1>
-    <p class="hero-sub">
-      Contenders for the best jerk chicken in Miami. Real Caribbean heat, authentic island marinade, wood-fire smoke. Born in the 305 — built for the culture.
-    </p>
-    <div class="hero-ctas">
-      <a href="#" class="btn btn-primary btn-lg" id="hero-doordash">🛵 Order on DoorDash</a>
-      <a href="menu.html" class="btn btn-outline btn-lg">View Full Menu</a>
+<!-- Hero -->
+<div class="page-hero">
+  <div class="page-hero-bg"></div>
+  <div class="page-hero-overlay"></div>
+  <div class="page-hero-content">
+    <div class="section-title">Jigga Jerk Joint</div>
+    <p class="section-subtitle">Miami's Caribbean Jerk Spot · 6200 NE 2 Ave · 305 🔥</p>
+    <div class="flex-center gap-2 mt-2">
+      <a href="#" id="hero-doordash" class="btn btn-primary">🛵 Order on DoorDash</a>
+      <a href="catering.html" class="btn btn-outline">Book Catering</a>
     </div>
-  </div>
-  <div class="hero-scroll"><span>↓</span> Scroll</div>
-</section>
-
-<!-- ── Stats Strip ───────────────────────────────────────── -->
-<div class="stats-strip">
-  <div class="stats-inner">
-    <div class="stat-item"><div class="stat-number" data-count="7400" data-suffix="+">7,400+</div><div class="stat-label">Instagram Followers</div></div>
-    <div class="stat-item"><div class="stat-number" data-count="113">113</div><div class="stat-label">Posts &amp; Counting</div></div>
-    <div class="stat-item"><div class="stat-number">#1</div><div class="stat-label">Jerk Chicken in Miami</div></div>
-    <div class="stat-item"><div class="stat-number">305</div><div class="stat-label">Miami Born &amp; Built</div></div>
   </div>
 </div>
 
-<!-- ── Featured Menu ─────────────────────────────────────── -->
-<section class="section section-warm" id="menu">
-  <div class="section-inner">
-    <div class="section-header">
-      <div class="section-title">🔥 Fan Favorites</div>
-      <p class="section-subtitle">Our most-ordered dishes — the ones that keep people coming back.</p>
-    </div>
-    <div class="featured-grid" id="featured-grid"><div class="spinner"></div></div>
-    <div class="text-center mt-3">
-      <a href="menu.html" class="btn btn-secondary">See Full Menu →</a>
-    </div>
-  </div>
-</section>
-
-<!-- ── Catering Banner ───────────────────────────────────── -->
-<section class="section" id="catering-cta">
-  <div class="section-inner">
-    <div class="catering-banner">
-      <div class="section-title">Feed Your Whole Crew</div>
-      <p>From backyard cookouts to corporate events — we bring authentic Jamaican jerk to any occasion. 20 to 2,000 guests.</p>
-      <div class="catering-features">
-        <div class="catering-feat"><span class="catering-feat-icon">🍽️</span> Full-service setup</div>
-        <div class="catering-feat"><span class="catering-feat-icon">🗓️</span> Easy online booking</div>
-        <div class="catering-feat"><span class="catering-feat-icon">🌶️</span> Custom menu options</div>
-        <div class="catering-feat"><span class="catering-feat-icon">💳</span> Flexible payment</div>
-      </div>
-      <a href="catering.html" class="btn btn-gold btn-lg">Book Catering Event</a>
-    </div>
-  </div>
-</section>
-
-<!-- Jamaica flag stripe between sections -->
-<div class="jamaica-stripe"></div>
-
-<!-- ── About ─────────────────────────────────────────────── -->
-<section class="section" id="about">
-  <div class="section-inner">
-    <div class="about-grid">
-      <div>
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
-          <span style="display:block;width:4px;height:36px;background:var(--pepper);border-radius:2px;flex-shrink:0;"></span>
-          <div class="section-title" style="margin-bottom:0;">Our Story</div>
-        </div>
-        <p style="color:var(--ink-mid);line-height:1.8;margin-bottom:1.5rem;margin-top:1rem;">
-          Jigga Jerk Joint is Miami's Caribbean jerk spot — bold scotch bonnet heat, authentic island marinades, and real wood-fire smoke. We bring the culture and the flavor together, every single time.
-        </p>
-        <p style="color:var(--ink-mid);line-height:1.8;margin-bottom:2rem;">
-          7,400+ followers and counting. The community keeps growing because the food speaks for itself. If you haven't tried it yet — come see what Miami's been talking about.
-        </p>
-        <div class="flex gap-2" style="flex-wrap:wrap;">
-          <a href="https://www.instagram.com/jiggajerkjoint/" target="_blank" rel="noopener" class="btn btn-outline">📸 7.4K on Instagram</a>
-          <a href="menu.html" class="btn btn-green">Explore the Menu</a>
-        </div>
-      </div>
-      <div style="background:#fff;border:1px solid var(--border);border-top:3px solid var(--green);border-radius:var(--radius-lg);padding:36px 32px;box-shadow:0 4px 32px rgba(0,155,58,0.12),0 2px 16px rgba(0,0,0,0.06);">
-        <div style="font-family:'Oswald',system-ui;font-size:0.75rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:18px;">The Secret Blend</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;">
-          <div style="background:linear-gradient(135deg,#FFF0CC,#FFE8B8);border:1px solid rgba(212,56,13,0.18);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;">
-            <span style="font-size:1.4rem;">🌶️</span>
-            <div>
-              <div style="font-size:0.82rem;font-weight:700;color:var(--ink);">Scotch Bonnet</div>
-              <div style="font-size:0.72rem;color:var(--muted);">Heat &amp; Depth</div>
-            </div>
-          </div>
-          <div style="background:linear-gradient(135deg,#EDF9F0,#D4F2DC);border:1px solid rgba(0,155,58,0.18);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;">
-            <span style="font-size:1.4rem;">🌿</span>
-            <div>
-              <div style="font-size:0.82rem;font-weight:700;color:var(--ink);">Fresh Thyme</div>
-              <div style="font-size:0.72rem;color:var(--muted);">Caribbean Aroma</div>
-            </div>
-          </div>
-          <div style="background:linear-gradient(135deg,#FFF0CC,#FFE8B8);border:1px solid rgba(212,56,13,0.18);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;">
-            <span style="font-size:1.4rem;">🫚</span>
-            <div>
-              <div style="font-size:0.82rem;font-weight:700;color:var(--ink);">Allspice</div>
-              <div style="font-size:0.72rem;color:var(--muted);">Signature Warmth</div>
-            </div>
-          </div>
-          <div style="background:linear-gradient(135deg,#FFF0CC,#FFE8B8);border:1px solid rgba(212,56,13,0.18);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;">
-            <span style="font-size:1.4rem;">🔥</span>
-            <div>
-              <div style="font-size:0.82rem;font-weight:700;color:var(--ink);">Wood Fire</div>
-              <div style="font-size:0.72rem;color:var(--muted);">The Real Smoke</div>
-            </div>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;justify-content:space-between;text-align:center;">
-          <div>
-            <div style="font-family:'Oswald',system-ui;font-size:1.6rem;color:var(--green);font-weight:700;">3</div>
-            <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Generations</div>
-          </div>
-          <div style="width:1px;background:var(--border);"></div>
-          <div>
-            <div style="font-family:'Oswald',system-ui;font-size:1.6rem;color:var(--gold-dim);font-weight:700;">24h</div>
-            <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Marinade</div>
-          </div>
-          <div style="width:1px;background:var(--border);"></div>
-          <div>
-            <div style="font-family:'Oswald',system-ui;font-size:1.6rem;color:var(--pepper);font-weight:700;">100%</div>
-            <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Wood-Fire</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── Reviews ───────────────────────────────────────────── -->
-<section class="section section-bright" style="padding-top:0;">
-  <div class="section-inner">
-    <div class="section-header text-center">
-      <div class="section-title">What People Say</div>
-      <p class="section-subtitle">Don't take our word for it.</p>
-    </div>
-    <div class="reviews-grid">
-      <div class="review-card">
-        <div class="review-stars">★★★★★</div>
-        <p class="review-text">"Best jerk chicken I've had outside of Jamaica. The scotch bonnet heat is REAL — and I mean that as the highest compliment."</p>
-        <div class="review-author">Marcus T. — Google Review</div>
-      </div>
-      <div class="review-card">
-        <div class="review-stars">★★★★★</div>
-        <p class="review-text">"Catered our company cookout for 150 people. Every single person asked for the info. The ribs were absolutely unreal."</p>
-        <div class="review-author">Danielle R. — Google Review</div>
-      </div>
-      <div class="review-card">
-        <div class="review-stars">★★★★★</div>
-        <p class="review-text">"The sorrel drink alone is worth the trip. I order from DoorDash twice a week. No shame whatsoever."</p>
-        <div class="review-author">Kenji M. — Google Review</div>
-      </div>
-    </div>
-    <div class="text-center mt-3">
-      <a href="#" id="gmaps-review-link" target="_blank" rel="noopener" class="btn btn-outline btn-sm">Read all reviews on Google →</a>
-    </div>
-  </div>
-</section>
-
-<!-- ── Hours & Location ──────────────────────────────────── -->
-<section class="section section-warm" id="hours">
-  <div class="section-inner">
-    <div class="section-header"><div class="section-title">Hours &amp; Location</div></div>
-    <div class="hours-location">
-      <div class="info-card">
-        <div class="info-card-title">📍 Find Us</div>
-        <p class="location-address" id="location-address">6200 NE 2 Ave<br>Miami, FL 33138</p>
-        <p class="location-phone" id="location-phone">📞 (786) 694-1440</p>
-        <a href="#" id="maps-link" target="_blank" rel="noopener" class="map-placeholder" style="text-decoration:none;cursor:pointer;transition:border-color var(--transition),background var(--transition);" onmouseover="this.style.borderColor='var(--border-mid)'" onmouseout="this.style.borderColor=''">
-          <span style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-            <span style="font-size:2rem;">📍</span>
-            <span style="font-size:0.82rem;color:var(--muted-hi);">Tap for directions</span>
-          </span>
-        </a>
-      </div>
-      <div class="info-card">
-        <div class="info-card-title">🕐 Hours</div>
-        <ul class="hours-list" id="hours-list">
-          <li><span class="day">Monday</span>    <span style="color:var(--muted)">Closed</span></li>
-          <li><span class="day">Tuesday</span>   <span style="color:var(--muted)">Closed</span></li>
-          <li><span class="day">Wednesday</span> <span>12:00 PM – 6:00 PM</span></li>
-          <li><span class="day">Thursday</span>  <span>12:00 PM – 8:00 PM</span></li>
-          <li><span class="day">Friday</span>    <span>4:00 PM – 12:00 AM</span></li>
-          <li><span class="day">Saturday</span>  <span>4:00 PM – 12:00 AM</span></li>
-          <li><span class="day">Sunday</span>    <span>4:00 PM – 10:00 PM</span></li>
-        </ul>
-        <div id="open-status" style="margin-top:12px;"></div>
-        <div class="mt-2">
-          <a href="catering.html" class="btn btn-primary btn-sm btn-full">Book a Catering Event</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── Newsletter ─────────────────────────────────────────── -->
-<div class="newsletter-section">
-  <div class="section-title" style="margin-bottom:8px;color:#fff;">Get the Weekly Specials</div>
-  <p style="color:rgba(255,255,255,0.8);margin-bottom:24px;font-size:0.95rem;">Drop your email — deals, event announcements, and new menu drops. No spam.</p>
-  <form class="newsletter-form" id="newsletter-form">
-    <input type="email" class="newsletter-input" placeholder="your@email.com" required />
-    <button type="submit" class="btn btn-primary">Subscribe</button>
-  </form>
+<!-- Sticky category nav -->
+<div class="menu-sticky">
+  <div class="tabs-bar" id="category-tabs" style="max-width:1140px;margin:0 auto;"></div>
 </div>
 
-<!-- ── Footer ────────────────────────────────────────────── -->
+<section class="section" style="padding-top:2rem;padding-bottom:40px;">
+  <div class="section-inner">
+    <div id="menu-content"><div class="spinner"></div></div>
+  </div>
+</section>
+
+<!-- Hours & Location -->
+<div class="hours-strip" id="hours">
+  <div class="hours-strip-inner">
+    <div class="hours-card">
+      <div class="hours-card-title">🕐 Hours</div>
+      <ul class="hours-list" id="hours-list">
+        <li><span class="day">Monday</span>    <span style="color:var(--muted)">Closed</span></li>
+        <li><span class="day">Tuesday</span>   <span style="color:var(--muted)">Closed</span></li>
+        <li><span class="day">Wednesday</span> <span>12:00 PM – 6:00 PM</span></li>
+        <li><span class="day">Thursday</span>  <span>12:00 PM – 8:00 PM</span></li>
+        <li><span class="day">Friday</span>    <span>4:00 PM – 12:00 AM</span></li>
+        <li><span class="day">Saturday</span>  <span>4:00 PM – 12:00 AM</span></li>
+        <li><span class="day">Sunday</span>    <span>4:00 PM – 10:00 PM</span></li>
+      </ul>
+      <div id="open-status" style="margin-top:12px;"></div>
+    </div>
+    <div class="hours-card">
+      <div class="hours-card-title">📍 Find Us</div>
+      <p style="font-size:1.05rem;color:var(--ink);margin-bottom:12px;line-height:1.5;" id="location-address">6200 NE 2 Ave<br>Miami, FL 33138</p>
+      <p style="font-size:0.95rem;color:var(--ink-mid);margin-bottom:20px;" id="location-phone">📞 (786) 694-1440</p>
+      <a href="#" id="maps-link" target="_blank" rel="noopener"
+         style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--green-light);border:1px solid var(--border);border-radius:var(--radius);height:120px;text-decoration:none;color:var(--ink-mid);font-size:0.82rem;transition:border-color var(--transition);">
+        <span style="font-size:2rem;">📍</span>
+        <span>Tap for directions</span>
+      </a>
+      <div class="mt-2">
+        <a href="catering.html" class="btn btn-primary btn-sm btn-full" style="margin-top:12px;">Book a Catering Event</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Order floating bar -->
+<div class="order-cta-bar" id="order-bar">
+  <div class="order-cta-bar-text">
+    Ready to order?
+    <span>Delivery available via DoorDash</span>
+  </div>
+  <a href="#" id="bar-doordash" class="btn btn-gold">🛵 Open DoorDash</a>
+</div>
+
 <div class="jamaica-stripe"></div>
 <footer class="site-footer" style="border-top:none;">
   <div class="footer-grid">
@@ -561,12 +274,14 @@
       </div>
     </div>
     <div>
-      <div class="footer-col-title">Quick Links</div>
+      <div class="footer-col-title">Menu</div>
       <ul class="footer-links">
-        <li><a href="menu.html">Full Menu</a></li>
-        <li><a href="catering.html">Book Catering</a></li>
-        <li><a href="#hours">Hours &amp; Location</a></li>
-        <li><a href="#about">Our Story</a></li>
+        <li><a href="#jerk-chicken">Jerk Chicken</a></li>
+        <li><a href="#jerk-pork">Jerk Pork</a></li>
+        <li><a href="#sandwiches">Sandwiches</a></li>
+        <li><a href="#seafood">Seafood</a></li>
+        <li><a href="#sides">Sides</a></li>
+        <li><a href="#drinks">Drinks</a></li>
       </ul>
     </div>
     <div>
@@ -580,8 +295,8 @@
       <div class="footer-col-title">Contact</div>
       <ul class="footer-links">
         <li><a href="tel:7866941440" id="footer-phone">📞 (786) 694-1440</a></li>
-        <li><a href="https://www.instagram.com/jiggajerkjoint/" target="_blank">📸 Instagram</a></li>
-        <li><a href="#hours">📍 Directions</a></li>
+        <li><a href="https://www.instagram.com/jiggajerkjoint/" target="_blank">📸 @jiggajerkjoint</a></li>
+        <li><a href="#hours">📍 Hours &amp; Directions</a></li>
       </ul>
     </div>
   </div>
@@ -602,70 +317,120 @@ document.getElementById("nav-hamburger").addEventListener("click", () => {
   document.getElementById("nav-links").classList.toggle("open");
 });
 
-getSiteSettings().then(s => {
-  const doordash = s.doordashUrl || "https://www.doordash.com";
-  const maps     = s.googleMapsUrl || "https://maps.google.com";
+// Show order bar after scroll
+window.addEventListener("scroll", () => {
+  const bar = document.getElementById("order-bar");
+  if (window.scrollY > 300) bar.classList.add("visible");
+  else bar.classList.remove("visible");
+}, { passive: true });
 
-  document.getElementById("hero-doordash").href        = doordash;
-  document.getElementById("nav-doordash").href         = doordash;
-  document.getElementById("footer-doordash").href      = doordash;
-  document.getElementById("footer-doordash-link").href = doordash;
-  document.getElementById("maps-link").href            = maps;
-  document.getElementById("footer-maps").href          = maps;
-  document.getElementById("gmaps-review-link").href    = maps;
-  document.getElementById("mobile-fab").href           = doordash;
+const CATEGORY_ICONS = {
+  "Jerk Chicken": "🍗",
+  "Jerk Pork":    "🥩",
+  "Sandwiches":   "🥪",
+  "Seafood":      "🐟",
+  "Sides":        "🍚",
+  "Drinks":       "🥤",
+};
 
-  if (s.phone) {
-    document.getElementById("location-phone").textContent = "📞 " + s.phone;
-    document.getElementById("footer-phone").textContent   = "📞 " + s.phone;
-    document.getElementById("footer-phone").href          = "tel:" + s.phone.replace(/\D/g,"");
-  }
-  if (s.address) {
-    document.getElementById("location-address").innerHTML = s.address.replace(/\n/g,"<br>");
-  }
-});
+async function renderMenu() {
+  const settings = await getSiteSettings();
+  const doordash  = settings.doordashUrl || "https://www.doordash.com";
+  const maps      = settings.googleMapsUrl || "https://maps.google.com/?q=6200+NE+2+Ave,+Miami,+FL+33138";
 
-getFeaturedItems().then(items => {
-  const grid = document.getElementById("featured-grid");
-  if (!items || items.length === 0) {
-    grid.innerHTML = '<p class="text-muted text-center" style="grid-column:1/-1;">Menu coming soon!</p>';
-    return;
+  document.getElementById("hero-doordash").href         = doordash;
+  document.getElementById("bar-doordash").href          = doordash;
+  document.getElementById("nav-doordash").href          = doordash;
+  document.getElementById("footer-doordash").href       = doordash;
+  document.getElementById("footer-doordash-link").href  = doordash;
+  document.getElementById("maps-link").href             = maps;
+  document.getElementById("footer-maps").href           = maps;
+  if (document.getElementById("mobile-fab")) document.getElementById("mobile-fab").href = doordash;
+
+  if (settings.phone) {
+    document.getElementById("location-phone").textContent = "📞 " + settings.phone;
+    document.getElementById("footer-phone").textContent   = "📞 " + settings.phone;
+    document.getElementById("footer-phone").href          = "tel:" + settings.phone.replace(/\D/g,"");
   }
-  grid.innerHTML = items.slice(0, 6).map((item, i) => `
-    <div class="card" style="transition-delay:${i * 60}ms">
-      ${item.photo
-        ? `<div class="card-img" style="background-image:url('${item.photo}')"></div>`
-        : `<div class="card-img-placeholder"><span>${item.emoji || "🍽️"}</span></div>`
-      }
-      <div class="card-body">
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-          ${item.spicy      ? '<span class="badge badge-spicy">🌶 Spicy</span>'  : ""}
-          ${item.glutenFree ? '<span class="badge badge-gf">GF</span>'           : ""}
-          ${item.vegan      ? '<span class="badge badge-vegan">🌿 Vegan</span>'  : ""}
-        </div>
-        <div class="card-title">${item.name}</div>
-        <div class="card-desc">${item.description}</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span class="card-price">$${parseFloat(item.price).toFixed(2)}</span>
-          <a href="catering.html" class="btn btn-outline btn-sm">Add to Catering</a>
+  if (settings.address) {
+    document.getElementById("location-address").innerHTML = settings.address.replace(/\n/g,"<br>");
+  }
+
+  const items = await getMenuItems();
+  const categories = [...new Set(items.map(i => i.category))];
+
+  // Build sticky tabs
+  const tabsBar = document.getElementById("category-tabs");
+  tabsBar.innerHTML = categories.map((cat, idx) => `
+    <button class="tab-btn ${idx===0?"active":""}" data-cat="${cat}" onclick="filterCat(this,'${cat}')">
+      ${CATEGORY_ICONS[cat]||"🍽️"} ${cat}
+    </button>
+  `).join("") + `<button class="tab-btn" data-cat="all" onclick="filterCat(this,'all')">View All</button>`;
+
+  // Build menu sections
+  const content = document.getElementById("menu-content");
+  let globalIdx = 0;
+  content.innerHTML = categories.map(cat => {
+    const catItems = items.filter(i => i.category === cat);
+    const slug = cat.toLowerCase().replace(/\s+/g, "-");
+    return `
+      <div class="menu-category-section" data-cat="${cat}" id="${slug}">
+        <div class="menu-section-title">${CATEGORY_ICONS[cat]||"🍽️"} ${cat}</div>
+        <div class="menu-grid">
+          ${catItems.map(item => {
+            const delay = (globalIdx++ % 6) * 55;
+            return `
+            <div class="menu-item" style="transition-delay:${delay}ms">
+              ${item.photo ? `<div class="menu-item-photo" style="background-image:url('${item.photo}')"></div>` : ""}
+              <div class="menu-item-inner">
+                ${!item.photo ? `<div class="menu-item-emoji">${item.emoji||"🍽️"}</div>` : ""}
+                <div class="menu-item-body">
+                  <div class="menu-item-name">${item.name}</div>
+                  <div class="menu-item-desc">${item.description}</div>
+                  <div class="menu-item-footer">
+                    <span class="menu-item-price">$${parseFloat(item.price).toFixed(2)}</span>
+                    <div class="menu-item-badges">
+                      ${item.spicy      ? '<span class="badge badge-spicy">🌶 Spicy</span>'  : ""}
+                      ${item.glutenFree ? '<span class="badge badge-gf">GF</span>'           : ""}
+                      ${item.vegan      ? '<span class="badge badge-vegan">🌿 Vegan</span>' : ""}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            `;
+          }).join("")}
         </div>
       </div>
-    </div>
-  `).join("");
-  if (window.revealFresh) window.revealFresh(grid);
-});
+    `;
+  }).join("");
+
+  if (window.revealFresh) window.revealFresh();
+}
+
+function filterCat(btn, cat) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  document.querySelectorAll(".menu-category-section").forEach(sec => {
+    sec.style.display = (cat === "all" || sec.dataset.cat === cat) ? "block" : "none";
+  });
+  if (cat !== "all") {
+    const target = document.querySelector(`.menu-category-section[data-cat="${cat}"]`);
+    if (target) setTimeout(() => target.scrollIntoView({ behavior:"smooth", block:"start" }), 50);
+  }
+}
 
 // Live open/closed status badge
 (function() {
   const now  = new Date();
-  const day  = now.getDay(); // 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
+  const day  = now.getDay();
   const hour = now.getHours() + now.getMinutes() / 60;
   let isOpen = false;
-  if (day === 3 && hour >= 12 && hour < 18) isOpen = true; // Wed 12–6pm
-  if (day === 4 && hour >= 12 && hour < 20) isOpen = true; // Thu 12–8pm
-  if (day === 5 && hour >= 16)              isOpen = true; // Fri 4pm–midnight
-  if (day === 6 && hour >= 16)              isOpen = true; // Sat 4pm–midnight
-  if (day === 0 && hour >= 16 && hour < 22) isOpen = true; // Sun 4–10pm
+  if (day === 3 && hour >= 12 && hour < 18) isOpen = true;
+  if (day === 4 && hour >= 12 && hour < 20) isOpen = true;
+  if (day === 5 && hour >= 16)              isOpen = true;
+  if (day === 6 && hour >= 16)              isOpen = true;
+  if (day === 0 && hour >= 16 && hour < 22) isOpen = true;
   const closedToday = (day === 1 || day === 2);
   const el = document.getElementById("open-status");
   if (!el) return;
@@ -678,21 +443,7 @@ getFeaturedItems().then(items => {
   }
 })();
 
-document.getElementById("newsletter-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const email = e.target.querySelector("input[type=email]").value.trim();
-  if (!email) return;
-  if (firebaseReady) {
-    try { await db.collection("newsletter").add({ email, subscribedAt: new Date() }); }
-    catch(err) { console.error(err); }
-  } else {
-    const subs = JSON.parse(localStorage.getItem("jjj_newsletter") || "[]");
-    subs.push({ email, date: new Date().toISOString() });
-    localStorage.setItem("jjj_newsletter", JSON.stringify(subs));
-  }
-  showToast("You're subscribed! 🔥 Watch for deals in your inbox.");
-  e.target.reset();
-});
+renderMenu();
 </script>
 </body>
 </html>

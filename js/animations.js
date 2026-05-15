@@ -6,30 +6,6 @@
 (function () {
   'use strict';
 
-  /* ── Navbar scroll tint ──────────────────────────────── */
-  const navbar = document.querySelector('.navbar');
-  if (navbar) {
-    window.addEventListener('scroll', () => {
-      navbar.style.background = window.scrollY > 40
-        ? 'rgba(26,10,0,0.98)'
-        : 'rgba(26,10,0,0.90)';
-    }, { passive: true });
-  }
-
-  /* ── Hero gradient follows mouse ─────────────────────── */
-  const heroFallback = document.querySelector('.hero-bg-fallback');
-  if (heroFallback) {
-    document.addEventListener('mousemove', e => {
-      const x = (e.clientX / window.innerWidth)  * 100;
-      const y = (e.clientY / window.innerHeight) * 100;
-      heroFallback.style.background = `
-        radial-gradient(ellipse at ${x}% ${y}%,   rgba(212,56,13,0.40)  0%, transparent 55%),
-        radial-gradient(ellipse at ${100-x}% ${100-y}%, rgba(249,199,79,0.20) 0%, transparent 50%),
-        linear-gradient(180deg, #1A0A00 0%, #261200 50%, #1A0A00 100%)
-      `;
-    }, { passive: true });
-  }
-
   /* ── Mobile FAB visibility ───────────────────────────── */
   const fab = document.getElementById('mobile-fab');
   if (fab) {
