@@ -73,43 +73,27 @@ h1, h2, h3, h4, h5 {
 a { color: inherit; text-decoration: none; }
 
 /* ── JJJ Logo Badge ─────────────────────────────────────── */
-.logo-badge-wrap {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-}
 .logo-ring {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: conic-gradient(from 180deg,
-    #ff00cc 0%, #ff5500 18%, #ffcc00 35%,
-    #00e676 52%, #00aaff 68%, #9900ff 84%, #ff00cc 100%
-  );
-  padding: 3px;
+  background: #fff;
+  border: 2px solid rgba(249,199,79,0.5);
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.logo-ring-inner {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: #000;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 1px;
   padding: 3px 4px;
+  overflow: hidden;
 }
 .logo-j {
   font-family: 'Oswald', system-ui;
   font-size: 1.35rem;
   font-weight: 900;
   line-height: 1;
-  background: linear-gradient(180deg, #009B3A 33%, #FFF8F0 33% 66%, #F9C74F 66%);
+  /* Black top → gold middle → green bottom — matches real logo */
+  background: linear-gradient(180deg, #1a1a1a 30%, #F9C74F 30% 65%, #009B3A 65%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -124,13 +108,15 @@ a { color: inherit; text-decoration: none; }
 }
 .logo-stack span {
   font-family: 'Oswald', system-ui;
-  font-size: 0.5rem;
-  font-weight: 700;
-  color: #fff;
+  font-size: 0.48rem;
+  font-weight: 800;
   letter-spacing: 0.03em;
-  line-height: 1.15;
+  line-height: 1.2;
   display: block;
 }
+.logo-stack span:nth-child(1) { color: #F9C74F; } /* IGGA — gold  */
+.logo-stack span:nth-child(2) { color: #F9C74F; } /* ERK  — gold  */
+.logo-stack span:nth-child(3) { color: #009B3A; } /* OINT — green */
 .logo-wordmark {
   font-family: 'Oswald', system-ui;
   font-size: 1.2rem;
