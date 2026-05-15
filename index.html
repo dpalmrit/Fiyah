@@ -98,6 +98,12 @@
   50%       { transform: translateX(-50%) translateY(6px); }
 }
 
+/* ── Open status pulse ──────────────────────────────────── */
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(1.4); }
+}
+
 /* ── Hero stagger-in ────────────────────────────────────── */
 @keyframes heroIn {
   from { opacity: 0; transform: translateY(28px); }
@@ -289,7 +295,13 @@
 <!-- ── Nav ───────────────────────────────────────────────── -->
 <nav class="navbar">
   <a href="index.html" class="nav-logo">
-    <span class="fire">Jigga</span> <span class="gold">Jerk</span> Joint
+    <div class="logo-ring" aria-hidden="true">
+      <div class="logo-ring-inner">
+        <span class="logo-j">J</span>
+        <div class="logo-stack"><span>IGGA</span><span>ERK</span><span>OINT</span></div>
+      </div>
+    </div>
+    <span class="logo-wordmark"><span class="fire">Jigga</span> <span class="gold">Jerk</span> Joint</span>
   </a>
   <div class="nav-links" id="nav-links">
     <a href="menu.html">Menu</a>
@@ -313,14 +325,14 @@
 <section class="hero">
   <div class="hero-bg-fallback"></div>
   <div class="hero-content">
-    <div class="hero-eyebrow">Authentic Caribbean Jerk</div>
+    <div class="hero-eyebrow">Miami's Caribbean Jerk Spot · 305 🔥</div>
     <h1 class="hero-title">
       <div class="line-fire">Jigga</div>
       <div class="line-jerk">Jerk</div>
       <div class="line-joint">Joint</div>
     </h1>
     <p class="hero-sub">
-      Wood-fire grilled jerk chicken, pork &amp; seafood — marinated 24 hours in our secret scotch bonnet blend. Real Jamaican flavors, every order.
+      Contenders for the best jerk chicken in Miami. Real Caribbean heat, authentic island marinade, wood-fire smoke. Born in the 305 — built for the culture.
     </p>
     <div class="hero-ctas">
       <a href="#" class="btn btn-primary btn-lg" id="hero-doordash">🛵 Order on DoorDash</a>
@@ -333,10 +345,10 @@
 <!-- ── Stats Strip ───────────────────────────────────────── -->
 <div class="stats-strip">
   <div class="stats-inner">
-    <div class="stat-item"><div class="stat-number" data-count="24" data-suffix="hr">24hr</div><div class="stat-label">Marinade Time</div></div>
-    <div class="stat-item"><div class="stat-number" data-count="100" data-suffix="%">100%</div><div class="stat-label">Wood-Fire Grilled</div></div>
-    <div class="stat-item"><div class="stat-number" data-count="4.9" data-prefix="⭐ " data-decimals="1">⭐ 4.9</div><div class="stat-label">Google Rating</div></div>
-    <div class="stat-item"><div class="stat-number" data-count="500" data-suffix="+">500+</div><div class="stat-label">Events Catered</div></div>
+    <div class="stat-item"><div class="stat-number" data-count="7400" data-suffix="+">7,400+</div><div class="stat-label">Instagram Followers</div></div>
+    <div class="stat-item"><div class="stat-number" data-count="113">113</div><div class="stat-label">Posts &amp; Counting</div></div>
+    <div class="stat-item"><div class="stat-number">#1</div><div class="stat-label">Jerk Chicken in Miami</div></div>
+    <div class="stat-item"><div class="stat-number">305</div><div class="stat-label">Miami Born &amp; Built</div></div>
   </div>
 </div>
 
@@ -384,13 +396,13 @@
           <div class="section-title" style="margin-bottom:0;">Our Story</div>
         </div>
         <p style="color:var(--muted-hi);line-height:1.8;margin-bottom:1.5rem;margin-top:1rem;">
-          Jigga Jerk Joint was born from a family recipe passed down through three generations — a secret marinade of scotch bonnet peppers, allspice, fresh thyme, and love. We brought those Jamaican roots to the streets and never looked back.
+          Jigga Jerk Joint is Miami's Caribbean jerk spot — bold scotch bonnet heat, authentic island marinades, and real wood-fire smoke. We bring the culture and the flavor together, every single time.
         </p>
         <p style="color:var(--muted-hi);line-height:1.8;margin-bottom:2rem;">
-          Every bird is marinated for a full 24 hours, then grilled slow over real wood fire. No shortcuts. Just bold, authentic flavor on every plate.
+          7,400+ followers and counting. The community keeps growing because the food speaks for itself. If you haven't tried it yet — come see what Miami's been talking about.
         </p>
         <div class="flex gap-2" style="flex-wrap:wrap;">
-          <a href="https://www.instagram.com/jiggajerkjoint/" target="_blank" rel="noopener" class="btn btn-ghost">📸 Follow on Instagram</a>
+          <a href="https://www.instagram.com/jiggajerkjoint/" target="_blank" rel="noopener" class="btn btn-ghost">📸 7.4K on Instagram</a>
           <a href="menu.html" class="btn btn-green">Explore the Menu</a>
         </div>
       </div>
@@ -484,8 +496,8 @@
     <div class="hours-location">
       <div class="info-card">
         <div class="info-card-title">📍 Find Us</div>
-        <p class="location-address" id="location-address">Atlanta, GA<br>Address coming soon</p>
-        <p class="location-phone" id="location-phone">📞 (555) 000-0000</p>
+        <p class="location-address" id="location-address">Miami, FL<br><span style="font-size:0.85rem;color:var(--muted-hi);">Full address on Instagram</span></p>
+        <p class="location-phone" id="location-phone">📞 (786) 694-1440</p>
         <a href="#" id="maps-link" target="_blank" rel="noopener" class="map-placeholder" style="text-decoration:none;cursor:pointer;transition:border-color var(--transition),background var(--transition);" onmouseover="this.style.borderColor='var(--border-mid)'" onmouseout="this.style.borderColor=''">
           <span style="display:flex;flex-direction:column;align-items:center;gap:6px;">
             <span style="font-size:2rem;">📍</span>
@@ -496,14 +508,13 @@
       <div class="info-card">
         <div class="info-card-title">🕐 Hours</div>
         <ul class="hours-list" id="hours-list">
-          <li><span class="day">Monday</span>    <span>11:00 AM – 9:00 PM</span></li>
-          <li><span class="day">Tuesday</span>   <span>11:00 AM – 9:00 PM</span></li>
-          <li><span class="day">Wednesday</span> <span>11:00 AM – 9:00 PM</span></li>
-          <li><span class="day">Thursday</span>  <span>11:00 AM – 9:00 PM</span></li>
-          <li><span class="day">Friday</span>    <span>11:00 AM – 10:00 PM</span></li>
-          <li><span class="day">Saturday</span>  <span>11:00 AM – 10:00 PM</span></li>
-          <li><span class="day">Sunday</span>    <span>12:00 PM – 8:00 PM</span></li>
+          <li><span class="day">Monday</span>    <span style="color:var(--muted)">Closed</span></li>
+          <li><span class="day">Tuesday</span>   <span style="color:var(--muted)">Closed</span></li>
+          <li><span class="day">Wednesday</span> <span>12:00 PM – 6:00 PM</span></li>
+          <li><span class="day">Thursday</span>  <span>12:00 PM – 8:00 PM</span></li>
+          <li><span class="day">Friday – Sunday</span> <span><a href="https://www.instagram.com/jiggajerkjoint/" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:underline;font-size:0.82rem;">Check Instagram</a></span></li>
         </ul>
+        <div id="open-status" style="margin-top:12px;"></div>
         <div class="mt-2">
           <a href="catering.html" class="btn btn-primary btn-sm btn-full">Book a Catering Event</a>
         </div>
@@ -554,7 +565,7 @@
     <div>
       <div class="footer-col-title">Contact</div>
       <ul class="footer-links">
-        <li><a href="#" id="footer-phone">📞 (555) 000-0000</a></li>
+        <li><a href="tel:7866941440" id="footer-phone">📞 (786) 694-1440</a></li>
         <li><a href="https://www.instagram.com/jiggajerkjoint/" target="_blank">📸 Instagram</a></li>
         <li><a href="#hours">📍 Directions</a></li>
       </ul>
@@ -626,6 +637,26 @@ getFeaturedItems().then(items => {
   `).join("");
   if (window.revealFresh) window.revealFresh(grid);
 });
+
+// Live open/closed status badge
+(function() {
+  const now   = new Date();
+  const day   = now.getDay(); // 0=Sun,1=Mon,...6=Sat
+  const hour  = now.getHours() + now.getMinutes() / 60;
+  // Known hours: Mon(1)/Tue(2) closed; Wed(3) 12-18; Thu(4) 12-20
+  let isOpen  = false;
+  if (day === 3 && hour >= 12 && hour < 18) isOpen = true;
+  if (day === 4 && hour >= 12 && hour < 20) isOpen = true;
+  const el = document.getElementById("open-status");
+  if (!el) return;
+  if (isOpen) {
+    el.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,155,58,0.15);border:1px solid rgba(0,155,58,0.4);border-radius:20px;padding:5px 12px;font-size:0.8rem;font-weight:700;color:var(--green-bright)"><span style="width:7px;height:7px;background:var(--green-bright);border-radius:50%;animation:pulse 1.5s infinite;"></span> Open Now</span>`;
+  } else if (day === 1 || day === 2) {
+    el.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(212,56,13,0.12);border:1px solid rgba(212,56,13,0.3);border-radius:20px;padding:5px 12px;font-size:0.8rem;font-weight:700;color:var(--pepper)">Closed Today</span>`;
+  } else {
+    el.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(160,128,90,0.12);border:1px solid rgba(160,128,90,0.25);border-radius:20px;padding:5px 12px;font-size:0.8rem;color:var(--muted-hi)">Currently Closed · <a href="https://www.instagram.com/jiggajerkjoint/" target="_blank" style="color:var(--gold)">Check IG for hours</a></span>`;
+  }
+})();
 
 document.getElementById("newsletter-form").addEventListener("submit", async (e) => {
   e.preventDefault();

@@ -31,16 +31,16 @@ const SEED_MENU = [
 const SITE_SETTINGS = {
   doordashUrl:   "https://www.doordash.com",
   instagramUrl:  "https://www.instagram.com/jiggajerkjoint/",
-  googleMapsUrl: "https://maps.google.com",
-  phone:         "(555) 000-0000",
-  address:       "Atlanta, GA",
+  googleMapsUrl: "https://www.google.com/maps/search/Jigga+Jerk+Joint+Miami+FL",
+  phone:         "(786) 694-1440",
+  address:       "Miami, FL",
   hours: {
-    mon: { open:"11:00", close:"21:00", closed:false },
-    tue: { open:"11:00", close:"21:00", closed:false },
-    wed: { open:"11:00", close:"21:00", closed:false },
-    thu: { open:"11:00", close:"21:00", closed:false },
-    fri: { open:"11:00", close:"22:00", closed:false },
-    sat: { open:"11:00", close:"22:00", closed:false },
+    mon: { closed: true },
+    tue: { closed: true },
+    wed: { open:"12:00", close:"18:00", closed:false },
+    thu: { open:"12:00", close:"20:00", closed:false },
+    fri: { open:"12:00", close:"20:00", closed:false },
+    sat: { open:"12:00", close:"20:00", closed:false },
     sun: { open:"12:00", close:"20:00", closed:false },
   }
 };
