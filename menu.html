@@ -50,22 +50,35 @@
   background: #fff;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 18px 20px;
+  overflow: hidden;
   display: flex;
-  gap: 16px;
-  align-items: flex-start;
+  flex-direction: column;
   transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
   box-shadow: 0 1px 8px rgba(0,0,0,0.05);
 }
 .menu-item:hover {
-  border-color: rgba(212,56,13,0.25);
+  border-color: rgba(0,155,58,0.30);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(212,56,13,0.10);
+  box-shadow: 0 6px 20px rgba(0,155,58,0.12);
+}
+.menu-item-photo {
+  width: 100%;
+  height: 180px;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+.menu-item-inner {
+  padding: 16px 18px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  flex: 1;
 }
 .menu-item-emoji {
-  font-size: 2.2rem;
+  font-size: 2rem;
   flex-shrink: 0;
-  width: 50px;
+  width: 44px;
   text-align: center;
 }
 .menu-item-body { flex: 1; }
@@ -225,16 +238,19 @@ async function renderMenu() {
             const delay = (globalIdx++ % 6) * 55;
             return `
             <div class="menu-item" style="transition-delay:${delay}ms">
-              <div class="menu-item-emoji">${item.emoji||"🍽️"}</div>
-              <div class="menu-item-body">
-                <div class="menu-item-name">${item.name}</div>
-                <div class="menu-item-desc">${item.description}</div>
-                <div class="menu-item-footer">
-                  <span class="menu-item-price">$${parseFloat(item.price).toFixed(2)}</span>
-                  <div class="menu-item-badges">
-                    ${item.spicy      ? '<span class="badge badge-spicy">🌶 Spicy</span>'  : ""}
-                    ${item.glutenFree ? '<span class="badge badge-gf">GF</span>'           : ""}
-                    ${item.vegan      ? '<span class="badge badge-vegan">🌿 Vegan</span>' : ""}
+              ${item.photo ? `<div class="menu-item-photo" style="background-image:url('${item.photo}')"></div>` : ""}
+              <div class="menu-item-inner">
+                ${!item.photo ? `<div class="menu-item-emoji">${item.emoji||"🍽️"}</div>` : ""}
+                <div class="menu-item-body">
+                  <div class="menu-item-name">${item.name}</div>
+                  <div class="menu-item-desc">${item.description}</div>
+                  <div class="menu-item-footer">
+                    <span class="menu-item-price">$${parseFloat(item.price).toFixed(2)}</span>
+                    <div class="menu-item-badges">
+                      ${item.spicy      ? '<span class="badge badge-spicy">🌶 Spicy</span>'  : ""}
+                      ${item.glutenFree ? '<span class="badge badge-gf">GF</span>'           : ""}
+                      ${item.vegan      ? '<span class="badge badge-vegan">🌿 Vegan</span>' : ""}
+                    </div>
                   </div>
                 </div>
               </div>
