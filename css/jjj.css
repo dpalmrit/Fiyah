@@ -252,12 +252,22 @@ a { color: inherit; text-decoration: none; }
 .card-img-placeholder {
   width: 100%;
   aspect-ratio: 4/3;
-  background: linear-gradient(135deg, var(--smoke3) 0%, var(--surface) 100%);
+  background: linear-gradient(150deg, #3D1800 0%, #5A2200 45%, #2A0E00 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3rem;
+  font-size: 3.5rem;
+  position: relative;
+  overflow: hidden;
 }
+.card-img-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 35% 65%, rgba(212,56,13,0.28) 0%, transparent 55%),
+              radial-gradient(ellipse at 75% 25%, rgba(249,199,79,0.12) 0%, transparent 45%);
+}
+.card-img-placeholder > * { position: relative; z-index: 1; }
 
 .card-body { padding: 18px 20px 22px; }
 .card-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 6px; color: var(--cream); }
@@ -504,6 +514,51 @@ a { color: inherit; text-decoration: none; }
 .section-green-border {
   border-left: 4px solid var(--green);
   padding-left: 16px;
+}
+
+/* ── Mobile FAB ─────────────────────────────────────────── */
+.mobile-fab {
+  position: fixed;
+  bottom: 22px;
+  right: 20px;
+  z-index: 200;
+  background: var(--pepper);
+  color: var(--cream);
+  padding: 13px 22px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 24px rgba(212,56,13,0.55);
+  display: none;
+  align-items: center;
+  gap: 7px;
+  transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);
+  opacity: 0;
+  pointer-events: none;
+}
+.mobile-fab.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.mobile-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 32px rgba(212,56,13,0.65);
+}
+@media (max-width: 768px) {
+  .mobile-fab { display: flex; }
+}
+
+/* ── Scroll-reveal utility ──────────────────────────────── */
+.fade-up {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.fade-up.in-view {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* ── Utility ────────────────────────────────────────────── */

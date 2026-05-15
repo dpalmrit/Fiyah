@@ -90,13 +90,25 @@
   font-size: 0.75rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  animation: bounce 2s infinite;
+  animation: bounce 2s 1.2s infinite both;
 }
 .hero-scroll span { font-size: 1.2rem; }
 @keyframes bounce {
   0%, 100% { transform: translateX(-50%) translateY(0); }
   50%       { transform: translateX(-50%) translateY(6px); }
 }
+
+/* ── Hero stagger-in ────────────────────────────────────── */
+@keyframes heroIn {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-eyebrow          { animation: heroIn 0.55s ease 0.05s both; }
+.hero-title .line-fire  { animation: heroIn 0.6s  ease 0.18s both; }
+.hero-title .line-jerk  { animation: heroIn 0.6s  ease 0.30s both; }
+.hero-title .line-joint { animation: heroIn 0.6s  ease 0.44s both; }
+.hero-sub              { animation: heroIn 0.6s  ease 0.58s both; }
+.hero-ctas             { animation: heroIn 0.55s ease 0.72s both; }
 
 /* ── Stats strip ────────────────────────────────────────── */
 .stats-strip {
@@ -294,6 +306,9 @@
 <!-- Jamaica flag stripe below nav -->
 <div class="jamaica-stripe"></div>
 
+<!-- Mobile floating order button -->
+<a href="#" id="mobile-fab" class="mobile-fab">🛵 Order Now</a>
+
 <!-- ── Hero ──────────────────────────────────────────────── -->
 <section class="hero">
   <div class="hero-bg-fallback"></div>
@@ -318,10 +333,10 @@
 <!-- ── Stats Strip ───────────────────────────────────────── -->
 <div class="stats-strip">
   <div class="stats-inner">
-    <div class="stat-item"><div class="stat-number">24hr</div><div class="stat-label">Marinade Time</div></div>
-    <div class="stat-item"><div class="stat-number">100%</div><div class="stat-label">Wood-Fire Grilled</div></div>
-    <div class="stat-item"><div class="stat-number">⭐ 4.9</div><div class="stat-label">Google Rating</div></div>
-    <div class="stat-item"><div class="stat-number">500+</div><div class="stat-label">Events Catered</div></div>
+    <div class="stat-item"><div class="stat-number" data-count="24" data-suffix="hr">24hr</div><div class="stat-label">Marinade Time</div></div>
+    <div class="stat-item"><div class="stat-number" data-count="100" data-suffix="%">100%</div><div class="stat-label">Wood-Fire Grilled</div></div>
+    <div class="stat-item"><div class="stat-number" data-count="4.9" data-prefix="⭐ " data-decimals="1">⭐ 4.9</div><div class="stat-label">Google Rating</div></div>
+    <div class="stat-item"><div class="stat-number" data-count="500" data-suffix="+">500+</div><div class="stat-label">Events Catered</div></div>
   </div>
 </div>
 
@@ -379,14 +394,53 @@
           <a href="menu.html" class="btn btn-green">Explore the Menu</a>
         </div>
       </div>
-      <div style="background:var(--smoke2);border:1px solid var(--border);border-top:3px solid var(--green);border-radius:var(--radius-lg);padding:40px;text-align:center;">
-        <div style="font-size:5rem;margin-bottom:16px;">🌿</div>
-        <div style="font-family:'Oswald',system-ui;font-size:1.5rem;color:var(--green-bright);margin-bottom:8px;">THREE GENERATIONS</div>
-        <div style="color:var(--muted-hi);font-size:0.9rem;line-height:1.6;">Of secret recipes,<br>Caribbean tradition,<br>&amp; serious jerk.</div>
-        <div style="margin-top:20px;display:flex;justify-content:center;gap:8px;">
-          <span style="width:32px;height:6px;background:var(--green);border-radius:3px;display:block;"></span>
-          <span style="width:32px;height:6px;background:var(--gold);border-radius:3px;display:block;"></span>
-          <span style="width:32px;height:6px;background:var(--green);border-radius:3px;display:block;"></span>
+      <div style="background:var(--smoke2);border:1px solid var(--border);border-top:3px solid var(--green);border-radius:var(--radius-lg);padding:36px 32px;">
+        <div style="font-family:'Oswald',system-ui;font-size:0.75rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:18px;">The Secret Blend</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;">
+          <div style="background:var(--smoke3);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;">
+            <span style="font-size:1.4rem;">🌶️</span>
+            <div>
+              <div style="font-size:0.82rem;font-weight:700;color:var(--cream);">Scotch Bonnet</div>
+              <div style="font-size:0.72rem;color:var(--muted);">Heat &amp; Depth</div>
+            </div>
+          </div>
+          <div style="background:var(--smoke3);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;">
+            <span style="font-size:1.4rem;">🌿</span>
+            <div>
+              <div style="font-size:0.82rem;font-weight:700;color:var(--cream);">Fresh Thyme</div>
+              <div style="font-size:0.72rem;color:var(--muted);">Caribbean Aroma</div>
+            </div>
+          </div>
+          <div style="background:var(--smoke3);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;">
+            <span style="font-size:1.4rem;">🫚</span>
+            <div>
+              <div style="font-size:0.82rem;font-weight:700;color:var(--cream);">Allspice</div>
+              <div style="font-size:0.72rem;color:var(--muted);">Signature Warmth</div>
+            </div>
+          </div>
+          <div style="background:var(--smoke3);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;">
+            <span style="font-size:1.4rem;">🔥</span>
+            <div>
+              <div style="font-size:0.82rem;font-weight:700;color:var(--cream);">Wood Fire</div>
+              <div style="font-size:0.72rem;color:var(--muted);">The Real Smoke</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:space-between;text-align:center;">
+          <div>
+            <div style="font-family:'Oswald',system-ui;font-size:1.6rem;color:var(--green-bright);font-weight:700;">3</div>
+            <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Generations</div>
+          </div>
+          <div style="width:1px;background:var(--border);"></div>
+          <div>
+            <div style="font-family:'Oswald',system-ui;font-size:1.6rem;color:var(--gold);font-weight:700;">24h</div>
+            <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Marinade</div>
+          </div>
+          <div style="width:1px;background:var(--border);"></div>
+          <div>
+            <div style="font-family:'Oswald',system-ui;font-size:1.6rem;color:var(--pepper);font-weight:700;">100%</div>
+            <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Wood-Fire</div>
+          </div>
         </div>
       </div>
     </div>
@@ -432,8 +486,12 @@
         <div class="info-card-title">📍 Find Us</div>
         <p class="location-address" id="location-address">Atlanta, GA<br>Address coming soon</p>
         <p class="location-phone" id="location-phone">📞 (555) 000-0000</p>
-        <div class="map-placeholder">📍 Map — configure address in admin settings</div>
-        <a href="#" id="maps-link" target="_blank" rel="noopener" class="btn btn-ghost btn-sm btn-full">Get Directions</a>
+        <a href="#" id="maps-link" target="_blank" rel="noopener" class="map-placeholder" style="text-decoration:none;cursor:pointer;transition:border-color var(--transition),background var(--transition);" onmouseover="this.style.borderColor='var(--border-mid)'" onmouseout="this.style.borderColor=''">
+          <span style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+            <span style="font-size:2rem;">📍</span>
+            <span style="font-size:0.82rem;color:var(--muted-hi);">Tap for directions</span>
+          </span>
+        </a>
       </div>
       <div class="info-card">
         <div class="info-card-title">🕐 Hours</div>
@@ -503,7 +561,7 @@
     </div>
   </div>
   <div class="footer-bottom">
-    <span class="footer-copy">© 2025 Jigga Jerk Joint. All rights reserved.</span>
+    <span class="footer-copy">© 2026 Jigga Jerk Joint. All rights reserved.</span>
     <a href="admin.html" class="footer-admin-link">Admin</a>
   </div>
 </footer>
@@ -513,6 +571,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <script src="js/firebase-init.js"></script>
+<script src="js/animations.js" defer></script>
 <script>
 document.getElementById("nav-hamburger").addEventListener("click", () => {
   document.getElementById("nav-links").classList.toggle("open");
@@ -529,6 +588,7 @@ getSiteSettings().then(s => {
   document.getElementById("maps-link").href            = maps;
   document.getElementById("footer-maps").href          = maps;
   document.getElementById("gmaps-review-link").href    = maps;
+  document.getElementById("mobile-fab").href           = doordash;
 
   if (s.phone) {
     document.getElementById("location-phone").textContent = "📞 " + s.phone;
@@ -546,9 +606,9 @@ getFeaturedItems().then(items => {
     grid.innerHTML = '<p class="text-muted text-center" style="grid-column:1/-1;">Menu coming soon!</p>';
     return;
   }
-  grid.innerHTML = items.slice(0, 6).map(item => `
-    <div class="card">
-      <div class="card-img-placeholder">${item.emoji || "🍽️"}</div>
+  grid.innerHTML = items.slice(0, 6).map((item, i) => `
+    <div class="card" style="transition-delay:${i * 60}ms">
+      <div class="card-img-placeholder"><span>${item.emoji || "🍽️"}</span></div>
       <div class="card-body">
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
           ${item.spicy      ? '<span class="badge badge-spicy">🌶 Spicy</span>'  : ""}
@@ -564,6 +624,7 @@ getFeaturedItems().then(items => {
       </div>
     </div>
   `).join("");
+  if (window.revealFresh) window.revealFresh(grid);
 });
 
 document.getElementById("newsletter-form").addEventListener("submit", async (e) => {

@@ -19,10 +19,16 @@
 .confirm-card {
   background: var(--smoke2);
   border: 1px solid var(--border-mid);
+  border-top: 4px solid var(--green);
   border-radius: var(--radius-lg);
   padding: 60px 48px;
   max-width: 560px;
   width: 100%;
+  animation: cardIn 0.5s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(32px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 @media (max-width: 480px) { .confirm-card { padding: 36px 20px; } }
 

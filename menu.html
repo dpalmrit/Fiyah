@@ -150,7 +150,7 @@
 <div class="jamaica-stripe"></div>
 <footer class="site-footer" style="border-top:none;">
   <div style="max-width:1140px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-    <span class="footer-copy">© 2025 Jigga Jerk Joint</span>
+    <span class="footer-copy">© 2026 Jigga Jerk Joint</span>
     <div class="flex gap-2">
       <a href="index.html" style="color:var(--muted-hi);font-size:0.9rem;">Home</a>
       <a href="catering.html" style="color:var(--muted-hi);font-size:0.9rem;">Catering</a>
@@ -164,6 +164,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <script src="js/firebase-init.js"></script>
+<script src="js/animations.js" defer></script>
 <script>
 document.getElementById("nav-hamburger").addEventListener("click", () => {
   document.getElementById("nav-links").classList.toggle("open");
@@ -205,14 +206,17 @@ async function renderMenu() {
 
   // Build all sections
   const content = document.getElementById("menu-content");
+  let globalIdx = 0;
   content.innerHTML = categories.map(cat => {
     const catItems = items.filter(i => i.category === cat);
     return `
       <div class="menu-category-section" data-cat="${cat}">
         <div class="menu-section-title">${CATEGORY_ICONS[cat]||"🍽️"} ${cat}</div>
         <div class="menu-grid">
-          ${catItems.map(item => `
-            <div class="menu-item">
+          ${catItems.map(item => {
+            const delay = (globalIdx++ % 6) * 55;
+            return `
+            <div class="menu-item" style="transition-delay:${delay}ms">
               <div class="menu-item-emoji">${item.emoji||"🍽️"}</div>
               <div class="menu-item-body">
                 <div class="menu-item-name">${item.name}</div>
@@ -227,7 +231,8 @@ async function renderMenu() {
                 </div>
               </div>
             </div>
-          `).join("")}
+            `;
+          }).join("")}
         </div>
       </div>
     `;
@@ -248,7 +253,7 @@ function filterCat(btn, cat) {
   }
 }
 
-renderMenu();
+renderMenu().then(() => { if (window.revealFresh) window.revealFresh(); });
 </script>
 </body>
 </html>
