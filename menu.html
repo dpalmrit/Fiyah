@@ -10,32 +10,32 @@
 <link rel="stylesheet" href="css/jjj.css" />
 <style>
 .page-hero {
-  background: linear-gradient(160deg, #1A0A00 0%, #3D1000 55%, #1A0A00 100%);
-  border-bottom: none;
+  background: linear-gradient(160deg, #FFFFFF 0%, #F2FCF6 55%, #FFFEF5 100%);
+  border-bottom: 3px solid var(--green);
   padding: 110px 5% 50px;
   text-align: center;
 }
-.page-hero .section-title { color: var(--gold); }
-.page-hero .section-subtitle { color: rgba(255,248,240,0.7); }
+.page-hero .section-title { color: var(--green); }
+.page-hero .section-subtitle { color: var(--ink-mid); }
 .menu-sticky {
   position: sticky;
   top: 66px;
   z-index: 50;
-  background: rgba(26,10,0,0.96);
+  background: rgba(255,255,255,0.97);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(0,155,58,0.15);
   padding: 0 5%;
 }
 .menu-section-title {
   font-family: 'Oswald', system-ui;
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--pepper);
+  color: var(--green);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: 1.2rem;
   padding-bottom: 10px;
-  border-bottom: 2px solid var(--border);
+  border-bottom: 2px solid rgba(0,155,58,0.20);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -78,7 +78,7 @@
 .order-cta-bar {
   position: fixed;
   bottom: 0; left: 0; right: 0;
-  background: var(--pepper);
+  background: var(--green);
   padding: 14px 5%;
   display: flex;
   align-items: center;
@@ -109,13 +109,8 @@
 
 <nav class="navbar">
   <a href="index.html" class="nav-logo">
-    <div class="logo-ring" aria-hidden="true">
-      <div class="logo-ring-inner">
-        <span class="logo-j">J</span>
-        <div class="logo-stack"><span>IGGA</span><span>ERK</span><span>OINT</span></div>
-      </div>
-    </div>
-    <span class="logo-wordmark"><span class="fire">Jigga</span> <span class="gold">Jerk</span> Joint</span>
+    <img src="img/logo.jpg" alt="Jigga Jerk Joint" class="nav-logo-img" />
+    <span class="logo-wordmark"><span class="fire">Jigga</span> <span class="gold">Jerk</span> <span class="grn">Joint</span></span>
   </a>
   <div class="nav-links" id="nav-links">
     <a href="menu.html" style="color:var(--gold)">Menu</a>
@@ -135,8 +130,8 @@
   <p class="section-subtitle">All items marinated in-house. Ask about daily specials.</p>
   <div class="flex-center gap-2 mt-2">
     <a href="#" id="hero-doordash" class="btn btn-primary">🛵 Order on DoorDash</a>
-    <a href="catering.html" class="btn btn-secondary">Book Catering</a>
-    <button onclick="window.print()" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:6px;">🖨️ Print Menu</button>
+    <a href="catering.html" class="btn btn-outline">Book Catering</a>
+    <button onclick="window.print()" class="btn btn-outline btn-sm" style="display:inline-flex;align-items:center;gap:6px;">🖨️ Print Menu</button>
   </div>
 </div>
 

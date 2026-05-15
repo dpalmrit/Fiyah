@@ -22,10 +22,11 @@
 .hero-bg-fallback {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 30% 65%, rgba(212,56,13,0.50) 0%, transparent 52%),
-              radial-gradient(ellipse at 75% 25%, rgba(249,199,79,0.28) 0%, transparent 48%),
-              radial-gradient(ellipse at 55% 85%, rgba(0,155,58,0.18) 0%, transparent 40%),
-              linear-gradient(180deg, #1A0A00 0%, #2E0E00 50%, #1A0A00 100%);
+  background:
+    radial-gradient(ellipse at 90% 10%, rgba(249,199,79,0.30) 0%, transparent 45%),
+    radial-gradient(ellipse at 10% 85%, rgba(0,155,58,0.20) 0%, transparent 45%),
+    radial-gradient(ellipse at 55% 50%, rgba(0,155,58,0.07) 0%, transparent 60%),
+    linear-gradient(160deg, #FFFFFF 0%, #F4FDF7 55%, #FFFEF5 100%);
 }
 
 .hero-content {
@@ -63,13 +64,13 @@
   line-height: 1;
   margin-bottom: 24px;
 }
-.hero-title .line-fire  { color: var(--pepper); }
-.hero-title .line-jerk  { color: var(--cream); }
-.hero-title .line-joint { color: var(--gold); }
+.hero-title .line-fire  { color: #111816; }
+.hero-title .line-jerk  { color: var(--gold-deep); }
+.hero-title .line-joint { color: var(--green); }
 
 .hero-sub {
   font-size: clamp(1rem, 2vw, 1.2rem);
-  color: var(--muted-hi);
+  color: var(--ink-mid);
   max-width: 520px;
   line-height: 1.6;
   margin-bottom: 40px;
@@ -87,7 +88,7 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  color: var(--muted);
+  color: var(--green);
   font-size: 0.75rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -119,10 +120,10 @@
 
 /* ── Stats strip ────────────────────────────────────────── */
 .stats-strip {
-  background: linear-gradient(90deg, #C23209 0%, #D4380D 40%, #E04A1A 60%, #C23209 100%);
+  background: linear-gradient(90deg, #007A2D 0%, #009B3A 40%, #00AA40 60%, #007A2D 100%);
   padding: 22px 5%;
-  border-bottom: 4px solid var(--green);
-  box-shadow: 0 4px 24px rgba(212,56,13,0.35);
+  border-bottom: 4px solid var(--gold);
+  box-shadow: 0 4px 24px rgba(0,155,58,0.30);
 }
 .stats-inner {
   max-width: 1140px;
@@ -197,13 +198,13 @@
 .info-card {
   background: #fff;
   border: 1px solid var(--border);
-  border-top: 3px solid var(--gold);
+  border-top: 3px solid var(--green);
   border-radius: var(--radius-lg);
   padding: 32px;
   box-shadow: 0 2px 16px rgba(0,0,0,0.06);
   transition: transform var(--transition), box-shadow var(--transition);
 }
-.info-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(212,56,13,0.10); }
+.info-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,155,58,0.12); }
 .info-card-title {
   font-family: 'Oswald', system-ui;
   font-size: 1rem;
@@ -257,7 +258,7 @@
   box-shadow: 0 2px 16px rgba(0,0,0,0.06);
   transition: transform var(--transition), box-shadow var(--transition);
 }
-.review-card:hover { transform: translateY(-4px); box-shadow: 0 10px 36px rgba(212,56,13,0.18); }
+.review-card:hover { transform: translateY(-4px); box-shadow: 0 10px 36px rgba(0,155,58,0.16); }
 .review-stars { color: #F59E0B; font-size: 0.9rem; letter-spacing: 2px; margin-bottom: 12px; }
 .review-text { font-size: 0.92rem; color: var(--ink-mid); line-height: 1.6; margin-bottom: 16px; font-style: italic; }
 .review-author { font-size: 0.82rem; font-weight: 700; color: var(--ink); }
@@ -306,13 +307,8 @@
 <!-- ── Nav ───────────────────────────────────────────────── -->
 <nav class="navbar">
   <a href="index.html" class="nav-logo">
-    <div class="logo-ring" aria-hidden="true">
-      <div class="logo-ring-inner">
-        <span class="logo-j">J</span>
-        <div class="logo-stack"><span>IGGA</span><span>ERK</span><span>OINT</span></div>
-      </div>
-    </div>
-    <span class="logo-wordmark"><span class="fire">Jigga</span> <span class="gold">Jerk</span> Joint</span>
+    <img src="img/logo.jpg" alt="Jigga Jerk Joint" class="nav-logo-img" />
+    <span class="logo-wordmark"><span class="fire">Jigga</span> <span class="gold">Jerk</span> <span class="grn">Joint</span></span>
   </a>
   <div class="nav-links" id="nav-links">
     <a href="menu.html">Menu</a>
@@ -347,7 +343,7 @@
     </p>
     <div class="hero-ctas">
       <a href="#" class="btn btn-primary btn-lg" id="hero-doordash">🛵 Order on DoorDash</a>
-      <a href="menu.html" class="btn btn-secondary btn-lg">View Full Menu</a>
+      <a href="menu.html" class="btn btn-outline btn-lg">View Full Menu</a>
     </div>
   </div>
   <div class="hero-scroll"><span>↓</span> Scroll</div>
@@ -551,7 +547,7 @@
 <footer class="site-footer" style="border-top:none;">
   <div class="footer-grid">
     <div>
-      <div class="footer-brand-name">Jigga Jerk Joint</div>
+      <div class="footer-brand-name"><span style="color:var(--cream)">Jigga</span> <span style="color:var(--gold)">Jerk</span> <span style="color:var(--green-bright)">Joint</span></div>
       <p class="footer-tagline">Authentic Jamaican jerk — wood-fire grilled, 24-hour marinated, served with love and heat.</p>
       <div class="footer-social">
         <a href="https://www.instagram.com/jiggajerkjoint/" target="_blank" rel="noopener" aria-label="Instagram">📸</a>
