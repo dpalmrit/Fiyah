@@ -1,0 +1,2431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PitchScout — Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:   #00e676;
+      --dark:    #080f0a;
+      --surface: #0d1a10;
+      --card:    #111e14;
+      --border:  #1e3324;
+      --text:    #e8f5e9;
+      --muted:   #6a9b78;
+      --red:     #ef5350;
+      --yellow:  #ffd600;
+      --blue:    #40c4ff;
+    }
+
+    body { background: var(--dark); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; }
+
+    /* ── Auth ── */
+    #auth-screen { display: none; align-items: center; justify-content: center; min-height: 100vh; }
+    .auth-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 40px; width: 360px; text-align: center; }
+    .auth-card h1 { font-size: 1.4rem; margin-bottom: 6px; }
+    .auth-card p  { color: var(--muted); font-size: 0.85rem; margin-bottom: 28px; }
+    .logo { color: var(--green); font-size: 1.6rem; font-weight: 800; margin-bottom: 10px; }
+    .btn-google { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; background: #fff; border: none; border-radius: 7px; color: #3c4043; cursor: pointer; font-size: 0.95rem; font-weight: 600; padding: 11px 16px; transition: box-shadow .15s; }
+    .btn-google:hover { box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+    .btn-google svg { flex-shrink: 0; }
+    .auth-err { color: var(--red); font-size: 0.82rem; margin-top: 14px; min-height: 18px; }
+
+    /* ── App shell ── */
+    #app { display: none; max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 10px; }
+    header h1 { font-size: 1.3rem; }
+    header h1 span { color: var(--green); }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .user-badge { font-size: 0.78rem; color: var(--muted); }
+    .user-badge strong { color: var(--text); }
+    .role-chip { display: inline-block; border-radius: 20px; font-size: 0.7rem; font-weight: 700; letter-spacing: .05em; padding: 2px 10px; text-transform: uppercase; }
+    .role-admin { background: rgba(0,230,118,.15); color: var(--green); border: 1px solid rgba(0,230,118,.3); }
+    .role-superuser { background: rgba(64,196,255,.12); color: var(--blue); border: 1px solid rgba(64,196,255,.25); }
+    .btn-signout { background: none; border: 1px solid var(--border); border-radius: 20px; color: var(--muted); cursor: pointer; font-size: 0.75rem; padding: 4px 14px; }
+    .btn-signout:hover { color: var(--red); border-color: var(--red); }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
+    .tab { background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); cursor: pointer; font-size: 0.88rem; font-weight: 500; padding: 10px 18px; margin-bottom: -1px; transition: color .15s, border-color .15s; }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--green); border-bottom-color: var(--green); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Shared components ── */
+    button { cursor: pointer; }
+    input[type="email"], input[type="text"] { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 0.9rem; padding: 10px 14px; outline: none; transition: border-color .15s; }
+    input:focus { border-color: var(--green); }
+    input::placeholder { color: var(--muted); }
+    .btn-primary { background: var(--green); border: none; border-radius: 7px; color: var(--dark); font-size: 0.9rem; font-weight: 700; padding: 10px 20px; transition: opacity .15s; }
+    .btn-primary:hover { opacity: .85; }
+    .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-danger { background: var(--red); border: none; border-radius: 7px; color: #fff; font-size: 0.8rem; font-weight: 600; padding: 6px 14px; }
+    .msg { font-size: 0.82rem; margin-top: 10px; min-height: 18px; }
+    .msg.ok  { color: var(--green); }
+    .msg.err { color: var(--red); }
+    .section-title { color: var(--muted); font-size: 0.82rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 14px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+    .empty { color: var(--muted); font-size: 0.88rem; text-align: center; padding: 32px 0; }
+
+    /* ── Allowlist tab ── */
+    .form-row { display: flex; gap: 10px; }
+    .form-row input[type="email"] { flex: 1; }
+    .form-row input[type="text"]  { flex: 0 0 180px; }
+    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .count { color: var(--green); font-weight: 700; font-size: 0.88rem; }
+    .user-list { display: flex; flex-direction: column; gap: 8px; }
+    .user-row { background: var(--card); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; }
+    .user-email { font-size: 0.9rem; font-weight: 500; }
+    .user-meta  { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── Admin Users tab ── */
+    .admin-section { margin-bottom: 28px; }
+    .admin-row { background: var(--card); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; margin-bottom: 8px; }
+    .admin-email { font-size: 0.9rem; font-weight: 500; }
+    .admin-meta  { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+    .admin-locked { color: var(--muted); font-size: 0.75rem; font-style: italic; }
+
+    /* ── Stats tab ── */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+    .stat-label { color: var(--muted); font-size: 0.75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 8px; }
+    .stat-value { font-size: 1.8rem; font-weight: 800; line-height: 1; }
+    .stat-value.green  { color: var(--green); }
+    .stat-value.yellow { color: var(--yellow); }
+    .stat-value.red    { color: var(--red); }
+    .stat-value.blue   { color: var(--blue); }
+    .stat-sub { color: var(--muted); font-size: 0.78rem; margin-top: 4px; }
+
+    .cost-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    .cost-table th { color: var(--muted); font-size: 0.75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; text-align: left; padding: 0 0 10px; }
+    .cost-table td { padding: 10px 0; border-top: 1px solid var(--border); }
+    .cost-table td:last-child { text-align: right; color: var(--green); font-weight: 600; }
+    .billing-note { color: var(--muted); font-size: 0.75rem; margin-top: 14px; font-style: italic; }
+
+    /* ── Spending redesign ── */
+    .spending-layout { display: flex; gap: 20px; align-items: flex-start; }
+    .spending-main { flex: 1; min-width: 0; }
+    .spending-sidebar { width: 220px; flex-shrink: 0; }
+    @media (max-width: 700px) { .spending-layout { flex-direction: column; } .spending-sidebar { width: 100%; } }
+    .month-selector { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .month-selector select { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 0.88rem; padding: 7px 12px; outline: none; cursor: pointer; }
+    .month-selector select:focus { border-color: var(--green); }
+    .month-total { font-size: 1.4rem; font-weight: 800; color: var(--green); }
+    .month-total-label { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+
+    .ytd-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; position: sticky; top: 20px; }
+    .ytd-title { color: var(--muted); font-size: 0.72rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; margin-bottom: 12px; }
+    .ytd-total-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .ytd-total-label { font-size: 0.82rem; font-weight: 600; }
+    .ytd-total-value { font-size: 1.2rem; font-weight: 800; color: var(--green); }
+    .ytd-cat-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; padding: 5px 0; }
+    .ytd-cat-name { color: var(--muted); }
+    .ytd-cat-amount { color: var(--text); font-weight: 600; }
+
+    /* ── Expense section ── */
+    .expense-section { margin-top: 16px; }
+    .exp-row { background: var(--card); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; margin-bottom: 8px; font-size: 0.85rem; }
+    .exp-desc { font-weight: 500; flex: 1; }
+    .exp-meta { color: var(--muted); font-size: 0.75rem; }
+    .exp-amount { color: var(--green); font-weight: 700; white-space: nowrap; }
+    .exp-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 2px 4px; }
+    .exp-del:hover { color: var(--red); }
+    .recurring-badge { display: inline-block; background: rgba(64,196,255,.1); border: 1px solid rgba(64,196,255,.2); border-radius: 4px; color: var(--blue); font-size: 0.68rem; font-weight: 700; letter-spacing: .04em; padding: 1px 6px; text-transform: uppercase; margin-left: 6px; }
+
+    .add-expense-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .add-expense-form input, .add-expense-form select { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 0.85rem; padding: 8px 12px; outline: none; }
+    .add-expense-form input:focus, .add-expense-form select:focus { border-color: var(--green); }
+    .add-expense-form input::placeholder { color: var(--muted); }
+    .add-expense-form .full-width { grid-column: 1 / -1; }
+    .btn-add-exp { background: rgba(0,230,118,.1); border: 1px solid rgba(0,230,118,.3); border-radius: 7px; color: var(--green); font-size: 0.82rem; font-weight: 700; padding: 8px 16px; cursor: pointer; white-space: nowrap; }
+    .btn-add-exp:hover { background: rgba(0,230,118,.2); }
+
+    /* ── Events tab ── */
+    .event-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
+    .event-card-header { display: flex; align-items: center; gap: 14px; padding: 16px 20px; cursor: pointer; }
+    .event-card-header:hover { background: rgba(255,255,255,.03); }
+    .event-logo-thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: contain; background: var(--surface); border: 1px solid var(--border); flex-shrink: 0; }
+    .event-logo-placeholder { width: 44px; height: 44px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+    .event-card-info { flex: 1; }
+    .event-card-name { font-size: 0.95rem; font-weight: 700; }
+    .event-card-meta { color: var(--muted); font-size: 0.78rem; margin-top: 2px; }
+    .event-card-stats { display: flex; gap: 14px; flex-shrink: 0; }
+    .event-stat { text-align: right; }
+    .event-stat-val { font-size: 1rem; font-weight: 800; }
+    .event-stat-lbl { color: var(--muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: .04em; }
+    .event-card-body { border-top: 1px solid var(--border); padding: 16px 20px; display: none; }
+    .event-card-body.open { display: block; }
+    .chevron { color: var(--muted); font-size: 0.9rem; transition: transform .2s; }
+    .event-card-header.expanded .chevron { transform: rotate(180deg); }
+
+    .roster-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; margin-bottom: 16px; }
+    .roster-table th { color: var(--muted); font-size: 0.72rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; text-align: left; padding: 0 0 8px; border-bottom: 1px solid var(--border); }
+    .roster-table td { padding: 9px 0; border-bottom: 1px solid rgba(30,51,36,.6); }
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+    .dot-green { background: var(--green); }
+    .dot-yellow { background: var(--yellow); }
+    .dot-red   { background: var(--red); }
+    .dot-grey  { background: #555; }
+
+    .create-event-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .create-event-form input { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 0.88rem; padding: 9px 12px; outline: none; }
+    .create-event-form input:focus { border-color: var(--green); }
+    .create-event-form input::placeholder { color: var(--muted); }
+    .create-event-form .full-width { grid-column: 1 / -1; }
+
+    .add-roster-form { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .add-roster-form input { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 0.85rem; padding: 8px 12px; outline: none; }
+    .add-roster-form input:focus { border-color: var(--green); }
+    .add-roster-form input::placeholder { color: var(--muted); }
+    .add-roster-form .inp-jersey  { width: 80px; }
+    .add-roster-form .inp-email   { flex: 1; min-width: 160px; }
+    .add-roster-form .inp-name    { flex: 1; min-width: 120px; }
+    .logo-upload-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+    .logo-preview { width: 40px; height: 40px; border-radius: 8px; object-fit: contain; background: var(--surface); border: 1px solid var(--border); display: none; }
+
+    /* ── Coach view ── */
+    .coach-event-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+    .coach-event-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .coach-event-logo { width: 48px; height: 48px; border-radius: 10px; object-fit: contain; background: var(--surface); border: 1px solid var(--border); }
+    .coach-event-name { font-size: 1rem; font-weight: 700; }
+    .coach-event-sub  { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
+    .pipeline-stats   { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .pipe-stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; text-align: center; min-width: 70px; }
+    .pipe-stat-val { font-size: 1.2rem; font-weight: 800; }
+    .pipe-stat-lbl { color: var(--muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+    .upload-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .upload-form input, .upload-form select { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 0.85rem; padding: 9px 12px; outline: none; }
+    .upload-form input:focus, .upload-form select:focus { border-color: var(--green); }
+    .upload-form input::placeholder { color: var(--muted); }
+    .upload-form .full-width { grid-column: 1 / -1; }
+    .upload-form label.field-label { color: var(--muted); font-size: 0.72rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+    .upload-progress { display: none; margin-top: 12px; }
+    .upload-progress.show { display: block; }
+    .progress-bar-wrap { background: var(--border); border-radius: 4px; height: 6px; margin-bottom: 6px; overflow: hidden; }
+    .progress-bar-fill { background: var(--green); height: 100%; border-radius: 4px; transition: width .3s; width: 0; }
+    .progress-label { color: var(--muted); font-size: 0.78rem; }
+
+    /* ── Coach requests ── */
+    .coach-req-row { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--yellow); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .coach-req-name  { font-size: 0.9rem; font-weight: 600; }
+    .coach-req-email { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
+    .coach-req-meta  { color: var(--muted); font-size: 0.76rem; margin-top: 4px; }
+    .coach-req-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+    .coach-req-actions input { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 0.8rem; padding: 6px 10px; outline: none; flex: 1; min-width: 140px; }
+    .coach-req-actions input:focus { border-color: var(--green); }
+    .coach-req-actions input::placeholder { color: var(--muted); }
+
+    /* ── Sparkline ── */
+    .sparkline-wrap { margin-top: 4px; }
+    .sparkline-wrap canvas { display: block; width: 100%; }
+
+    /* ── Failure alert widget ── */
+    .alert-widget { display: none; background: rgba(239,83,80,.08); border: 1px solid rgba(239,83,80,.35); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; }
+    .alert-widget.visible { display: flex; align-items: center; gap: 14px; }
+    .alert-pulse { width: 10px; height: 10px; border-radius: 50%; background: var(--red); flex-shrink: 0; animation: pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(239,83,80,.6); }
+      50%      { box-shadow: 0 0 0 7px rgba(239,83,80,0); }
+    }
+    .alert-body { flex: 1; }
+    .alert-title { font-size: 0.9rem; font-weight: 700; color: var(--red); margin-bottom: 2px; }
+    .alert-sub   { font-size: 0.78rem; color: var(--muted); }
+    .alert-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .btn-dismiss { background: none; border: 1px solid rgba(239,83,80,.4); border-radius: 6px; color: var(--muted); font-size: 0.78rem; padding: 6px 12px; cursor: pointer; }
+    .btn-dismiss:hover { border-color: var(--muted); }
+    .notify-toggle { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-size: 0.75rem; padding: 4px 10px; cursor: pointer; white-space: nowrap; }
+    .notify-toggle.on  { border-color: var(--green); color: var(--green); }
+    .notify-toggle.off { border-color: var(--border); color: var(--muted); }
+    .poll-status { font-size: 0.72rem; color: var(--muted); margin-left: auto; white-space: nowrap; }
+
+    /* ── Failures tab ── */
+    .failure-list { display: flex; flex-direction: column; gap: 8px; }
+    .failure-row { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; align-items: center; gap: 12px; padding: 12px 16px; font-size: 0.85rem; }
+    .failure-row.analysis_failed { border-left-color: var(--yellow); }
+    .failure-row.upload_failed   { border-left-color: #ff9800; }
+    .failure-email { font-weight: 500; }
+    .failure-meta  { color: var(--muted); font-size: 0.78rem; }
+    .failure-detail { color: var(--muted); font-size: 0.76rem; margin-top: 3px; font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px; }
+    .failure-badge { display: inline-block; border-radius: 4px; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; text-transform: uppercase; letter-spacing: .04em; }
+    .badge-failed   { background: rgba(239,83,80,.15); color: var(--red); }
+    .badge-analysis { background: rgba(255,214,0,.12); color: var(--yellow); }
+    .badge-upload   { background: rgba(255,152,0,.15); color: #ff9800; }
+    .pre-errors-section { margin-top: 24px; }
+    .pre-errors-heading { font-size: 0.72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .pre-error-row { background: var(--card); border: 1px solid var(--border); border-left: 3px solid #9e9e9e; border-radius: 8px; display: flex; align-items: center; gap: 12px; padding: 10px 14px; font-size: 0.82rem; }
+    .pre-error-type { font-weight: 600; color: #bbb; min-width: 140px; }
+    .pre-error-msg  { color: var(--muted); font-size: 0.78rem; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pre-error-date { color: var(--muted); font-size: 0.75rem; white-space: nowrap; }
+    .btn-retry { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-size: 0.75rem; padding: 4px 10px; }
+    .btn-retry:hover { border-color: var(--green); color: var(--green); }
+
+    /* ── Stalls section ── */
+    .stall-section { margin-top: 24px; }
+    .stall-heading { font-size: 0.72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--yellow); margin-bottom: 10px; }
+    .stall-row { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--yellow); border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr auto; align-items: start; gap: 12px; padding: 12px 16px; font-size: 0.85rem; margin-bottom: 8px; }
+    .stall-row.proc { border-left-color: #40c4ff; }
+    .stall-reason { color: var(--muted); font-size: 0.75rem; font-style: italic; margin-top: 4px; }
+
+    /* ── Beta requests section ── */
+    .requests-section { margin-top: 28px; }
+    .req-row { background: var(--card); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; margin-bottom: 8px; }
+    .req-email { font-size: 0.9rem; font-weight: 500; }
+    .req-meta  { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+    .req-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .btn-approve { background: rgba(0,230,118,.15); border: 1px solid rgba(0,230,118,.4); border-radius: 6px; color: var(--green); font-size: 0.78rem; font-weight: 600; padding: 5px 14px; }
+    .btn-approve:hover { background: rgba(0,230,118,.25); }
+    .btn-decline { background: rgba(239,83,80,.1); border: 1px solid rgba(239,83,80,.35); border-radius: 6px; color: var(--red); font-size: 0.78rem; font-weight: 600; padding: 5px 14px; }
+    .btn-decline:hover { background: rgba(239,83,80,.2); }
+    .status-chip { display: inline-block; border-radius: 4px; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; text-transform: uppercase; letter-spacing: .04em; }
+    .chip-approved { background: rgba(0,230,118,.12); color: var(--green); }
+    .chip-declined { background: rgba(239,83,80,.1); color: var(--red); }
+    .chip-pending  { background: rgba(255,214,0,.1); color: var(--yellow); }
+
+    @media (max-width: 600px) {
+      .failure-row { grid-template-columns: 1fr; }
+      .form-row { flex-direction: column; }
+      .form-row input[type="text"] { flex: unset; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Auth screen -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="logo">⚽</div>
+    <h1>PitchScout Admin</h1>
+    <p>Sign in with your Google account to continue</p>
+    <button class="btn-google" id="auth-google-btn">
+      <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+        <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+        <path d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
+        <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+      </svg>
+      Continue with Google
+    </button>
+    <div class="auth-err" id="auth-err"></div>
+  </div>
+</div>
+
+<!-- Admin app -->
+<div id="app">
+  <header>
+    <h1>PitchScout <span>Admin</span></h1>
+    <div class="header-right">
+      <div class="user-badge">
+        <strong id="header-email"></strong>
+        <span id="header-role-chip"></span>
+      </div>
+      <button class="btn-signout" id="signout-btn">Sign out</button>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tab-nav">
+    <button class="tab" data-tab="myevents" id="tab-myevents-btn" style="display:none">My Events</button>
+    <button class="tab active" data-tab="allowlist" id="tab-allowlist-btn">Beta Testers</button>
+    <button class="tab" data-tab="stats">Spending</button>
+    <button class="tab" data-tab="failures">Failures <span id="failure-badge"></span></button>
+    <button class="tab" data-tab="events" id="tab-events-btn" style="display:none">Events</button>
+    <button class="tab" data-tab="users" id="tab-users-btn" style="display:none">Admin Users</button>
+    <button class="tab" data-tab="pricing" id="tab-pricing-btn" style="display:none">Pricing</button>
+    <button class="tab" data-tab="accounts" id="tab-accounts-btn" style="display:none">Accounts</button>
+  </nav>
+
+  <!-- ── Tab: Allowlist ── -->
+  <div class="tab-panel active" id="tab-allowlist">
+    <div class="card">
+      <div class="section-title">Add beta tester</div>
+      <div class="form-row">
+        <input type="email" id="add-email" placeholder="email@example.com" />
+        <input type="text"  id="add-note"  placeholder="Note (optional)" maxlength="80" />
+        <button class="btn-primary" id="add-btn">Add</button>
+      </div>
+      <div class="msg" id="add-msg"></div>
+    </div>
+
+    <div class="list-header">
+      <div class="section-title" style="margin:0">Approved testers</div>
+      <span class="count" id="user-count">—</span>
+    </div>
+    <div class="user-list" id="user-list"><div class="empty">Loading…</div></div>
+
+    <div class="requests-section">
+      <div class="list-header" style="margin-bottom:12px">
+        <div class="section-title" style="margin:0">Beta access requests</div>
+        <span class="count" id="req-count">—</span>
+      </div>
+      <div id="req-list"><div class="empty">Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- ── Tab: Spending ── -->
+  <div class="tab-panel" id="tab-stats">
+    <div class="spending-layout">
+      <!-- Main column -->
+      <div class="spending-main">
+        <!-- Month selector + total -->
+        <div class="month-selector">
+          <select id="month-select"></select>
+          <div>
+            <div class="month-total" id="month-total">—</div>
+            <div class="month-total-label">Total this month</div>
+          </div>
+        </div>
+
+        <!-- TwelveLabs breakdown -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="section-title">TwelveLabs Analysis</div>
+          <table class="cost-table" id="cost-table">
+            <thead><tr><th>Match type</th><th>Sessions</th><th>Unit cost</th><th>Subtotal</th></tr></thead>
+            <tbody id="cost-body"></tbody>
+          </table>
+          <p class="billing-note" id="billing-note"></p>
+        </div>
+
+        <!-- One-time expenses -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+            <span>One-time Expenses</span>
+            <span class="count" id="oneoff-total">$0.00</span>
+          </div>
+          <div id="oneoff-list"><div class="empty" style="padding:12px 0">None this month.</div></div>
+
+          <div class="section-title" style="margin-top:16px;margin-bottom:8px">Add Expense</div>
+          <div class="add-expense-form">
+            <input type="text" id="exp-desc" placeholder="Description" />
+            <input type="number" id="exp-amount" placeholder="Amount ($)" min="0.01" step="0.01" />
+            <select id="exp-category">
+              <option value="other">Category</option>
+              <option value="ai_subscriptions">AI Subscriptions</option>
+              <option value="infrastructure">Infrastructure</option>
+              <option value="platform">Platform</option>
+              <option value="domain">Domain</option>
+              <option value="tooling">Tooling</option>
+              <option value="marketing">Marketing</option>
+              <option value="other">Other</option>
+            </select>
+            <button class="btn-add-exp" id="add-exp-btn">+ Add</button>
+            <div class="msg full-width" id="exp-msg"></div>
+          </div>
+        </div>
+
+        <!-- Recurring expenses -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+            <span>Recurring Expenses</span>
+            <span class="count" id="recurring-total">$0.00</span>
+          </div>
+          <div id="recurring-list"><div class="empty" style="padding:12px 0">Loading…</div></div>
+
+          <div class="section-title" style="margin-top:16px;margin-bottom:8px">Add Recurring</div>
+          <div class="add-expense-form">
+            <input type="text" id="rec-desc" placeholder="Description (e.g. Claude Max)" class="full-width" />
+            <input type="number" id="rec-amount" placeholder="Monthly amount ($)" min="0.01" step="0.01" />
+            <select id="rec-category">
+              <option value="other">Category</option>
+              <option value="ai_subscriptions">AI Subscriptions</option>
+              <option value="infrastructure">Infrastructure</option>
+              <option value="platform">Platform</option>
+              <option value="domain">Domain</option>
+              <option value="tooling">Tooling</option>
+              <option value="marketing">Marketing</option>
+              <option value="other">Other</option>
+            </select>
+            <input type="month" id="rec-start" title="Start month" />
+            <button class="btn-add-exp" id="add-rec-btn">+ Add Recurring</button>
+            <div class="msg full-width" id="rec-msg"></div>
+          </div>
+        </div>
+
+        <!-- Sparkline -->
+        <div class="card">
+          <div class="section-title">Daily completions (last 30 days)</div>
+          <div class="sparkline-wrap"><canvas id="sparkline" height="60"></canvas></div>
+        </div>
+      </div>
+
+      <!-- YTD sidebar -->
+      <div class="spending-sidebar">
+        <div class="ytd-card">
+          <div class="ytd-title">Year to Date <span id="ytd-year"></span></div>
+          <div class="ytd-total-row">
+            <span class="ytd-total-label">Total</span>
+            <span class="ytd-total-value" id="ytd-total">—</span>
+          </div>
+          <div id="ytd-cats"><div style="color:var(--muted);font-size:0.8rem">Loading…</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Tab: Events (admin/superuser only) ── -->
+  <div class="tab-panel" id="tab-events">
+    <!-- Create event form (admin only) -->
+    <div class="card" id="create-event-card">
+      <div class="section-title">Create New Event</div>
+      <div class="create-event-form">
+        <input type="text" id="new-event-id" placeholder="event_id (e.g. summercamp2026)" />
+        <input type="text" id="new-event-name" placeholder="Display name" />
+        <input type="date" id="new-event-date" />
+        <input type="number" id="new-event-count" placeholder="Expected players" min="1" />
+        <button class="btn-primary full-width" id="create-event-btn">Create Event</button>
+        <div class="msg full-width" id="create-event-msg"></div>
+      </div>
+    </div>
+
+    <div class="list-header">
+      <div class="section-title" style="margin:0">Events</div>
+      <span class="count" id="events-count">—</span>
+    </div>
+    <div id="events-list"><div class="empty">Loading…</div></div>
+  </div>
+
+  <!-- ── Tab: My Events (coach only) ── -->
+  <div class="tab-panel" id="tab-myevents">
+    <div id="myevents-list"><div class="empty">Loading…</div></div>
+  </div>
+
+  <!-- ── Tab: Failures ── -->
+  <div class="tab-panel" id="tab-failures">
+
+    <!-- Notification widget -->
+    <div class="alert-widget" id="alert-widget">
+      <div class="alert-pulse"></div>
+      <div class="alert-body">
+        <div class="alert-title" id="alert-title">New failures detected</div>
+        <div class="alert-sub" id="alert-sub"></div>
+      </div>
+      <div class="alert-actions">
+        <button class="btn-dismiss" id="alert-dismiss">Dismiss</button>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="list-header" style="margin-bottom:16px;align-items:center">
+      <div class="section-title" style="margin:0">Failed sessions — last 30 days</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="poll-status" id="poll-status"></span>
+        <button class="notify-toggle off" id="notify-toggle" title="Browser notifications">🔔 Notify</button>
+        <span class="count" id="failure-count">—</span>
+      </div>
+    </div>
+    <div class="failure-list" id="failure-list"><div class="empty">Loading…</div></div>
+  </div>
+
+  <!-- ── Tab: Admin Users (full admin only) ── -->
+  <div class="tab-panel" id="tab-users">
+
+    <!-- Coach requests -->
+    <div class="admin-section">
+      <div class="list-header" style="margin-bottom:12px">
+        <div class="section-title" style="margin:0">Coach Requests</div>
+        <span class="count" id="coach-req-count">—</span>
+      </div>
+      <div id="coach-req-list"><div class="empty">Loading…</div></div>
+    </div>
+
+    <!-- Approved coaches -->
+    <div class="admin-section">
+      <div class="section-title">Coaches</div>
+      <div id="coaches-list"><div class="empty">Loading…</div></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Add Coach</div>
+      <div class="form-row" style="flex-wrap:wrap;gap:8px">
+        <input type="email" id="coach-email" placeholder="coach@example.com" style="flex:1;min-width:200px" />
+        <input type="text"  id="coach-org"   placeholder="Team / Organization" style="flex:1;min-width:160px" />
+        <input type="text"  id="coach-events" placeholder="Event IDs (comma-separated)" style="flex:2;min-width:200px" />
+        <button class="btn-primary" id="coach-add-btn" style="white-space:nowrap">Add Coach</button>
+      </div>
+      <div class="msg" id="coach-add-msg"></div>
+    </div>
+
+    <div class="admin-section">
+      <div class="section-title">Full admins</div>
+      <div id="full-admins-list"><div class="empty">Loading…</div></div>
+    </div>
+
+    <div class="admin-section">
+      <div class="section-title">Superusers</div>
+      <div id="superusers-list"><div class="empty">Loading…</div></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Add superuser</div>
+      <div class="form-row">
+        <input type="email" id="su-email" placeholder="email@example.com" />
+        <button class="btn-primary" id="su-add-btn">Add superuser</button>
+      </div>
+      <div class="msg" id="su-msg"></div>
+    </div>
+  </div>
+
+  <!-- ── Tab: Pricing (admin only) ── -->
+  <div class="tab-panel" id="tab-pricing">
+
+    <!-- Tier pricing cards -->
+    <div class="admin-section">
+      <div class="list-header" style="margin-bottom:12px">
+        <div class="section-title" style="margin:0">Pricing Tiers</div>
+        <button class="btn-primary" id="pricing-refresh-btn" style="font-size:0.78rem;padding:5px 14px">Refresh</button>
+      </div>
+      <div id="pricing-tiers-list"><div class="empty">Loading…</div></div>
+    </div>
+
+    <!-- Edit tier form -->
+    <div class="card" id="pricing-edit-card" style="display:none">
+      <div class="section-title">Edit Tier: <span id="pricing-edit-key" style="color:var(--green)"></span></div>
+      <div class="form-row" style="flex-wrap:wrap;gap:8px;margin-bottom:10px">
+        <input type="text" id="pricing-edit-name" placeholder="Display name" style="flex:1;min-width:180px" />
+        <input type="text" id="pricing-edit-amount" placeholder="Amount in cents (e.g. 2499)" style="flex:1;min-width:160px" />
+        <input type="text" id="pricing-edit-desc"   placeholder="Description" style="flex:2;min-width:200px" />
+        <input type="text" id="pricing-edit-interval" placeholder="interval: month / year / (blank=one-time)" style="flex:1;min-width:180px" />
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-primary" id="pricing-save-btn">Save</button>
+        <button class="btn-danger"  id="pricing-cancel-btn">Cancel</button>
+      </div>
+      <div class="msg" id="pricing-edit-msg"></div>
+    </div>
+
+    <!-- Promo codes -->
+    <div class="admin-section" style="margin-top:24px">
+      <div class="section-title">Promo Codes</div>
+      <div id="promo-list"><div class="empty">Loading…</div></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Add Promo Code</div>
+      <div class="form-row" style="flex-wrap:wrap;gap:8px">
+        <input type="text" id="promo-code"    placeholder="Code (e.g. EARLYBIRD25)" style="flex:1;min-width:140px;text-transform:uppercase" />
+        <input type="text" id="promo-pct"     placeholder="Discount %" style="flex:0 0 110px" />
+        <input type="text" id="promo-uses"    placeholder="Max uses (blank=unlimited)" style="flex:1;min-width:160px" />
+        <button class="btn-primary" id="promo-add-btn">Add Code</button>
+      </div>
+      <div class="msg" id="promo-add-msg"></div>
+    </div>
+
+    <!-- Subscriptions -->
+    <div class="admin-section" style="margin-top:24px">
+      <div class="list-header" style="margin-bottom:12px">
+        <div class="section-title" style="margin:0">Active Subscriptions</div>
+        <span class="count" id="sub-count">—</span>
+      </div>
+      <div id="sub-list"><div class="empty">Loading…</div></div>
+    </div>
+
+  </div>
+
+  <!-- ── Tab: Accounts (admin only) ── -->
+  <div class="tab-panel" id="tab-accounts">
+
+    <!-- Auth issues banner -->
+    <div class="admin-section">
+      <div class="list-header" style="margin-bottom:12px">
+        <div class="section-title" style="margin:0">Auth Flow Issues</div>
+        <button class="btn-primary" onclick="loadAccountIssues()" style="font-size:0.78rem;padding:5px 14px">Refresh</button>
+      </div>
+      <div style="color:var(--muted);font-size:0.8rem;margin-bottom:12px;line-height:1.5">
+        Flags accounts with broken sign-in states: <span style="color:var(--red)">disabled</span>,
+        <span style="color:var(--yellow)">unconfirmed email</span>, or
+        <span style="color:var(--yellow)">awaiting password set</span>.
+        Google SSO accounts cannot be locked by failed attempts.
+      </div>
+      <div id="account-issues-list"><div class="empty">Loading…</div></div>
+    </div>
+
+    <!-- Lockout info -->
+    <div class="card" style="background:rgba(255,214,0,.04);border-color:rgba(255,214,0,.2);margin-top:4px">
+      <div style="font-size:0.82rem;line-height:1.6;color:var(--muted)">
+        <strong style="color:var(--yellow)">Lockout policy:</strong>
+        Email/password accounts are automatically locked for <strong style="color:var(--text)">15 minutes</strong>
+        after <strong style="color:var(--text)">5 consecutive failed sign-in attempts</strong>.
+        Google SSO users are never affected. Use <em>Reset Password</em> below to immediately clear a lockout
+        — the user receives a reset code by email.
+      </div>
+    </div>
+
+    <!-- User search -->
+    <div class="admin-section" style="margin-top:24px">
+      <div class="section-title">Look Up Account</div>
+      <div class="form-row" style="margin-bottom:14px">
+        <input type="email" id="acct-search-email" placeholder="email@example.com" style="flex:1" />
+        <button class="btn-primary" id="acct-search-btn">Search</button>
+      </div>
+      <div id="acct-search-results"></div>
+    </div>
+
+    <!-- All users list -->
+    <div class="admin-section" style="margin-top:24px">
+      <div class="list-header" style="margin-bottom:12px">
+        <div class="section-title" style="margin:0">All Cognito Users</div>
+        <span class="count" id="acct-all-count">—</span>
+      </div>
+      <div id="acct-all-list"><div class="empty">Loading…</div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API_BASE    = 'https://mdvmhkrsc3.execute-api.us-east-1.amazonaws.com';
+const SESSION_KEY = 'ps_admin_jwt';
+
+const COGNITO_DOMAIN = 'https://pitchscout.auth.us-east-1.amazoncognito.com';
+const CLIENT_ID      = '65brgla25g237lk7ajrm7kptm8';
+const REDIRECT_URI   = window.location.origin + '/admin.html';
+
+let jwt      = '';
+let myEmail  = '';
+let myRole   = '';
+
+// ── PKCE helpers ─────────────────────────────────────────────────────────────
+
+function _pkceVerifier() {
+  const arr = new Uint8Array(32);
+  crypto.getRandomValues(arr);
+  return btoa(String.fromCharCode(...arr)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+
+async function _pkceChallenge(verifier) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
+  return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+
+function _decodeEmail(token) {
+  try {
+    const b64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    const payload = JSON.parse(atob(b64 + '=='.slice((b64.length + 3) % 4 ? 0 : 2)));
+    return (payload.email || '').trim().toLowerCase();
+  } catch { return ''; }
+}
+
+// ── OAuth flow ────────────────────────────────────────────────────────────────
+
+async function startGoogleSignIn() {
+  const verifier   = _pkceVerifier();
+  const challenge  = await _pkceChallenge(verifier);
+  sessionStorage.setItem('pkce_verifier', verifier);
+  const params = new URLSearchParams({
+    response_type: 'code',
+    client_id:     CLIENT_ID,
+    redirect_uri:  REDIRECT_URI,
+    identity_provider: 'Google',
+    scope: 'openid email profile',
+    code_challenge: challenge,
+    code_challenge_method: 'S256',
+  });
+  window.location.href = `${COGNITO_DOMAIN}/oauth2/authorize?${params}`;
+}
+
+async function handleOAuthCallback() {
+  const code = new URLSearchParams(window.location.search).get('code');
+  if (!code) return false;
+  window.history.replaceState({}, '', window.location.pathname);
+
+  const verifier = sessionStorage.getItem('pkce_verifier');
+  sessionStorage.removeItem('pkce_verifier');
+
+  const body = new URLSearchParams({
+    grant_type:   'authorization_code',
+    client_id:    CLIENT_ID,
+    code,
+    redirect_uri: REDIRECT_URI,
+  });
+  if (verifier) body.set('code_verifier', verifier);
+
+  const resp = await fetch(`${COGNITO_DOMAIN}/oauth2/token`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  });
+  if (!resp.ok) {
+    document.getElementById('auth-err').textContent = 'Sign-in failed. Please try again.';
+    return false;
+  }
+  const tokens = await resp.json();
+  sessionStorage.setItem(SESSION_KEY, tokens.access_token);
+  return tokens.access_token;
+}
+
+function authHeaders() {
+  return { 'Authorization': 'Bearer ' + jwt };
+}
+
+async function verifyAndShow(token) {
+  jwt = token;
+
+  const resp = await fetch(`${API_BASE}/admin/me`, {
+    headers: authHeaders(),
+  }).catch(() => null);
+  if (!resp || resp.status === 403) { jwt = ''; return false; }
+
+  const data = await resp.json().catch(() => null);
+  if (!data || !data.role || !data.email) { jwt = ''; return false; }
+
+  myEmail = data.email;
+  myRole  = data.role;
+  return true;
+}
+
+// ── Auth UI ───────────────────────────────────────────────────────────────────
+
+document.getElementById('auth-google-btn').addEventListener('click', startGoogleSignIn);
+
+document.getElementById('signout-btn').addEventListener('click', () => {
+  sessionStorage.removeItem(SESSION_KEY);
+  jwt = myEmail = myRole = '';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('auth-err').textContent = '';
+});
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    // Lazy-load tab data
+    if (tab.dataset.tab === 'stats')    loadSpending();
+    if (tab.dataset.tab === 'users')    { loadAdminUsers(); if (myRole === 'admin') loadCoachRequests(); }
+    if (tab.dataset.tab === 'events')   loadEvents();
+    if (tab.dataset.tab === 'myevents') loadMyEvents();
+    if (tab.dataset.tab === 'pricing')  loadPricing();
+    if (tab.dataset.tab === 'accounts') loadAccounts();
+  });
+});
+
+// ── Allowlist ─────────────────────────────────────────────────────────────────
+
+async function loadAllowlist() {
+  const resp = await fetch(`${API_BASE}/admin/allowlist`, { headers: authHeaders() });
+  const data = await resp.json();
+  const users = data.users || [];
+  document.getElementById('user-count').textContent = users.length + ' approved';
+  const list = document.getElementById('user-list');
+  if (!users.length) { list.innerHTML = '<div class="empty">No beta testers yet.</div>'; return; }
+  list.innerHTML = users.map(u => `
+    <div class="user-row">
+      <div>
+        <div class="user-email">${esc(u.email)}</div>
+        <div class="user-meta">${u.note ? esc(u.note) + ' · ' : ''}Added ${esc((u.added || u.added_at || '—').slice(0,10))}</div>
+      </div>
+      <button class="btn-danger" data-remove="${esc(u.email)}">Remove</button>
+    </div>
+  `).join('');
+  list.querySelectorAll('[data-remove]').forEach(btn =>
+    btn.addEventListener('click', () => removeUser(btn.dataset.remove)));
+}
+
+async function loadRequests() {
+  const resp = await fetch(`${API_BASE}/admin/requests`, { headers: authHeaders() });
+  if (!resp.ok) {
+    document.getElementById('req-list').innerHTML = '<div class="empty">Could not load requests.</div>';
+    return;
+  }
+  const data = await resp.json();
+  const reqs = data.requests || [];
+  const pending = reqs.filter(r => r.status === 'pending');
+  const others  = reqs.filter(r => r.status !== 'pending');
+
+  document.getElementById('req-count').textContent =
+    pending.length ? `${pending.length} pending` : reqs.length + ' total';
+
+  if (!reqs.length) {
+    document.getElementById('req-list').innerHTML = '<div class="empty">No access requests yet.</div>';
+    return;
+  }
+
+  const STATUS_CHIP = {
+    pending:  '<span class="status-chip chip-pending">Pending</span>',
+    approved: '<span class="status-chip chip-approved">Approved</span>',
+    declined: '<span class="status-chip chip-declined">Declined</span>',
+  };
+
+  const rows = [...pending, ...others].map(r => `
+    <div class="req-row" id="req-${esc(r.email.replace(/[@.]/g,'-'))}">
+      <div>
+        <div class="req-email">${esc(r.email)}</div>
+        <div class="req-meta">Requested ${esc(r.requested_at)} ${STATUS_CHIP[r.status] || ''}</div>
+      </div>
+      ${r.status === 'pending' ? `
+        <div class="req-actions">
+          <button class="btn-approve" data-req-approve="${esc(r.email)}">Approve</button>
+          <button class="btn-decline" data-req-decline="${esc(r.email)}">Decline</button>
+        </div>` : ''}
+    </div>`).join('');
+
+  document.getElementById('req-list').innerHTML = rows;
+
+  document.querySelectorAll('[data-req-approve]').forEach(btn =>
+    btn.addEventListener('click', () => handleRequest(btn.dataset.reqApprove, 'approve')));
+  document.querySelectorAll('[data-req-decline]').forEach(btn =>
+    btn.addEventListener('click', () => handleRequest(btn.dataset.reqDecline, 'decline')));
+}
+
+async function handleRequest(email, action) {
+  const resp = await fetch(`${API_BASE}/admin/requests`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body:    JSON.stringify({ email, action }),
+  });
+  if (resp.ok) {
+    await loadRequests();
+    if (action === 'approve') await loadAllowlist();
+  } else {
+    const d = await resp.json().catch(() => ({}));
+    alert(d.error || 'Failed.');
+  }
+}
+
+document.getElementById('add-btn').addEventListener('click', async () => {
+  const email = document.getElementById('add-email').value.trim().toLowerCase();
+  const note  = document.getElementById('add-note').value.trim();
+  const msgEl = document.getElementById('add-msg');
+  if (!email || !email.includes('@')) { msgEl.className = 'msg err'; msgEl.textContent = 'Enter a valid email.'; return; }
+  document.getElementById('add-btn').disabled = true;
+  msgEl.className = 'msg'; msgEl.textContent = '';
+  const resp = await fetch(`${API_BASE}/admin/allowlist`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body:    JSON.stringify({ email, note }),
+  });
+  const data = await resp.json();
+  if (resp.ok) {
+    msgEl.className = 'msg ok'; msgEl.textContent = `${email} added.`;
+    document.getElementById('add-email').value = '';
+    document.getElementById('add-note').value = '';
+    await loadAllowlist();
+  } else {
+    msgEl.className = 'msg err'; msgEl.textContent = data.error || 'Failed.';
+  }
+  document.getElementById('add-btn').disabled = false;
+});
+
+document.getElementById('add-email').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('add-btn').click(); });
+
+async function removeUser(email) {
+  if (!confirm(`Remove ${email}?`)) return;
+  const resp = await fetch(`${API_BASE}/admin/allowlist`, {
+    method:  'DELETE',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body:    JSON.stringify({ email }),
+  });
+  if (resp.ok) await loadAllowlist();
+  else { const d = await resp.json(); alert(d.error || 'Failed.'); }
+}
+
+// ── Spending (new) ───────────────────────────────────────────────────────────
+
+function buildMonthOptions() {
+  const sel = document.getElementById('month-select');
+  if (!sel) return;
+  const now   = new Date();
+  const start = new Date(2026, 0, 1); // Jan 2026
+  const opts  = [];
+  let d = new Date(now.getFullYear(), now.getMonth(), 1);
+  while (d >= start) {
+    const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const lbl = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+    opts.push(`<option value="${val}">${lbl}</option>`);
+    d.setMonth(d.getMonth() - 1);
+  }
+  sel.innerHTML = opts.join('');
+}
+
+async function loadSpending() {
+  buildMonthOptions();
+  const month = document.getElementById('month-select')?.value ||
+    new Date().toISOString().slice(0,7);
+  await Promise.all([loadMonthSpending(month), loadYtd(), loadRecurringList(), loadSparklineData()]);
+}
+
+async function loadMonthSpending(month) {
+  const resp = await fetch(`${API_BASE}/admin/spending?month=${month}`, { headers: authHeaders() });
+  if (!resp.ok) return;
+  const d = await resp.json();
+
+  document.getElementById('month-total').textContent = `$${(d.grand_total || 0).toFixed(2)}`;
+
+  // TwelveLabs table
+  const tbody = document.getElementById('cost-body');
+  const tl = d.twelvelabs || {};
+  const breakdown = tl.breakdown || {};
+  if (!Object.keys(breakdown).length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);padding:10px 0">No analysis sessions this month.</td></tr>';
+  } else {
+    tbody.innerHTML = Object.entries(breakdown).map(([type, v]) => `
+      <tr>
+        <td>${esc(type)}</td>
+        <td>${v.count}</td>
+        <td style="color:var(--muted)">$${v.unit_cost.toFixed(2)}</td>
+        <td>$${v.subtotal.toFixed(2)}</td>
+      </tr>
+    `).join('') + `
+      <tr>
+        <td colspan="3" style="font-weight:700;padding-top:12px;border-top:2px solid var(--border)">TwelveLabs Total</td>
+        <td style="padding-top:12px;border-top:2px solid var(--border)">$${(tl.total||0).toFixed(2)}</td>
+      </tr>`;
+  }
+  document.getElementById('billing-note').textContent =
+    'Estimates: Marengo $0.042/min + Pegasus $0.0292/min. Actuals may vary.';
+
+  // One-off expenses
+  const oneoffList = document.getElementById('oneoff-list');
+  const oneoffs    = d.one_off || [];
+  document.getElementById('oneoff-total').textContent = `$${(d.one_off_total||0).toFixed(2)}`;
+  if (!oneoffs.length) {
+    oneoffList.innerHTML = '<div class="empty" style="padding:10px 0">None this month.</div>';
+  } else {
+    oneoffList.innerHTML = oneoffs.map(e => `
+      <div class="exp-row">
+        <div>
+          <div class="exp-desc">${esc(e.description)}</div>
+          <div class="exp-meta">${esc(e.category)}</div>
+        </div>
+        <div class="exp-amount">$${(e.amount||0).toFixed(2)}</div>
+        <button class="exp-del" data-exp-id="${esc(e.id)}" data-exp-month="${esc(month)}" title="Delete">✕</button>
+      </div>`).join('');
+    oneoffList.querySelectorAll('[data-exp-id]').forEach(btn =>
+      btn.addEventListener('click', () => deleteExpense(btn.dataset.expId, btn.dataset.expMonth)));
+  }
+
+  // Recurring for this month
+  const recList = document.getElementById('recurring-list');
+  const recItems = d.recurring || [];
+  document.getElementById('recurring-total').textContent = `$${(d.recurring_total||0).toFixed(2)}`;
+  renderRecurringList(recItems);
+}
+
+function renderRecurringList(items) {
+  const recList = document.getElementById('recurring-list');
+  if (!items.length) {
+    recList.innerHTML = '<div class="empty" style="padding:10px 0">No recurring expenses set up yet.</div>';
+    return;
+  }
+  recList.innerHTML = items.map(e => `
+    <div class="exp-row">
+      <div>
+        <div class="exp-desc">${esc(e.description)} <span class="recurring-badge">Monthly</span></div>
+        <div class="exp-meta">${esc(e.category)} · From ${esc(e.recurring_start || '')}${e.recurring_end ? ' to ' + esc(e.recurring_end) : ' (ongoing)'}</div>
+      </div>
+      <div class="exp-amount">$${(e.amount||0).toFixed(2)}</div>
+      <button class="exp-del" data-rec-id="${esc(e.id)}" title="Delete recurring">✕</button>
+    </div>`).join('');
+  recList.querySelectorAll('[data-rec-id]').forEach(btn =>
+    btn.addEventListener('click', () => deleteRecurring(btn.dataset.recId)));
+}
+
+async function loadYtd() {
+  const resp = await fetch(`${API_BASE}/admin/spending/ytd`, { headers: authHeaders() });
+  if (!resp.ok) return;
+  const d = await resp.json();
+  document.getElementById('ytd-year').textContent = d.year || new Date().getFullYear();
+  document.getElementById('ytd-total').textContent = `$${(d.ytd_total||0).toFixed(2)}`;
+
+  const cats = d.ytd_by_category || {};
+  const CAT_LABELS = {
+    twelvelabs: 'TwelveLabs', ai_subscriptions: 'AI Subs', infrastructure: 'Infra',
+    platform: 'Platform', domain: 'Domain', tooling: 'Tooling',
+    marketing: 'Marketing', other: 'Other',
+  };
+  const sorted = Object.entries(cats).filter(([,v]) => v > 0).sort((a,b) => b[1]-a[1]);
+  const catsEl = document.getElementById('ytd-cats');
+  if (!sorted.length) { catsEl.innerHTML = '<div style="color:var(--muted);font-size:0.8rem">No data yet</div>'; return; }
+  catsEl.innerHTML = sorted.map(([k,v]) => `
+    <div class="ytd-cat-row">
+      <span class="ytd-cat-name">${CAT_LABELS[k] || k}</span>
+      <span class="ytd-cat-amount">$${v.toFixed(2)}</span>
+    </div>`).join('');
+}
+
+async function loadRecurringList() {
+  const resp = await fetch(`${API_BASE}/admin/spending/recurring`, { headers: authHeaders() });
+  if (!resp.ok) return;
+  const d = await resp.json();
+  renderRecurringList(d.recurring || []);
+}
+
+async function loadSparklineData() {
+  const resp = await fetch(`${API_BASE}/admin/stats`, { headers: authHeaders() });
+  if (!resp.ok) return;
+  const d = await resp.json();
+  drawSparkline(d.daily || []);
+}
+
+async function deleteExpense(id, month) {
+  if (!confirm('Delete this expense?')) return;
+  const r = await fetch(`${API_BASE}/admin/spending/expenses/${id}`, {
+    method: 'DELETE', headers: authHeaders(),
+  });
+  if (r.ok) await loadMonthSpending(month);
+  else alert('Failed to delete.');
+}
+
+async function deleteRecurring(id) {
+  if (!confirm('Delete this recurring expense?')) return;
+  const r = await fetch(`${API_BASE}/admin/spending/recurring/${id}`, {
+    method: 'DELETE', headers: authHeaders(),
+  });
+  if (r.ok) { await loadRecurringList(); await loadYtd(); }
+  else alert('Failed to delete.');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const monthSel = document.getElementById('month-select');
+  if (monthSel) monthSel.addEventListener('change', () =>
+    loadMonthSpending(monthSel.value));
+
+  const addExpBtn = document.getElementById('add-exp-btn');
+  if (addExpBtn) addExpBtn.addEventListener('click', async () => {
+    const desc   = document.getElementById('exp-desc').value.trim();
+    const amount = parseFloat(document.getElementById('exp-amount').value);
+    const cat    = document.getElementById('exp-category').value;
+    const month  = document.getElementById('month-select')?.value || new Date().toISOString().slice(0,7);
+    const msgEl  = document.getElementById('exp-msg');
+    if (!desc || isNaN(amount) || amount <= 0) {
+      msgEl.className = 'msg err'; msgEl.textContent = 'Description and a positive amount are required.'; return;
+    }
+    msgEl.className = 'msg'; msgEl.textContent = '';
+    addExpBtn.disabled = true;
+    const r = await fetch(`${API_BASE}/admin/spending/expenses`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body:    JSON.stringify({ description: desc, amount, category: cat, month }),
+    });
+    addExpBtn.disabled = false;
+    if (r.ok) {
+      document.getElementById('exp-desc').value   = '';
+      document.getElementById('exp-amount').value = '';
+      msgEl.className = 'msg ok'; msgEl.textContent = 'Expense added.';
+      await Promise.all([loadMonthSpending(month), loadYtd()]);
+    } else {
+      const d = await r.json().catch(() => ({}));
+      msgEl.className = 'msg err'; msgEl.textContent = d.error || 'Failed.';
+    }
+  });
+
+  const addRecBtn = document.getElementById('add-rec-btn');
+  if (addRecBtn) addRecBtn.addEventListener('click', async () => {
+    const desc  = document.getElementById('rec-desc').value.trim();
+    const amt   = parseFloat(document.getElementById('rec-amount').value);
+    const cat   = document.getElementById('rec-category').value;
+    const start = document.getElementById('rec-start').value || new Date().toISOString().slice(0,7);
+    const msgEl = document.getElementById('rec-msg');
+    if (!desc || isNaN(amt) || amt <= 0) {
+      msgEl.className = 'msg err'; msgEl.textContent = 'Description and a positive amount are required.'; return;
+    }
+    msgEl.className = 'msg'; msgEl.textContent = '';
+    addRecBtn.disabled = true;
+    const r = await fetch(`${API_BASE}/admin/spending/recurring`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body:    JSON.stringify({ description: desc, amount: amt, category: cat, recurring_start: start }),
+    });
+    addRecBtn.disabled = false;
+    if (r.ok) {
+      document.getElementById('rec-desc').value   = '';
+      document.getElementById('rec-amount').value = '';
+      msgEl.className = 'msg ok'; msgEl.textContent = 'Recurring expense added.';
+      await Promise.all([loadRecurringList(), loadYtd()]);
+    } else {
+      const d = await r.json().catch(() => ({}));
+      msgEl.className = 'msg err'; msgEl.textContent = d.error || 'Failed.';
+    }
+  });
+});
+
+// ── Stats (legacy used for sparkline) ─────────────────────────────────────────
+
+async function loadStats() {
+  const resp = await fetch(`${API_BASE}/admin/stats`, { headers: authHeaders() });
+  const d = await resp.json();
+
+  const sc = d.status_counts || {};
+  const complete = sc.complete || 0;
+  const failed   = (sc.failed || 0) + (sc.analysis_failed || 0);
+  const pending  = (sc.pending_upload || 0) + (sc.submitted || 0) + (sc.processing || 0);
+  const total    = Object.values(sc).reduce((a, b) => a + b, 0);
+
+  document.getElementById('stat-grid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Est. spend (30d)</div>
+      <div class="stat-value green">$${d.total_cost.toFixed(2)}</div>
+      <div class="stat-sub">TwelveLabs estimated</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Completed</div>
+      <div class="stat-value blue">${complete}</div>
+      <div class="stat-sub">Full reports delivered</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">In progress</div>
+      <div class="stat-value yellow">${pending}</div>
+      <div class="stat-sub">Pending / processing</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Failed</div>
+      <div class="stat-value ${failed > 0 ? 'red' : 'green'}">${failed}</div>
+      <div class="stat-sub">Last 30 days</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total sessions</div>
+      <div class="stat-value">${total}</div>
+      <div class="stat-sub">All statuses</div>
+    </div>
+  `;
+
+  const tbody = document.getElementById('cost-body');
+  const cb = d.cost_by_type || {};
+  if (!Object.keys(cb).length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);padding:12px 0">No completed sessions yet.</td></tr>';
+  } else {
+    tbody.innerHTML = Object.entries(cb).map(([type, v]) => `
+      <tr>
+        <td>${type}</td>
+        <td>${v.count}</td>
+        <td style="color:var(--muted)">$${v.unit_cost.toFixed(2)}</td>
+        <td>$${v.subtotal.toFixed(2)}</td>
+      </tr>
+    `).join('') + `
+      <tr>
+        <td colspan="3" style="font-weight:700;padding-top:14px">Total</td>
+        <td style="padding-top:14px">$${d.total_cost.toFixed(2)}</td>
+      </tr>
+    `;
+  }
+  document.getElementById('billing-note').textContent = d.billing_note || '';
+  drawSparkline(d.daily || []);
+}
+
+function drawSparkline(daily) {
+  const canvas = document.getElementById('sparkline');
+  const ctx    = canvas.getContext('2d');
+  const dpr    = window.devicePixelRatio || 1;
+  const w = canvas.offsetWidth || 800;
+  const h = 60;
+  canvas.width  = w * dpr;
+  canvas.height = h * dpr;
+  ctx.scale(dpr, dpr);
+
+  if (!daily.length) {
+    ctx.fillStyle = '#6a9b78';
+    ctx.font = '13px Inter, system-ui';
+    ctx.fillText('No data yet', 10, 34);
+    return;
+  }
+
+  const maxVal = Math.max(...daily.map(d => d.count), 1);
+  const padX = 4;
+  const barW = Math.max(4, Math.floor((w - padX * 2) / daily.length) - 2);
+
+  daily.forEach((d, i) => {
+    const barH = Math.max(3, (d.count / maxVal) * (h - 20));
+    const x    = padX + i * ((w - padX * 2) / daily.length);
+    const y    = h - barH - 4;
+    ctx.fillStyle = '#00e676';
+    ctx.globalAlpha = 0.75;
+    roundRect(ctx, x, y, barW, barH, 2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle = '#6a9b78';
+  ctx.font = '10px Inter, system-ui';
+  ctx.fillText(daily[0].date.slice(5), padX, h);
+  const lastLabel = daily[daily.length - 1].date.slice(5);
+  ctx.fillText(lastLabel, w - ctx.measureText(lastLabel).width - padX, h);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h);
+  ctx.lineTo(x, y + h);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+// ── Failures ──────────────────────────────────────────────────────────────────
+
+async function loadFailures() {
+  const resp = await fetch(`${API_BASE}/admin/failures`, { headers: authHeaders() });
+  const data = await resp.json();
+  const failures  = data.failures   || [];
+  const preErrors = data.pre_errors || [];
+
+  const total = failures.length + preErrors.length;
+  document.getElementById('failure-count').textContent = total + ' failure' + (total !== 1 ? 's' : '');
+  const badge = document.getElementById('failure-badge');
+  if (total > 0) badge.textContent = ` (${total})`;
+
+  const list = document.getElementById('failure-list');
+
+  const BADGE = {
+    failed:          { cls: 'badge-failed',   label: 'TwelveLabs failed' },
+    analysis_failed: { cls: 'badge-analysis', label: 'Analysis failed'   },
+    upload_failed:   { cls: 'badge-upload',   label: 'Upload failed'     },
+  };
+
+  const sessionRows = failures.length
+    ? failures.map(f => {
+        const b = BADGE[f.job_status] || BADGE.failed;
+        const detail = f.error_detail
+          ? `<div class="failure-detail" title="${esc(f.error_detail)}">${esc(f.error_detail)}</div>`
+          : '';
+        return `
+          <div class="failure-row ${f.job_status}">
+            <div>
+              <div class="failure-email">${esc(f.email)}</div>
+              <div class="failure-meta">${esc(f.created_at)} · ${esc(f.video_filename || '—')}</div>
+              ${detail}
+            </div>
+            <div class="failure-meta">${esc(f.position || '—')} · #${esc(f.jersey_number || '—')} · ${esc(f.match_type || '—')}</div>
+            <div><span class="failure-badge ${b.cls}">${b.label}</span></div>
+            <a href="/?session_id=${esc(f.session_id)}" target="_blank" style="text-decoration:none">
+              <button class="btn-retry">View</button>
+            </a>
+          </div>`;
+      }).join('')
+    : '<div class="empty">No session failures in the last 30 days.</div>';
+
+  const staleUploads    = data.stale_uploads    || [];
+  const staleProcessing = data.stale_processing || [];
+
+  const staleUploadSection = staleUploads.length ? `
+    <div class="stall-section">
+      <div class="stall-heading">⚠ Stalled uploads (pending_upload >2 h) — ${staleUploads.length}</div>
+      ${staleUploads.map(f => `
+        <div class="stall-row">
+          <div>
+            <div class="failure-email">${esc(f.email)}</div>
+            <div class="failure-meta">${esc(f.created_at.slice(0,10))} · ${esc(f.video_filename || '—')}</div>
+            <div class="stall-reason">${esc(f.stall_reason)}</div>
+          </div>
+          <div class="failure-meta">${esc(f.position || '—')} · #${esc(f.jersey_number || '—')} · ${esc(f.match_type || '—')}</div>
+          <a href="/?session_id=${esc(f.session_id)}" target="_blank" style="text-decoration:none">
+            <button class="btn-retry">View</button>
+          </a>
+        </div>`).join('')}
+    </div>` : '';
+
+  const staleProcSection = staleProcessing.length ? `
+    <div class="stall-section">
+      <div class="stall-heading" style="color:var(--blue)">⚠ Stalled processing (>30 min) — ${staleProcessing.length}</div>
+      ${staleProcessing.map(f => `
+        <div class="stall-row proc">
+          <div>
+            <div class="failure-email">${esc(f.email)}</div>
+            <div class="failure-meta">${esc((f.updated_at || '').slice(0,10))} · ${esc(f.task_id || '—')}</div>
+            <div class="stall-reason">${esc(f.stall_reason)}</div>
+          </div>
+          <div class="failure-meta">${esc(f.position || '—')} · ${esc(f.match_type || '—')}</div>
+          <a href="/?session_id=${esc(f.session_id)}" target="_blank" style="text-decoration:none">
+            <button class="btn-retry">View</button>
+          </a>
+        </div>`).join('')}
+    </div>` : '';
+
+  const preSection = preErrors.length ? `
+    <div class="pre-errors-section">
+      <div class="pre-errors-heading">Pre-session errors (CORS / auth / allowlist) — ${preErrors.length}</div>
+      ${preErrors.map(e => `
+        <div class="pre-error-row">
+          <span class="pre-error-type">${esc(e.error_type)}</span>
+          <span class="pre-error-msg" title="${esc(e.error_message)}">${esc(e.error_message || '—')}</span>
+          <span class="pre-error-date">${esc(e.stage || '')} · ${esc(e.occurred_at)}</span>
+        </div>`).join('')}
+    </div>` : '';
+
+  list.innerHTML = sessionRows + staleUploadSection + staleProcSection + preSection;
+}
+
+// ── Events tab ───────────────────────────────────────────────────────────────
+
+async function loadEvents() {
+  const resp = await fetch(`${API_BASE}/admin/events`, { headers: authHeaders() });
+  if (!resp.ok) return;
+  const d = await resp.json();
+  const events = d.events || [];
+  const countEl = document.getElementById('events-count');
+  if (countEl) countEl.textContent = events.length + ' event' + (events.length !== 1 ? 's' : '');
+
+  const listEl = document.getElementById('events-list');
+  if (!listEl) return;
+  if (!events.length) { listEl.innerHTML = '<div class="empty">No events yet. Create one above.</div>'; return; }
+
+  listEl.innerHTML = events.map((ev, idx) => {
+    const rs = ev.roster_stats || {};
+    const logoHtml = ev.logo_url
+      ? `<img class="event-logo-thumb" src="${esc(ev.logo_url)}" alt="logo">`
+      : `<div class="event-logo-placeholder">⚽</div>`;
+    return `
+      <div class="event-card" id="ev-card-${idx}">
+        <div class="event-card-header" data-ev-idx="${idx}" onclick="toggleEventCard(${idx})">
+          ${logoHtml}
+          <div class="event-card-info">
+            <div class="event-card-name">${esc(ev.name || ev.event_id)}</div>
+            <div class="event-card-meta">${esc(ev.event_id)}${ev.date ? ' · ' + esc(ev.date) : ''}</div>
+          </div>
+          <div class="event-card-stats">
+            <div class="event-stat">
+              <div class="event-stat-val">${rs.total || 0}</div>
+              <div class="event-stat-lbl">On Roster</div>
+            </div>
+            <div class="event-stat">
+              <div class="event-stat-val green">${rs.analyzed || 0}</div>
+              <div class="event-stat-lbl">Analysed</div>
+            </div>
+          </div>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="event-card-body" id="ev-body-${idx}">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+            <div style="flex:1;min-width:200px">
+              <span style="color:var(--muted);font-size:0.78rem">
+                Released: ${rs.release_signed||0}/${rs.total||0} &nbsp;·&nbsp;
+                Uploaded: ${rs.uploaded||0} &nbsp;·&nbsp;
+                Claimed: ${rs.claimed||0}
+              </span>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span style="font-size:0.78rem;color:var(--muted)">Logo:</span>
+              <input type="file" id="logo-file-${idx}" accept="image/*" style="display:none" data-ev-id="${esc(ev.event_id)}" data-ev-idx="${idx}" />
+              <button class="btn-add-exp" onclick="document.getElementById('logo-file-${idx}').click()">Upload Logo</button>
+              ${ev.logo_url ? `<img src="${esc(ev.logo_url)}" class="logo-preview" style="display:block">` : ''}
+            </div>
+          </div>
+
+          <div id="roster-${idx}"><div class="empty">Loading roster…</div></div>
+
+          <div class="section-title" style="margin-top:14px;margin-bottom:8px">Add Player to Roster</div>
+          <div class="add-roster-form">
+            <input type="text" class="inp-jersey"  id="r-jersey-${idx}"  placeholder="#" maxlength="10" />
+            <input type="email" class="inp-email"  id="r-email-${idx}"   placeholder="Parent email" />
+            <input type="text"  class="inp-name"   id="r-name-${idx}"    placeholder="Player name (optional)" />
+            <button class="btn-primary" onclick="addToRoster('${esc(ev.event_id)}', ${idx})">+ Add</button>
+          </div>
+          <div class="msg" id="r-msg-${idx}"></div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Logo file upload handlers
+  events.forEach((ev, idx) => {
+    const fileInput = document.getElementById(`logo-file-${idx}`);
+    if (fileInput) fileInput.addEventListener('change', e => uploadLogo(ev.event_id, idx, e.target.files[0]));
+  });
+
+  // Load rosters for visible cards
+  events.forEach((ev, idx) => loadRoster(ev.event_id, idx));
+}
+
+function toggleEventCard(idx) {
+  const header = document.querySelector(`#ev-card-${idx} .event-card-header`);
+  const body   = document.getElementById(`ev-body-${idx}`);
+  if (!header || !body) return;
+  header.classList.toggle('expanded');
+  body.classList.toggle('open');
+}
+
+async function loadRoster(eventId, idx) {
+  const el = document.getElementById(`roster-${idx}`);
+  if (!el) return;
+  const r = await fetch(`${API_BASE}/admin/events/${encodeURIComponent(eventId)}/roster`, { headers: authHeaders() });
+  if (!r.ok) { el.innerHTML = '<div class="empty">Could not load roster.</div>'; return; }
+  const d = await r.json();
+  const players = d.players || [];
+  if (!players.length) { el.innerHTML = '<div class="empty" style="padding:8px 0">No players on roster yet.</div>'; return; }
+
+  const STATUS_MAP = {
+    complete:        ['dot-green',  'Ready'],
+    submitted:       ['dot-yellow', 'Queued'],
+    processing:      ['dot-yellow', 'Processing'],
+    pending_upload:  ['dot-grey',   'Pending upload'],
+    failed:          ['dot-red',    'Failed'],
+    analysis_failed: ['dot-red',    'Failed'],
+  };
+
+  el.innerHTML = `
+    <table class="roster-table">
+      <thead><tr><th>Jersey</th><th>Player</th><th>Release</th><th>Analysis</th><th>Claimed</th><th></th></tr></thead>
+      <tbody>
+        ${players.map(p => {
+          const [dotCls, statusLabel] = STATUS_MAP[p.session_status] || ['dot-grey', p.session_status || 'Not uploaded'];
+          const releaseDot = p.release_signed ? 'dot-green' : 'dot-yellow';
+          const releaseLabel = p.release_signed ? 'Signed' : 'Pending';
+          const claimLabel = p.claimed ? `✅ ${esc(p.claim_email || '')}` : '—';
+          const reportLink = p.report_token
+            ? `<a href="/?token=${esc(p.report_token)}" target="_blank" style="color:var(--green);font-size:0.75rem">View</a>`
+            : '';
+          return `
+            <tr>
+              <td><strong>#${esc(p.jersey_number)}</strong></td>
+              <td>${esc(p.player_name || p.parent_email || '—')}</td>
+              <td><span class="status-dot ${releaseDot}"></span>${releaseLabel}</td>
+              <td><span class="status-dot ${dotCls}"></span>${statusLabel} ${reportLink}</td>
+              <td style="font-size:0.78rem">${claimLabel}</td>
+              <td><button class="exp-del" data-del-event="${esc(eventId)}" data-del-jersey="${esc(p.jersey_number)}" data-del-idx="${idx}" title="Remove">✕</button></td>
+            </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+
+  el.querySelectorAll('[data-del-event]').forEach(btn =>
+    btn.addEventListener('click', () =>
+      removeFromRoster(btn.dataset.delEvent, btn.dataset.delJersey, parseInt(btn.dataset.delIdx))));
+}
+
+async function addToRoster(eventId, idx) {
+  const jersey = document.getElementById(`r-jersey-${idx}`)?.value.trim();
+  const email  = document.getElementById(`r-email-${idx}`)?.value.trim().toLowerCase();
+  const name   = document.getElementById(`r-name-${idx}`)?.value.trim();
+  const msgEl  = document.getElementById(`r-msg-${idx}`);
+  if (!jersey) { msgEl.className = 'msg err'; msgEl.textContent = 'Jersey required.'; return; }
+  if (!email || !email.includes('@')) { msgEl.className = 'msg err'; msgEl.textContent = 'Valid parent email required.'; return; }
+  msgEl.className = 'msg'; msgEl.textContent = '';
+  const r = await fetch(`${API_BASE}/admin/events/${encodeURIComponent(eventId)}/roster`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body:    JSON.stringify({ jersey_number: jersey, parent_email: email, player_name: name }),
+  });
+  const d = await r.json();
+  if (r.ok) {
+    msgEl.className = 'msg ok';
+    msgEl.textContent = `#${jersey} added. Release email sent: ${d.release_email_sent ? 'yes' : 'no'}.`;
+    document.getElementById(`r-jersey-${idx}`).value = '';
+    document.getElementById(`r-email-${idx}`).value  = '';
+    document.getElementById(`r-name-${idx}`).value   = '';
+    await loadRoster(eventId, idx);
+  } else {
+    msgEl.className = 'msg err'; msgEl.textContent = d.error || 'Failed.';
+  }
+}
+
+async function removeFromRoster(eventId, jersey, idx) {
+  if (!confirm(`Remove Jersey #${jersey} from roster?`)) return;
+  const r = await fetch(`${API_BASE}/admin/events/${encodeURIComponent(eventId)}/roster/${encodeURIComponent(jersey)}`, {
+    method: 'DELETE', headers: authHeaders(),
+  });
+  if (r.ok) await loadRoster(eventId, idx);
+  else { const d = await r.json(); alert(d.error || 'Failed.'); }
+}
+
+async function uploadLogo(eventId, idx, file) {
+  if (!file) return;
+  // Step 1: get presigned PUT URL
+  const r1 = await fetch(`${API_BASE}/admin/events/${encodeURIComponent(eventId)}/logo`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body:    JSON.stringify({ filename: file.name, content_type: file.type }),
+  });
+  if (!r1.ok) { alert('Could not get upload URL.'); return; }
+  const { upload_url, logo_key } = await r1.json();
+
+  // Step 2: PUT to S3
+  const r2 = await fetch(upload_url, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } });
+  if (!r2.ok) { alert('Upload failed.'); return; }
+
+  // Step 3: save logo_key to event
+  await fetch(`${API_BASE}/admin/events/${encodeURIComponent(eventId)}`, {
+    method:  'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body:    JSON.stringify({ logo_key }),
+  });
+  await loadEvents();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const createBtn = document.getElementById('create-event-btn');
+  if (createBtn) createBtn.addEventListener('click', async () => {
+    const event_id     = document.getElementById('new-event-id').value.trim().toLowerCase();
+    const name         = document.getElementById('new-event-name').value.trim();
+    const date         = document.getElementById('new-event-date').value;
+    const player_count = parseInt(document.getElementById('new-event-count').value) || 0;
+    const msgEl        = document.getElementById('create-event-msg');
+    if (!event_id || !name) { msgEl.className = 'msg err'; msgEl.textContent = 'ID and name required.'; return; }
+    msgEl.className = 'msg'; msgEl.textContent = '';
+    createBtn.disabled = true;
+    const r = await fetch(`${API_BASE}/admin/events`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body:    JSON.stringify({ event_id, name, date, player_count }),
+    });
+    createBtn.disabled = false;
+    const d = await r.json();
+    if (r.ok) {
+      msgEl.className = 'msg ok'; msgEl.textContent = `Event "${name}" created.`;
+      document.getElementById('new-event-id').value    = '';
+      document.getElementById('new-event-name').value  = '';
+      document.getElementById('new-event-date').value  = '';
+      document.getElementById('new-event-count').value = '';
+      await loadEvents();
+    } else {
+      msgEl.className = 'msg err'; msgEl.textContent = d.error || 'Failed.';
+    }
+  });
+});
+
+// ── Coach Requests ────────────────────────────────────────────────────────────
+
+async function loadCoachRequests() {
+  const resp = await fetch(`${API_BASE}/admin/coach-requests`, { headers: authHeaders() });
+  if (!resp.ok) return;
+  const d = await resp.json();
+  const reqs = d.requests || [];
+  const countEl = document.getElementById('coach-req-count');
+  if (countEl) countEl.textContent = reqs.length ? `${reqs.length} pending` : '0 pending';
+
+  const listEl = document.getElementById('coach-req-list');
+  if (!listEl) return;
+  if (!reqs.length) { listEl.innerHTML = '<div class="empty">No pending coach requests.</div>'; return; }
+
+  listEl.innerHTML = reqs.map(r => `
+    <div class="coach-req-row" id="coach-req-${esc(r.id)}">
+      <div class="coach-req-name">${esc(r.name)}</div>
+      <div class="coach-req-email">${esc(r.email)}</div>
+      <div class="coach-req-meta">
+        ${r.organization ? esc(r.organization) + ' · ' : ''}
+        ${r.requested_event ? 'Event: ' + esc(r.requested_event) + ' · ' : ''}
+        Requested ${esc(r.requested_at)}
+      </div>
+      <div class="coach-req-actions">
+        <input type="text" id="cr-events-${esc(r.id)}" placeholder="Event IDs (comma-separated)" value="${esc(r.requested_event || '')}" />
+        <button class="btn-approve" onclick="handleCoachRequest('${esc(r.id)}', 'approve')">Approve</button>
+        <button class="btn-decline" onclick="handleCoachRequest('${esc(r.id)}', 'reject')">Reject</button>
+      </div>
+    </div>`).join('');
+}
+
+async function handleCoachRequest(id, action) {
+  const evInput = document.getElementById(`cr-events-${id}`);
+  const evList  = evInput ? evInput.value.split(',').map(s => s.trim().toLowerCase()).filter(Boolean) : [];
+  const r = await fetch(`${API_BASE}/admin/coach-requests/${id}/${action}`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body:    JSON.stringify({ assigned_events: evList }),
+  });
+  if (r.ok) { await loadCoachRequests(); await loadAdminUsers(); }
+  else { const d = await r.json(); alert(d.error || 'Failed.'); }
+}
+
+// ── Coach: My Events view ─────────────────────────────────────────────────────
+
+async function loadMyEvents() {
+  const resp = await fetch(`${API_BASE}/admin/events`, { headers: authHeaders() });
+  if (!resp.ok) return;
+  const d = await resp.json();
+  const events = d.events || [];
+  const listEl = document.getElementById('myevents-list');
+  if (!listEl) return;
+
+  if (!events.length) {
+    listEl.innerHTML = '<div class="empty">You have no assigned events yet. Contact an admin to be assigned to an event.</div>';
+    return;
+  }
+
+  listEl.innerHTML = events.map((ev, idx) => {
+    const logoHtml = ev.logo_url
+      ? `<img src="${esc(ev.logo_url)}" class="coach-event-logo" alt="logo">`
+      : `<div class="event-logo-placeholder" style="width:48px;height:48px;font-size:1.5rem">⚽</div>`;
+    return `
+      <div class="coach-event-card">
+        <div class="coach-event-header">
+          ${logoHtml}
+          <div>
+            <div class="coach-event-name">${esc(ev.name || ev.event_id)}</div>
+            <div class="coach-event-sub">${esc(ev.event_id)}${ev.date ? ' · ' + esc(ev.date) : ''}</div>
+          </div>
+        </div>
+
+        <div id="coach-roster-${idx}"><div class="empty" style="padding:8px 0">Loading roster…</div></div>
+
+        <div class="section-title" style="margin-top:18px;margin-bottom:10px">Upload Video</div>
+        <div class="upload-form">
+          <div>
+            <label class="field-label" for="u-jersey-${idx}">Jersey #</label>
+            <input type="text" id="u-jersey-${idx}" placeholder="e.g. 7" maxlength="10" />
+          </div>
+          <div>
+            <label class="field-label" for="u-pos-${idx}">Position</label>
+            <select id="u-pos-${idx}">
+              <option value="CM">CM</option><option value="ST">ST</option><option value="GK">GK</option>
+              <option value="CB">CB</option><option value="LB">LB</option><option value="RB">RB</option>
+              <option value="CDM">CDM</option><option value="CAM">CAM</option>
+              <option value="LW">LW</option><option value="RW">RW</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="u-age-${idx}">Age Bracket</label>
+            <select id="u-age-${idx}">
+              <option value="U13">U13</option><option value="U14">U14</option><option value="U15">U15</option>
+              <option value="U16">U16</option><option value="U17">U17</option><option value="U18">U18</option>
+              <option value="U19">U19</option><option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="u-foot-${idx}">Dominant Foot</label>
+            <select id="u-foot-${idx}">
+              <option value="Right">Right</option><option value="Left">Left</option><option value="Both">Both</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="u-match-${idx}">Match Type</label>
+            <select id="u-match-${idx}">
+              <option value="League">League</option><option value="Tournament">Tournament</option>
+              <option value="Friendly">Friendly</option><option value="Training">Training</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="u-kit-${idx}">Kit Colour</label>
+            <input type="text" id="u-kit-${idx}" placeholder="e.g. blue" />
+          </div>
+          <div class="full-width">
+            <label class="field-label" for="u-file-${idx}">Video File</label>
+            <input type="file" id="u-file-${idx}" accept="video/*" data-ev-id="${esc(ev.event_id)}" data-ev-idx="${idx}" style="color:var(--text)" />
+          </div>
+          <button class="btn-primary full-width" id="u-submit-${idx}" onclick="coachUpload('${esc(ev.event_id)}', ${idx})">Upload for Analysis</button>
+        </div>
+        <div class="upload-progress" id="u-progress-${idx}">
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="u-bar-${idx}"></div></div>
+          <div class="progress-label" id="u-label-${idx}">Preparing…</div>
+        </div>
+        <div class="msg" id="u-msg-${idx}"></div>
+      </div>`;
+  }).join('');
+
+  events.forEach((ev, idx) => loadCoachRoster(ev.event_id, idx));
+}
+
+async function loadCoachRoster(eventId, idx) {
+  const el = document.getElementById(`coach-roster-${idx}`);
+  if (!el) return;
+  const r = await fetch(`${API_BASE}/admin/events/${encodeURIComponent(eventId)}/roster`, { headers: authHeaders() });
+  if (!r.ok) { el.innerHTML = '<div class="empty">Could not load roster.</div>'; return; }
+  const d  = await r.json();
+  const ps = d.players || [];
+  if (!ps.length) { el.innerHTML = '<div class="empty" style="padding:6px 0">Roster is empty.</div>'; return; }
+
+  const STATUS_MAP = {
+    complete:        ['dot-green',  'Report Ready'],
+    submitted:       ['dot-yellow', 'Queued'],
+    processing:      ['dot-yellow', 'Processing'],
+    pending_upload:  ['dot-grey',   'Uploaded'],
+    failed:          ['dot-red',    'Failed'],
+    analysis_failed: ['dot-red',    'Failed'],
+  };
+
+  el.innerHTML = `
+    <table class="roster-table">
+      <thead><tr><th>Jersey</th><th>Release</th><th>Status</th></tr></thead>
+      <tbody>
+        ${ps.map(p => {
+          const relDot = p.release_signed ? 'dot-green' : 'dot-yellow';
+          const [dotCls, lbl] = STATUS_MAP[p.session_status] || ['dot-grey', 'Not uploaded'];
+          return `<tr>
+            <td><strong>#${esc(p.jersey_number)}</strong>${p.player_name ? ' · ' + esc(p.player_name) : ''}</td>
+            <td><span class="status-dot ${relDot}"></span>${p.release_signed ? 'Signed' : 'Pending'}</td>
+            <td><span class="status-dot ${dotCls}"></span>${lbl}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+async function coachUpload(eventId, idx) {
+  const jersey = document.getElementById(`u-jersey-${idx}`)?.value.trim();
+  const pos    = document.getElementById(`u-pos-${idx}`)?.value;
+  const age    = document.getElementById(`u-age-${idx}`)?.value;
+  const foot   = document.getElementById(`u-foot-${idx}`)?.value;
+  const match  = document.getElementById(`u-match-${idx}`)?.value;
+  const kit    = document.getElementById(`u-kit-${idx}`)?.value.trim();
+  const fileEl = document.getElementById(`u-file-${idx}`);
+  const file   = fileEl?.files?.[0];
+  const msgEl  = document.getElementById(`u-msg-${idx}`);
+  const prog   = document.getElementById(`u-progress-${idx}`);
+  const bar    = document.getElementById(`u-bar-${idx}`);
+  const lbl    = document.getElementById(`u-label-${idx}`);
+  const btn    = document.getElementById(`u-submit-${idx}`);
+
+  if (!jersey) { msgEl.className = 'msg err'; msgEl.textContent = 'Jersey number required.'; return; }
+  if (!file)   { msgEl.className = 'msg err'; msgEl.textContent = 'Please select a video file.'; return; }
+
+  btn.disabled = true;
+  msgEl.className = 'msg'; msgEl.textContent = '';
+  prog.classList.add('show');
+  lbl.textContent = 'Requesting upload URL…';
+
+  try {
+    // Step 1: get presigned URL
+    const r1 = await fetch(`${API_BASE}/upload-url`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body:    JSON.stringify({
+        filename:      file.name,
+        content_type:  file.type || 'video/mp4',
+        file_size:     file.size,
+        jersey_number: jersey,
+        position:      pos,
+        age_bracket:   age,
+        dominant_foot: foot,
+        match_type:    match,
+        kit_colour:    kit,
+        event_id:      eventId,
+      }),
+    });
+    if (!r1.ok) {
+      const e = await r1.json().catch(() => ({}));
+      throw new Error(e.error || `HTTP ${r1.status}`);
+    }
+    const presigned = await r1.json();
+
+    // Step 2: upload to S3
+    lbl.textContent = 'Uploading video…';
+    bar.style.width = '10%';
+
+    const xhr = new XMLHttpRequest();
+    await new Promise((resolve, reject) => {
+      xhr.upload.onprogress = e => {
+        if (e.lengthComputable) bar.style.width = Math.round(10 + (e.loaded/e.total)*80) + '%';
+      };
+      xhr.onload  = () => xhr.status < 300 ? resolve() : reject(new Error(`S3 upload failed: ${xhr.status}`));
+      xhr.onerror = () => reject(new Error('Network error during upload'));
+      xhr.open('PUT', presigned.upload_url);
+      xhr.setRequestHeader('Content-Type', file.type || 'video/mp4');
+      xhr.send(file);
+    });
+
+    bar.style.width = '100%';
+    lbl.textContent = 'Video uploaded. Queued for analysis.';
+    msgEl.className = 'msg ok';
+    msgEl.textContent = `#${jersey} uploaded and queued for AI analysis. Session ID: ${presigned.session_id}`;
+    fileEl.value = '';
+    btn.disabled = false;
+    await loadCoachRoster(eventId, idx);
+  } catch (err) {
+    prog.classList.remove('show');
+    bar.style.width = '0';
+    btn.disabled = false;
+    msgEl.className = 'msg err';
+    msgEl.textContent = err.message || 'Upload failed. Please try again.';
+  }
+}
+
+// ── Admin Users ───────────────────────────────────────────────────────────────
+
+async function loadAdminUsers() {
+  const resp = await fetch(`${API_BASE}/admin/users`, { headers: authHeaders() });
+  const data = await resp.json();
+
+  const fullAdmins = data.full_admins || [];
+  document.getElementById('full-admins-list').innerHTML = fullAdmins.map(u => `
+    <div class="admin-row">
+      <div>
+        <div class="admin-email">${esc(u.email)}</div>
+        <div class="admin-meta">Full admin</div>
+      </div>
+      <span class="admin-locked">Protected — contact Dee to change</span>
+    </div>
+  `).join('') || '<div class="empty">None.</div>';
+
+  const superusers = data.superusers || [];
+  document.getElementById('superusers-list').innerHTML = superusers.length
+    ? superusers.map(u => `
+        <div class="admin-row">
+          <div>
+            <div class="admin-email">${esc(u.email)}</div>
+            <div class="admin-meta">Added by ${esc(u.added_by || '—')} · ${esc((u.added_at || '').slice(0,10))}</div>
+          </div>
+          <button class="btn-danger" data-remove-su="${esc(u.email)}">Remove</button>
+        </div>
+      `).join('')
+    : '<div class="empty">No superusers yet.</div>';
+
+  document.querySelectorAll('[data-remove-su]').forEach(btn =>
+    btn.addEventListener('click', () => removeSuperuser(btn.dataset.removeSu)));
+
+  // Coaches section
+  const coaches = data.coaches || [];
+  const coachesList = document.getElementById('coaches-list');
+  if (coachesList) {
+    coachesList.innerHTML = coaches.length
+      ? coaches.map(u => `
+          <div class="admin-row" id="coach-row-${esc(u.email).replace(/[@.]/g,'-')}">
+            <div style="flex:1">
+              <div class="admin-email">${esc(u.email)}</div>
+              <div class="admin-meta">
+                ${u.organization ? esc(u.organization) + ' · ' : ''}
+                Added ${esc((u.added_at || '').slice(0,10))}
+              </div>
+              <div style="margin-top:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                <input type="text" id="coach-ev-${esc(u.email).replace(/[@.]/g,'-')}"
+                  value="${esc((u.assigned_events||[]).join(', '))}"
+                  placeholder="Event IDs (comma-separated)"
+                  style="background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem;padding:5px 10px;outline:none;flex:1;min-width:180px" />
+                <button class="btn-primary" style="padding:5px 12px;font-size:0.78rem;width:auto"
+                  onclick="updateCoachEvents('${esc(u.email)}')">Save Events</button>
+              </div>
+            </div>
+            <button class="btn-danger" data-remove-coach="${esc(u.email)}">Remove</button>
+          </div>`).join('')
+      : '<div class="empty">No coaches yet.</div>';
+    coachesList.querySelectorAll('[data-remove-coach]').forEach(btn =>
+      btn.addEventListener('click', () => removeAdminUser(btn.dataset.removeCoach)));
+  }
+}
+
+async function updateCoachEvents(email) {
+  const key    = email.replace(/[@.]/g, '-');
+  const input  = document.getElementById(`coach-ev-${key}`);
+  const evList = input ? input.value.split(',').map(s => s.trim().toLowerCase()).filter(Boolean) : [];
+  const resp   = await fetch(`${API_BASE}/admin/users`, {
+    method:  'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body:    JSON.stringify({ email, assigned_events: evList }),
+  });
+  if (resp.ok) {
+    await loadAdminUsers();
+  } else {
+    const d = await resp.json();
+    alert(d.error || 'Failed to update events.');
+  }
+}
+
+async function removeAdminUser(email) {
+  if (!confirm(`Remove ${email}?`)) return;
+  const resp = await fetch(`${API_BASE}/admin/users`, {
+    method:  'DELETE',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body:    JSON.stringify({ email }),
+  });
+  if (resp.ok) await loadAdminUsers();
+  else { const d = await resp.json(); alert(d.error || 'Failed.'); }
+}
+
+document.getElementById('coach-add-btn').addEventListener('click', async () => {
+  const email   = document.getElementById('coach-email').value.trim().toLowerCase();
+  const org     = document.getElementById('coach-org').value.trim();
+  const evInput = document.getElementById('coach-events').value;
+  const evList  = evInput.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+  const msgEl   = document.getElementById('coach-add-msg');
+  if (!email || !email.includes('@')) { msgEl.className = 'msg err'; msgEl.textContent = 'Enter a valid email.'; return; }
+  document.getElementById('coach-add-btn').disabled = true;
+  msgEl.className = 'msg'; msgEl.textContent = '';
+  const resp = await fetch(`${API_BASE}/admin/users`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body:    JSON.stringify({ email, role: 'coach', organization: org, assigned_events: evList }),
+  });
+  const data = await resp.json();
+  if (resp.ok) {
+    msgEl.className = 'msg ok'; msgEl.textContent = `${email} added as coach.`;
+    document.getElementById('coach-email').value = '';
+    document.getElementById('coach-org').value = '';
+    document.getElementById('coach-events').value = '';
+    await loadAdminUsers();
+  } else {
+    msgEl.className = 'msg err'; msgEl.textContent = data.error || 'Failed.';
+  }
+  document.getElementById('coach-add-btn').disabled = false;
+});
+
+document.getElementById('su-add-btn').addEventListener('click', async () => {
+  const email = document.getElementById('su-email').value.trim().toLowerCase();
+  const msgEl = document.getElementById('su-msg');
+  if (!email || !email.includes('@')) { msgEl.className = 'msg err'; msgEl.textContent = 'Enter a valid email.'; return; }
+  document.getElementById('su-add-btn').disabled = true;
+  msgEl.className = 'msg'; msgEl.textContent = '';
+  const resp = await fetch(`${API_BASE}/admin/users`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body:    JSON.stringify({ email }),
+  });
+  const data = await resp.json();
+  if (resp.ok) {
+    msgEl.className = 'msg ok'; msgEl.textContent = `${email} added as superuser.`;
+    document.getElementById('su-email').value = '';
+    await loadAdminUsers();
+  } else {
+    msgEl.className = 'msg err'; msgEl.textContent = data.error || 'Failed.';
+  }
+  document.getElementById('su-add-btn').disabled = false;
+});
+
+async function removeSuperuser(email) {
+  if (!confirm(`Remove superuser ${email}?`)) return;
+  const resp = await fetch(`${API_BASE}/admin/users`, {
+    method:  'DELETE',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body:    JSON.stringify({ email }),
+  });
+  if (resp.ok) await loadAdminUsers();
+  else { const d = await resp.json(); alert(d.error || 'Failed.'); }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function esc(str) {
+  return String(str ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Failure polling + notifications ───────────────────────────────────────────
+
+let _lastFailureKey = null;
+let _pollInterval   = null;
+let _notifyEnabled  = false;
+const POLL_MS       = 60_000;
+
+function _failureFingerprint(data) {
+  const ids = (data.failures || []).map(f => f.session_id + ':' + f.job_status).sort();
+  return ids.join('|') + '|total:' + (data.total || 0);
+}
+
+function _formatAlertSub(data) {
+  const n      = data.total || 0;
+  const stalls = (data.stale_uploads || []).length + (data.stale_processing || []).length;
+  const parts  = [];
+  if (n)      parts.push(`${n} failed session${n !== 1 ? 's' : ''}`);
+  if (stalls) parts.push(`${stalls} stalled`);
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return parts.join(', ') + ` — detected at ${now}`;
+}
+
+function _showAlert(data) {
+  const widget = document.getElementById('alert-widget');
+  const n      = data.total || 0;
+  document.getElementById('alert-title').textContent = n === 1 ? '1 new failure detected' : `${n} failures detected`;
+  document.getElementById('alert-sub').textContent   = _formatAlertSub(data);
+  widget.classList.add('visible');
+  document.getElementById('failure-badge').textContent = n > 0 ? ` (${n})` : '';
+
+  if (_notifyEnabled && document.hidden) {
+    new Notification('PitchScout — Failures', {
+      body: document.getElementById('alert-sub').textContent,
+      icon: '/favicon.ico',
+      tag:  'ps-failure',
+    });
+  }
+}
+
+function _updatePollStatus() {
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('poll-status').textContent = `Last checked ${now}`;
+}
+
+async function pollFailures() {
+  if (!jwt) return;
+  try {
+    const resp = await fetch(`${API_BASE}/admin/failures`, { headers: authHeaders() });
+    if (!resp.ok) return;
+    const data = await resp.json();
+    const key  = _failureFingerprint(data);
+    _updatePollStatus();
+    if (_lastFailureKey !== null && key !== _lastFailureKey && (data.total || 0) > 0) {
+      _showAlert(data);
+      await loadFailures();
+    }
+    _lastFailureKey = key;
+  } catch (_) {}
+}
+
+function startPolling() {
+  if (_pollInterval) return;
+  _pollInterval = setInterval(pollFailures, POLL_MS);
+}
+
+document.getElementById('notify-toggle').addEventListener('click', async () => {
+  const btn = document.getElementById('notify-toggle');
+  if (_notifyEnabled) {
+    _notifyEnabled  = false;
+    btn.textContent = '🔔 Notify';
+    btn.className   = 'notify-toggle off';
+    return;
+  }
+  if (!('Notification' in window)) { alert('Browser notifications are not supported.'); return; }
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    _notifyEnabled  = true;
+    btn.textContent = '🔔 On';
+    btn.className   = 'notify-toggle on';
+  } else {
+    btn.textContent = '🔕 Blocked';
+    btn.className   = 'notify-toggle off';
+  }
+});
+
+document.getElementById('alert-dismiss').addEventListener('click', () => {
+  document.getElementById('alert-widget').classList.remove('visible');
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+
+function showApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+
+  document.getElementById('header-email').textContent = myEmail;
+  const chip = document.getElementById('header-role-chip');
+  if (myRole === 'admin') {
+    chip.innerHTML = ' <span class="role-chip role-admin">Full Admin</span>';
+  } else if (myRole === 'coach') {
+    chip.innerHTML = ' <span class="role-chip" style="background:rgba(255,214,0,.12);color:var(--yellow);border:1px solid rgba(255,214,0,.25)">Coach</span>';
+  } else {
+    chip.innerHTML = ' <span class="role-chip role-superuser">Superuser</span>';
+  }
+
+  if (myRole === 'coach') {
+    // Coach sees only My Events tab
+    document.getElementById('tab-myevents-btn').style.display = '';
+    document.getElementById('tab-allowlist-btn').style.display = 'none';
+    // Switch to My Events
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-myevents-btn').classList.add('active');
+    document.getElementById('tab-myevents').classList.add('active');
+    loadMyEvents();
+    return;
+  }
+
+  // Admin / superuser view
+  if (myRole === 'admin') {
+    document.getElementById('tab-users-btn').style.display = '';
+    document.getElementById('tab-events-btn').style.display = '';
+    document.getElementById('tab-pricing-btn').style.display = '';
+    document.getElementById('tab-accounts-btn').style.display = '';
+  } else if (myRole === 'superuser') {
+    document.getElementById('tab-events-btn').style.display = '';
+  }
+
+  loadAllowlist();
+  loadRequests();
+  loadSpending();
+  loadFailures().then(() => {
+    fetch(`${API_BASE}/admin/failures`, { headers: authHeaders() })
+      .then(r => r.json()).then(d => { _lastFailureKey = _failureFingerprint(d); _updatePollStatus(); });
+    startPolling();
+  });
+  if (myRole === 'admin') {
+    loadAdminUsers();
+    loadCoachRequests();
+  }
+}
+
+function showAuthScreen(msg) {
+  document.getElementById('auth-screen').style.display = 'flex';
+  if (msg) document.getElementById('auth-err').textContent = msg;
+}
+
+// ── Pricing ───────────────────────────────────────────────────────────────────
+
+let _editingTier = null;
+
+async function loadPricing() {
+  loadPricingTiers();
+  loadPromoCodes();
+  loadSubscriptions();
+}
+
+async function loadPricingTiers() {
+  const el = document.getElementById('pricing-tiers-list');
+  el.innerHTML = '<div class="empty">Loading…</div>';
+  const r = await fetch(`${API_BASE}/admin/pricing`, { headers: authHeaders() });
+  const d = await r.json();
+  const tiers = d.tiers || [];
+  if (!tiers.length) { el.innerHTML = '<div class="empty">No pricing tiers configured.</div>'; return; }
+  el.innerHTML = tiers.map(t => `
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:14px 18px;margin-bottom:10px">
+      <div>
+        <div style="font-weight:700;margin-bottom:2px">${esc(t.display_name || t.tier)}</div>
+        <div style="color:var(--muted);font-size:0.82rem">${esc(t.tier)} · $${((t.amount_cents||0)/100).toFixed(2)} ${t.interval ? '/ '+t.interval : '(one-time)'}</div>
+        <div style="color:var(--muted);font-size:0.78rem;margin-top:2px">${esc(t.description||'')}</div>
+      </div>
+      <button class="btn-primary" style="font-size:0.8rem;padding:6px 16px" onclick="openPricingEdit('${esc(t.tier)}','${esc(t.display_name||'')}','${t.amount_cents||0}','${esc(t.description||'')}','${esc(t.interval||'')}')">Edit</button>
+    </div>
+  `).join('');
+}
+
+function openPricingEdit(tier, name, cents, desc, interval) {
+  _editingTier = tier;
+  document.getElementById('pricing-edit-key').textContent = tier;
+  document.getElementById('pricing-edit-name').value = name;
+  document.getElementById('pricing-edit-amount').value = cents;
+  document.getElementById('pricing-edit-desc').value = desc;
+  document.getElementById('pricing-edit-interval').value = interval;
+  document.getElementById('pricing-edit-card').style.display = '';
+  document.getElementById('pricing-edit-msg').textContent = '';
+}
+
+document.getElementById('pricing-cancel-btn').addEventListener('click', () => {
+  document.getElementById('pricing-edit-card').style.display = 'none';
+  _editingTier = null;
+});
+
+document.getElementById('pricing-save-btn').addEventListener('click', async () => {
+  if (!_editingTier) return;
+  const msg = document.getElementById('pricing-edit-msg');
+  const payload = {
+    tier:         _editingTier,
+    display_name: document.getElementById('pricing-edit-name').value.trim(),
+    amount_cents: parseInt(document.getElementById('pricing-edit-amount').value.trim(), 10),
+    description:  document.getElementById('pricing-edit-desc').value.trim(),
+    interval:     document.getElementById('pricing-edit-interval').value.trim() || null,
+  };
+  if (!payload.display_name || isNaN(payload.amount_cents)) {
+    msg.className = 'msg err'; msg.textContent = 'Name and amount are required.'; return;
+  }
+  const r = await fetch(`${API_BASE}/admin/pricing`, {
+    method: 'POST', headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const d = await r.json();
+  if (r.ok) {
+    msg.className = 'msg ok'; msg.textContent = 'Saved.';
+    setTimeout(() => { document.getElementById('pricing-edit-card').style.display = 'none'; _editingTier = null; loadPricingTiers(); }, 1000);
+  } else {
+    msg.className = 'msg err'; msg.textContent = d.error || 'Save failed.';
+  }
+});
+
+document.getElementById('pricing-refresh-btn').addEventListener('click', loadPricingTiers);
+
+async function loadPromoCodes() {
+  const el = document.getElementById('promo-list');
+  el.innerHTML = '<div class="empty">Loading…</div>';
+  const r = await fetch(`${API_BASE}/admin/pricing/coupons`, { headers: authHeaders() });
+  const d = await r.json();
+  const codes = d.codes || [];
+  if (!codes.length) { el.innerHTML = '<div class="empty">No promo codes yet.</div>'; return; }
+  el.innerHTML = codes.map(c => `
+    <div class="user-row">
+      <div>
+        <div class="user-email">${esc(c.code)}</div>
+        <div class="user-meta">${c.discount_pct}% off${c.max_uses ? ' · max '+c.max_uses+' uses' : ''} · used ${c.used_count||0}${c.active===false ? ' · <span style="color:var(--red)">disabled</span>' : ''}</div>
+      </div>
+      ${c.active !== false ? `<button class="btn-danger" onclick="disablePromo('${esc(c.code)}')">Disable</button>` : ''}
+    </div>
+  `).join('');
+}
+
+async function disablePromo(code) {
+  if (!confirm(`Disable promo code ${code}?`)) return;
+  const r = await fetch(`${API_BASE}/admin/pricing/coupons/${encodeURIComponent(code)}`, {
+    method: 'DELETE', headers: authHeaders(),
+  });
+  if (r.ok) loadPromoCodes();
+  else alert('Failed to disable code.');
+}
+
+document.getElementById('promo-add-btn').addEventListener('click', async () => {
+  const msg   = document.getElementById('promo-add-msg');
+  const code  = document.getElementById('promo-code').value.trim().toUpperCase();
+  const pct   = parseFloat(document.getElementById('promo-pct').value.trim());
+  const uses  = document.getElementById('promo-uses').value.trim();
+  if (!code) { msg.className = 'msg err'; msg.textContent = 'Code is required.'; return; }
+  if (isNaN(pct) || pct <= 0 || pct > 100) { msg.className = 'msg err'; msg.textContent = 'Discount % must be 1–100.'; return; }
+  const payload = { code, discount_pct: pct };
+  if (uses) payload.max_uses = parseInt(uses, 10);
+  const r = await fetch(`${API_BASE}/admin/pricing/coupons`, {
+    method: 'POST', headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const d = await r.json();
+  if (r.ok) {
+    msg.className = 'msg ok'; msg.textContent = 'Code added.';
+    document.getElementById('promo-code').value = '';
+    document.getElementById('promo-pct').value  = '';
+    document.getElementById('promo-uses').value = '';
+    loadPromoCodes();
+  } else {
+    msg.className = 'msg err'; msg.textContent = d.error || 'Failed to add code.';
+  }
+});
+
+async function loadSubscriptions() {
+  const el = document.getElementById('sub-list');
+  el.innerHTML = '<div class="empty">Loading…</div>';
+  const r = await fetch(`${API_BASE}/admin/subscriptions`, { headers: authHeaders() });
+  const d = await r.json();
+  const subs = d.subscriptions || [];
+  document.getElementById('sub-count').textContent = subs.length + ' total';
+  if (!subs.length) { el.innerHTML = '<div class="empty">No subscriptions yet.</div>'; return; }
+  el.innerHTML = subs.map(s => `
+    <div class="user-row">
+      <div>
+        <div class="user-email">${esc(s.email)}</div>
+        <div class="user-meta">${esc(s.display_name||s.tier||'—')} · <span style="color:${s.status==='active'?'var(--green)':s.status==='past_due'?'var(--yellow)':'var(--red)'}">${esc(s.status||'—')}</span>${s.current_period_end ? ' · renews '+esc(s.current_period_end.slice(0,10)) : ''}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Accounts ──────────────────────────────────────────────────────────────────
+
+const STATUS_LABELS = {
+  CONFIRMED:             { label: 'Confirmed',              color: 'var(--green)'  },
+  EXTERNAL_PROVIDER:     { label: 'Google SSO',             color: 'var(--blue)'   },
+  UNCONFIRMED:           { label: 'Unconfirmed email',      color: 'var(--yellow)' },
+  FORCE_CHANGE_PASSWORD: { label: 'Awaiting password set',  color: 'var(--yellow)' },
+  RESET_REQUIRED:        { label: 'Password reset pending', color: 'var(--yellow)' },
+};
+
+function statusChip(status, enabled) {
+  if (!enabled) return `<span style="background:rgba(239,83,80,.12);border:1px solid rgba(239,83,80,.3);border-radius:4px;color:var(--red);font-size:0.7rem;font-weight:700;padding:2px 8px;letter-spacing:.04em">DISABLED</span>`;
+  const s = STATUS_LABELS[status] || { label: status, color: 'var(--muted)' };
+  return `<span style="color:${s.color};font-size:0.78rem;font-weight:600">${s.label}</span>`;
+}
+
+function userActions(u) {
+  const isExternal = u.status === 'EXTERNAL_PROVIDER';
+  const canReset   = !isExternal;
+  return `
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+      ${u.enabled
+        ? `<button class="btn-danger" style="font-size:0.75rem;padding:4px 12px" onclick="acctAction('disable','${esc(u.username)}','${esc(u.email)}')">Disable</button>`
+        : `<button class="btn-primary" style="font-size:0.75rem;padding:4px 12px;background:var(--green)" onclick="acctAction('enable','${esc(u.username)}','${esc(u.email)}')">Enable / Unlock</button>`
+      }
+      ${canReset ? `<button style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:0.75rem;padding:4px 12px;cursor:pointer" onclick="acctAction('reset-password','${esc(u.username)}','${esc(u.email)}')">Reset Password</button>` : ''}
+    </div>`;
+}
+
+function renderUserRow(u) {
+  return `
+    <div class="card" style="padding:14px 18px;margin-bottom:10px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-weight:700;font-size:0.9rem">${esc(u.email || u.username)}</div>
+          <div style="color:var(--muted);font-size:0.76rem;margin-top:2px">${esc(u.username)}</div>
+          <div style="margin-top:5px">${statusChip(u.status, u.enabled)}</div>
+          ${u.created ? `<div style="color:var(--muted);font-size:0.74rem;margin-top:3px">Created ${esc(u.created.slice(0,10))}</div>` : ''}
+        </div>
+        <div style="font-size:0.75rem;color:var(--muted);text-align:right">
+          ${u.issue ? `<span style="color:var(--red);font-weight:600">${esc(u.issue)}</span>` : ''}
+        </div>
+      </div>
+      ${userActions(u)}
+    </div>`;
+}
+
+async function loadAccounts() {
+  loadAccountIssues();
+  loadAllUsers();
+}
+
+async function loadAccountIssues() {
+  const el = document.getElementById('account-issues-list');
+  el.innerHTML = '<div class="empty">Loading…</div>';
+  try {
+    const r = await fetch(`${API_BASE}/admin/cognito/issues`, { headers: authHeaders() });
+    const d = await r.json();
+    const issues = d.issues || [];
+    if (!issues.length) {
+      el.innerHTML = '<div class="empty" style="color:var(--green)">No auth flow issues detected.</div>';
+      return;
+    }
+    el.innerHTML = issues.map(renderUserRow).join('');
+  } catch (_) {
+    el.innerHTML = '<div class="empty" style="color:var(--red)">Failed to load issues.</div>';
+  }
+}
+
+async function loadAllUsers() {
+  const el = document.getElementById('acct-all-list');
+  el.innerHTML = '<div class="empty">Loading…</div>';
+  try {
+    const r = await fetch(`${API_BASE}/admin/cognito/users`, { headers: authHeaders() });
+    const d = await r.json();
+    const users = d.users || [];
+    document.getElementById('acct-all-count').textContent = users.length + ' users';
+    el.innerHTML = users.length ? users.map(renderUserRow).join('') : '<div class="empty">No users found.</div>';
+  } catch (_) {
+    el.innerHTML = '<div class="empty" style="color:var(--red)">Failed to load users.</div>';
+  }
+}
+
+document.getElementById('acct-search-btn').addEventListener('click', async () => {
+  const email = document.getElementById('acct-search-email').value.trim().toLowerCase();
+  const el    = document.getElementById('acct-search-results');
+  if (!email) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="empty">Searching…</div>';
+  try {
+    const r = await fetch(`${API_BASE}/admin/cognito/users?email=${encodeURIComponent(email)}`, { headers: authHeaders() });
+    const d = await r.json();
+    const users = d.users || [];
+    el.innerHTML = users.length ? users.map(renderUserRow).join('') : '<div class="empty">No account found for that email.</div>';
+  } catch (_) {
+    el.innerHTML = '<div class="empty" style="color:var(--red)">Search failed.</div>';
+  }
+});
+document.getElementById('acct-search-email').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('acct-search-btn').click();
+});
+
+async function acctAction(action, username, email) {
+  const labels = { enable: 'Enable / unlock', disable: 'Disable', 'reset-password': 'Send password reset to' };
+  const label  = labels[action] || action;
+  if (!confirm(`${label} account: ${email}?`)) return;
+  try {
+    const r = await fetch(`${API_BASE}/admin/cognito/users/${action}`, {
+      method: 'POST',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username }),
+    });
+    const d = await r.json();
+    if (r.ok) {
+      if (action === 'reset-password') alert(`Password reset email sent to ${email}.`);
+      loadAccountIssues();
+      loadAllUsers();
+      document.getElementById('acct-search-results').innerHTML = '';
+    } else {
+      alert(`Action failed: ${d.error || 'Unknown error'}`);
+    }
+  } catch (_) {
+    alert('Request failed. Please try again.');
+  }
+}
+
+async function init() {
+  // Handle OAuth callback
+  const code = new URLSearchParams(window.location.search).get('code');
+  if (code) {
+    const token = await handleOAuthCallback();
+    if (token) {
+      const ok = await verifyAndShow(token);
+      if (ok) { showApp(); return; }
+      showAuthScreen('Access denied. Admin accounts only.');
+    } else {
+      showAuthScreen('Sign-in failed. Please try again.');
+    }
+    return;
+  }
+
+  // Restore from session
+  const saved = sessionStorage.getItem(SESSION_KEY);
+  if (saved) {
+    const ok = await verifyAndShow(saved);
+    if (ok) { showApp(); return; }
+    sessionStorage.removeItem(SESSION_KEY);
+  }
+
+  // No valid session — show login
+  showAuthScreen();
+}
+
+init().catch(() => showAuthScreen());
+</script>
+</body>
+</html>

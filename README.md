@@ -1,72 +1,91 @@
-# Scout AI — Soccer Video Analysis Demo
+# Project Fiyah — Jigga Jerk Joint Website
 
-An interactive frontend demo for a Soccer AI Video Analysis web app. Built as a static site — zero dependencies, no build step required.
-
-## Live demo
-
-Deploy instantly to **GitHub Pages** — see setup below.
+Full-featured restaurant website for **Jigga Jerk Joint**. Built as a zero-dependency static site deployed via GitHub Pages, with Firebase as the serverless backend.
 
 ---
 
-## What's in this repo
+## Live Site
 
-```
-scout-ai/
-├── index.html          # Main app shell + all three views
-├── css/
-│   └── style.css       # Full stylesheet (dark theme, responsive)
-├── js/
-│   └── app.js          # Nav, upload simulation, dashboard logic
-└── README.md
-```
-
-### Three views
-
-| View | Description |
-|------|-------------|
-| **Drop Portal** | Simulates the S3 pre-signed upload flow with UUID assignment, progress steps, and PII scrubbing display |
-| **Dashboard** | Tactical analysis output — scout grade, metric bars, scanning timeline, AI observations |
-| **Architecture** | AWS stack overview — Lambda, DynamoDB, S3, SNS/SES, with a Python handler code snippet |
+Deployed automatically to GitHub Pages on every push to `main`.
 
 ---
 
-## Deploy to GitHub Pages (3 steps)
+## Pages
 
-### 1. Push to GitHub
-
-```bash
-git init
-git add .
-git commit -m "Initial Scout AI demo"
-git remote add origin https://github.com/YOUR_USERNAME/scout-ai.git
-git push -u origin main
-```
-
-### 2. Enable GitHub Pages
-
-1. Go to your repo → **Settings** → **Pages**
-2. Under **Source**, select `main` branch and `/ (root)`
-3. Click **Save**
-
-### 3. Your site is live
-
-```
-https://YOUR_USERNAME.github.io/scout-ai/
-```
-
-GitHub Pages typically goes live within 60 seconds.
+| Page | URL | Description |
+|---|---|---|
+| Landing | `/` | Hero, featured menu, catering CTA, reviews, hours |
+| Full Menu | `/menu.html` | All items by category, printable |
+| Catering | `/catering.html` | 3-step booking form |
+| Order Confirm | `/order-confirm.html` | Post-submit confirmation |
+| Admin | `/admin.html` | Full admin portal (auth-gated) |
 
 ---
 
-## Local development
+## Admin Portal Features
 
-No build step needed. Just open the file:
+| Tab | What it does |
+|---|---|
+| Dashboard | Stats, recent orders, quick actions |
+| Menu Editor | Add / edit / delete menu items, toggle active/featured |
+| Specials | Enable/disable timed specials banner |
+| Catering Orders | View all requests, filter by status, export CSV |
+| Square Invoices | Paste Square API token → fetch live invoice list |
+| Google My Business | OAuth connect → push hours/description to GMB |
+| Settings | Update DoorDash URL, Maps link, phone, address |
+
+---
+
+## Tech Stack
+
+| Layer | Choice |
+|---|---|
+| Hosting | GitHub Pages (free) |
+| Database | Firebase Firestore |
+| Auth | Firebase Authentication (Google Sign-In) |
+| Storage | Firebase Storage (menu photos) |
+| Invoices | Square REST API |
+| GMB | Google My Business API |
+
+**Demo mode**: When Firebase is not configured, the site runs on `localStorage` with seed menu data — no backend required to preview.
+
+---
+
+## Firebase Setup (go-live)
+
+1. Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
+2. Enable **Firestore**, **Authentication** (Google provider), and **Storage**
+3. Copy your config object into `js/firebase-init.js` (replace `REPLACE_WITH_*` placeholders)
+4. In Firestore, create `settings/site` doc with your DoorDash URL, Maps URL, phone, address
+5. Create `admins/config` doc with `allowedUids: ["your-google-uid"]`
+
+---
+
+## Square Integration
+
+1. Go to [developer.squareup.com](https://developer.squareup.com/apps)
+2. Create an app → copy your **Personal Access Token**
+3. In Admin → Square Invoices, paste the token and save
+
+---
+
+## Google My Business Integration
+
+1. In Admin → GMB, click "Connect Google My Business"
+2. Authorize with the Google account that manages your Business Profile
+3. Edit hours, description, and phone — click Save to push to Google
+
+---
+
+## Local Development
+
+No build step needed:
 
 ```bash
 # Option A — open directly
 open index.html
 
-# Option B — serve locally (avoids any CORS edge cases)
+# Option B — serve locally
 npx serve .
 # or
 python3 -m http.server 8080
@@ -74,53 +93,19 @@ python3 -m http.server 8080
 
 ---
 
-## Tech stack (demo)
+## Pricing Reference
 
-| Layer | Choice |
-|-------|--------|
-| Framework | Vanilla HTML/CSS/JS — no dependencies |
-| Fonts | Bebas Neue (display) + DM Sans (body) via Google Fonts |
-| Theme | Dark, mobile-responsive |
-| State | In-memory JS only |
-
----
-
-## Production architecture (what this demo represents)
-
-| Layer | Stack |
-|-------|-------|
-| Frontend | React + Vite + Tailwind CSS |
-| API | AWS API Gateway + Lambda (Python 3.12) |
-| Storage | S3 with Transfer Acceleration + Pre-signed URLs |
-| Database | DynamoDB — UUID primary keys only (no PII) |
-| AI | Gemini Vision / GPT-4o via Lambda stub |
-| Notifications | AWS SNS (SMS) + SES (Email) |
-| IaC | AWS SAM or Terraform |
-| Performance | Provisioned Concurrency on AI analysis Lambda |
-| Security | AES-256 at rest, TLS 1.3 in transit, COPPA-aware schema |
+| Item | Cost |
+|---|---|
+| Development (one-time) | $5,500 flat (see plan for itemized breakdown) |
+| GitHub Pages hosting | Free |
+| Firebase (Spark tier) | Free |
+| Square (per transaction) | 2.6% + 10¢ |
+| Custom domain (annual) | ~$15/yr |
+| Maintenance retainer | $150–$350/mo |
 
 ---
 
-## Security design notes
+## Project Codename
 
-- No player names or birthdates are stored anywhere
-- All records use `player_uuid` and `session_uuid` as primary keys
-- S3 pre-signed URLs expire after 15 minutes
-- S3 Transfer Acceleration handles large video uploads on mobile connections
-- Provisioned Concurrency eliminates cold starts on the AI analysis function
-
----
-
-## Next steps
-
-- [ ] Wire up real AWS SAM backend (`template.yaml`)
-- [ ] Replace upload simulation with live pre-signed URL fetch
-- [ ] Add authentication (Amazon Cognito)
-- [ ] Build React version with Vite + Tailwind
-- [ ] Add COPPA compliance review for youth athlete data handling
-
----
-
-## License
-
-MIT
+**Fiyah** 🔥

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Order Received — Jigga Jerk Joint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/jjj.css" />
+<style>
+.confirm-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 5% 60px;
+  text-align: center;
+}
+.confirm-card {
+  background: var(--smoke2);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-lg);
+  padding: 60px 48px;
+  max-width: 560px;
+  width: 100%;
+}
+@media (max-width: 480px) { .confirm-card { padding: 36px 20px; } }
+
+.confirm-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes popIn {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.confirm-title {
+  font-family: 'Oswald', system-ui;
+  font-size: 2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.confirm-subtitle { color: var(--muted-hi); line-height: 1.6; margin-bottom: 28px; }
+.ref-box {
+  background: var(--smoke3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 24px;
+  margin-bottom: 28px;
+}
+.ref-label { font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.ref-number { font-family: 'Oswald', system-ui; font-size: 1.8rem; color: var(--pepper); font-weight: 700; letter-spacing: 0.05em; }
+.next-steps {
+  background: var(--smoke3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  text-align: left;
+  margin-bottom: 28px;
+}
+.next-steps-title { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; font-weight: 600; }
+.next-step-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  font-size: 0.88rem;
+  color: var(--muted-hi);
+}
+.next-step-item:last-child { margin-bottom: 0; }
+.next-step-num {
+  width: 22px; height: 22px;
+  background: rgba(249,199,79,0.15);
+  border: 1px solid rgba(249,199,79,0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--gold);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.confirm-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html" class="nav-logo">
+    <span class="fire">Jigga</span> <span class="gold">Jerk</span> Joint
+  </a>
+  <div class="nav-links" id="nav-links">
+    <a href="menu.html">Menu</a>
+    <a href="catering.html">Catering</a>
+    <a href="index.html#hours">Hours</a>
+    <a href="index.html#about">About</a>
+  </div>
+  <button class="nav-hamburger" id="nav-hamburger"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="confirm-page">
+  <div class="confirm-card">
+    <div class="confirm-icon">🎉</div>
+    <div class="confirm-title">Request Received!</div>
+    <p class="confirm-subtitle">
+      Your catering request has been submitted. We'll review it and get back to you within <strong>24 hours</strong> to confirm availability and send a formal quote.
+    </p>
+
+    <div class="ref-box">
+      <div class="ref-label">Your Reference Number</div>
+      <div class="ref-number" id="ref-number">JJJ-XXXXXX</div>
+    </div>
+
+    <div class="next-steps">
+      <div class="next-steps-title">What happens next</div>
+      <div class="next-step-item">
+        <div class="next-step-num">1</div>
+        <span>Our team reviews your event details and menu selection.</span>
+      </div>
+      <div class="next-step-item">
+        <div class="next-step-num">2</div>
+        <span>We contact you within 24 hours to confirm availability.</span>
+      </div>
+      <div class="next-step-item">
+        <div class="next-step-num">3</div>
+        <span>You receive a formal quote and deposit invoice via email.</span>
+      </div>
+      <div class="next-step-item">
+        <div class="next-step-num">4</div>
+        <span>Your event is locked in — we handle the rest. 🔥</span>
+      </div>
+    </div>
+
+    <div class="confirm-actions">
+      <a href="index.html" class="btn btn-secondary">← Back to Home</a>
+      <a href="menu.html" class="btn btn-gold">Explore the Menu</a>
+    </div>
+
+    <div style="margin-top:24px;">
+      <a href="https://www.instagram.com/jiggajerkjoint/" target="_blank" rel="noopener" style="font-size:0.85rem;color:var(--muted-hi);">
+        📸 Follow us on Instagram for updates
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById("nav-hamburger").addEventListener("click", () => {
+  document.getElementById("nav-links").classList.toggle("open");
+});
+
+// Show reference number from session
+const order = JSON.parse(sessionStorage.getItem("jjj_last_order") || "{}");
+if (order.refNumber) {
+  document.getElementById("ref-number").textContent = order.refNumber;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Catering — Jigga Jerk Joint</title>
+<meta name="description" content="Book Jigga Jerk Joint for your next event. Authentic Jamaican jerk catering for 20 to 2,000 guests." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/jjj.css" />
+<style>
+.page-hero {
+  background: linear-gradient(180deg, var(--smoke2) 0%, var(--smoke) 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 110px 5% 50px;
+  text-align: center;
+}
+
+.progress-bar {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 3rem;
+}
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  flex: 1;
+  max-width: 160px;
+}
+.progress-step::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: calc(50% + 18px);
+  right: calc(-50% + 18px);
+  height: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+.progress-step:last-child::before { display: none; }
+.progress-step.done::before { background: var(--gold); }
+
+.step-circle {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--smoke2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+  position: relative;
+  z-index: 1;
+  transition: all 0.2s;
+}
+.progress-step.active .step-circle  { border-color: var(--gold); color: var(--gold); background: rgba(249,199,79,0.1); }
+.progress-step.done   .step-circle  { border-color: var(--green); background: var(--green); color: var(--smoke); }
+.step-label { font-size: 0.75rem; color: var(--muted); text-align: center; white-space: nowrap; }
+.progress-step.active .step-label { color: var(--gold); }
+
+.form-card {
+  background: var(--smoke2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+@media (max-width: 580px) { .form-card { padding: 24px 18px; } }
+
+.form-step { display: none; }
+.form-step.active { display: block; }
+
+.step-title {
+  font-family: 'Oswald', system-ui;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.step-desc { font-size: 0.88rem; color: var(--muted-hi); margin-bottom: 28px; }
+
+.menu-select-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+.menu-select-item {
+  background: var(--smoke3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.menu-select-item:hover { border-color: var(--border-mid); }
+.menu-select-item.selected { border-color: var(--gold); background: rgba(249,199,79,0.07); }
+.menu-select-item input[type=checkbox] { display: none; }
+.item-check {
+  width: 20px; height: 20px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  font-size: 0.85rem;
+}
+.menu-select-item.selected .item-check { border-color: var(--gold); background: rgba(249,199,79,0.15); }
+.item-info { flex: 1; }
+.item-info-name  { font-size: 0.9rem; font-weight: 600; color: var(--cream); }
+.item-info-price { font-size: 0.8rem; color: var(--muted-hi); margin-top: 2px; }
+.item-qty {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.qty-label { font-size: 0.75rem; color: var(--muted); }
+.qty-input {
+  width: 60px;
+  background: var(--smoke2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--cream);
+  font-size: 0.88rem;
+  padding: 4px 8px;
+  text-align: center;
+}
+
+.order-summary {
+  background: var(--smoke3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 0.9rem;
+  color: var(--muted-hi);
+  border-bottom: 1px solid var(--border);
+}
+.summary-row:last-child { border-bottom: none; }
+.summary-row .label { color: var(--cream); }
+
+.form-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  gap: 12px;
+}
+
+.budget-options { display: flex; flex-wrap: wrap; gap: 10px; }
+.budget-option {
+  background: var(--smoke3);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 8px 18px;
+  font-size: 0.88rem;
+  color: var(--muted-hi);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.budget-option:hover { border-color: var(--border-mid); color: var(--cream); }
+.budget-option.selected { border-color: var(--gold); color: var(--gold); background: rgba(249,199,79,0.08); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html" class="nav-logo">
+    <span class="fire">Jigga</span> <span class="gold">Jerk</span> Joint
+  </a>
+  <div class="nav-links" id="nav-links">
+    <a href="menu.html">Menu</a>
+    <a href="catering.html" style="color:var(--gold)">Catering</a>
+    <a href="index.html#hours">Hours</a>
+    <a href="index.html#about">About</a>
+    <a href="#" id="nav-doordash" class="nav-cta">🛵 Order Now</a>
+  </div>
+  <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="page-hero">
+  <div class="section-title">Book Catering</div>
+  <p class="section-subtitle">Fill out the form below — we'll confirm within 24 hours.</p>
+</div>
+
+<section class="section">
+  <div class="section-inner">
+
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progress-bar">
+      <div class="progress-step active" data-step="1">
+        <div class="step-circle">1</div>
+        <div class="step-label">Event Details</div>
+      </div>
+      <div class="progress-step" data-step="2">
+        <div class="step-circle">2</div>
+        <div class="step-label">Menu Selection</div>
+      </div>
+      <div class="progress-step" data-step="3">
+        <div class="step-circle">3</div>
+        <div class="step-label">Contact &amp; Review</div>
+      </div>
+    </div>
+
+    <div class="form-card">
+
+      <!-- Step 1: Event Details -->
+      <div class="form-step active" id="step-1">
+        <div class="step-title">Event Details</div>
+        <p class="step-desc">Tell us about your event so we can build the right menu for you.</p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Event Type *</label>
+            <select class="form-select" id="event-type" required>
+              <option value="">Select event type</option>
+              <option>Birthday Party</option>
+              <option>Corporate Event</option>
+              <option>Wedding / Reception</option>
+              <option>Cookout / Backyard Party</option>
+              <option>Church / Community Event</option>
+              <option>Graduation</option>
+              <option>Other</option>
+            </select>
+            <div class="form-error" id="err-event-type">Please select an event type.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Number of Guests *</label>
+            <input type="number" class="form-input" id="guest-count" placeholder="e.g. 75" min="10" required />
+            <div class="form-error" id="err-guest-count">Please enter a guest count (min 10).</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Event Date *</label>
+            <input type="date" class="form-input" id="event-date" required />
+            <div class="form-error" id="err-event-date">Please select a future date.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Event Time *</label>
+            <input type="time" class="form-input" id="event-time" required />
+            <div class="form-error" id="err-event-time">Please select a time.</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Venue / Address *</label>
+          <input type="text" class="form-input" id="venue-address" placeholder="123 Main St, Atlanta, GA 30301" required />
+          <div class="form-error" id="err-venue">Please enter the venue address.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Service Style</label>
+          <select class="form-select" id="service-style">
+            <option value="buffet">Buffet Style</option>
+            <option value="plated">Plated / Served</option>
+            <option value="stations">Food Stations</option>
+            <option value="dropoff">Drop-off Only</option>
+          </select>
+        </div>
+
+        <div class="form-nav">
+          <span></span>
+          <button class="btn btn-primary" onclick="goStep(2)">Next: Menu Selection →</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Menu Selection -->
+      <div class="form-step" id="step-2">
+        <div class="step-title">Menu Selection</div>
+        <p class="step-desc">Choose the items you'd like. We'll confirm availability and finalize quantities with you.</p>
+        <div class="menu-select-grid" id="menu-select-grid"><div class="spinner"></div></div>
+        <div class="form-nav">
+          <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+          <button class="btn btn-primary" onclick="goStep(3)">Next: Contact Info →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Contact & Review -->
+      <div class="form-step" id="step-3">
+        <div class="step-title">Contact &amp; Review</div>
+        <p class="step-desc">Almost done — enter your info and submit your request.</p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Your Name *</label>
+            <input type="text" class="form-input" id="contact-name" placeholder="First &amp; Last Name" required />
+            <div class="form-error" id="err-name">Please enter your name.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number *</label>
+            <input type="tel" class="form-input" id="contact-phone" placeholder="(555) 000-0000" required />
+            <div class="form-error" id="err-phone">Please enter a valid phone number.</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email Address *</label>
+          <input type="email" class="form-input" id="contact-email" placeholder="you@email.com" required />
+          <div class="form-error" id="err-email">Please enter a valid email.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Estimated Budget</label>
+          <div class="budget-options">
+            <div class="budget-option" data-val="under500">Under $500</div>
+            <div class="budget-option" data-val="500-1000">$500 – $1,000</div>
+            <div class="budget-option" data-val="1000-2500">$1,000 – $2,500</div>
+            <div class="budget-option" data-val="2500-5000">$2,500 – $5,000</div>
+            <div class="budget-option" data-val="5000plus">$5,000+</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Special Requests / Dietary Notes</label>
+          <textarea class="form-textarea" id="contact-notes" placeholder="Allergies, dietary restrictions, special setup needs, etc."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">How did you hear about us?</label>
+          <select class="form-select" id="referral">
+            <option value="">Select one</option>
+            <option>Instagram</option>
+            <option>Google</option>
+            <option>Word of mouth</option>
+            <option>DoorDash</option>
+            <option>Previous customer</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="order-summary" id="order-summary"></div>
+
+        <div class="form-nav">
+          <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
+          <button class="btn btn-primary btn-lg" id="submit-btn" onclick="submitOrder()">
+            🔥 Submit Catering Request
+          </button>
+        </div>
+        <p style="font-size:0.78rem;color:var(--muted);margin-top:14px;text-align:center;">
+          We'll confirm availability and send a formal quote within 24 hours. No payment required now.
+        </p>
+      </div>
+
+    </div><!-- /form-card -->
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div style="max-width:1140px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <span class="footer-copy">© 2025 Jigga Jerk Joint</span>
+    <div class="flex gap-2">
+      <a href="index.html" style="color:var(--muted-hi);font-size:0.9rem;">Home</a>
+      <a href="menu.html" style="color:var(--muted-hi);font-size:0.9rem;">Menu</a>
+      <a href="index.html#hours" style="color:var(--muted-hi);font-size:0.9rem;">Hours</a>
+    </div>
+  </div>
+</footer>
+
+<div id="toast-container"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script>
+document.getElementById("nav-hamburger").addEventListener("click", () => {
+  document.getElementById("nav-links").classList.toggle("open");
+});
+
+getSiteSettings().then(s => {
+  document.getElementById("nav-doordash").href = s.doordashUrl || "https://www.doordash.com";
+});
+
+// Set min date to tomorrow
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+document.getElementById("event-date").min = tomorrow.toISOString().split("T")[0];
+
+// Budget selection
+let selectedBudget = "";
+document.querySelectorAll(".budget-option").forEach(opt => {
+  opt.addEventListener("click", () => {
+    document.querySelectorAll(".budget-option").forEach(o => o.classList.remove("selected"));
+    opt.classList.add("selected");
+    selectedBudget = opt.dataset.val;
+  });
+});
+
+// Menu items state
+let allMenuItems = [];
+let selectedItems = {}; // itemId -> { item, qty }
+
+async function loadMenuItems() {
+  allMenuItems = await getMenuItems();
+  const grid = document.getElementById("menu-select-grid");
+  if (!allMenuItems.length) {
+    grid.innerHTML = "<p class='text-muted'>Menu items loading — check back soon.</p>";
+    return;
+  }
+  grid.innerHTML = allMenuItems.map(item => `
+    <div class="menu-select-item" id="sel-${item.id}" onclick="toggleItem('${item.id}')">
+      <input type="checkbox" id="chk-${item.id}" />
+      <div class="item-check" id="check-icon-${item.id}">✓</div>
+      <div style="font-size:1.5rem;flex-shrink:0;">${item.emoji||"🍽️"}</div>
+      <div class="item-info">
+        <div class="item-info-name">${item.name}</div>
+        <div class="item-info-price">${item.category} · $${parseFloat(item.price).toFixed(2)}/person</div>
+        <div class="item-qty hidden" id="qty-row-${item.id}">
+          <span class="qty-label">Est. servings:</span>
+          <input type="number" class="qty-input" id="qty-${item.id}" value="1" min="1"
+            onclick="event.stopPropagation()" oninput="updateQty('${item.id}', this.value)" />
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+function toggleItem(id) {
+  const el = document.getElementById("sel-" + id);
+  const qtyRow = document.getElementById("qty-row-" + id);
+  if (el.classList.contains("selected")) {
+    el.classList.remove("selected");
+    qtyRow.classList.add("hidden");
+    delete selectedItems[id];
+  } else {
+    el.classList.add("selected");
+    qtyRow.classList.remove("hidden");
+    const item = allMenuItems.find(i => i.id === id);
+    selectedItems[id] = { item, qty: 1 };
+  }
+}
+
+function updateQty(id, val) {
+  if (selectedItems[id]) selectedItems[id].qty = parseInt(val) || 1;
+}
+
+// Step navigation
+let currentStep = 1;
+
+function goStep(step) {
+  if (step > currentStep && !validateStep(currentStep)) return;
+  if (step === 3) buildSummary();
+
+  document.querySelectorAll(".form-step").forEach(s => s.classList.remove("active"));
+  document.getElementById("step-" + step).classList.add("active");
+
+  document.querySelectorAll(".progress-step").forEach(s => {
+    const n = parseInt(s.dataset.step);
+    s.classList.remove("active","done");
+    if (n < step)  s.classList.add("done");
+    if (n === step) s.classList.add("active");
+  });
+
+  currentStep = step;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function validateStep(step) {
+  let valid = true;
+
+  const clearErr = id => document.getElementById(id).classList.remove("show");
+  const showErr  = id => { document.getElementById(id).classList.add("show"); valid = false; };
+
+  if (step === 1) {
+    clearErr("err-event-type"); clearErr("err-guest-count"); clearErr("err-event-date"); clearErr("err-event-time"); clearErr("err-venue");
+    if (!document.getElementById("event-type").value) showErr("err-event-type");
+    const gc = parseInt(document.getElementById("guest-count").value);
+    if (!gc || gc < 10) showErr("err-guest-count");
+    const ed = document.getElementById("event-date").value;
+    if (!ed || new Date(ed) < new Date()) showErr("err-event-date");
+    if (!document.getElementById("event-time").value) showErr("err-event-time");
+    if (!document.getElementById("venue-address").value.trim()) showErr("err-venue");
+  }
+
+  if (step === 3) {
+    clearErr("err-name"); clearErr("err-phone"); clearErr("err-email");
+    if (!document.getElementById("contact-name").value.trim()) showErr("err-name");
+    if (!document.getElementById("contact-phone").value.trim()) showErr("err-phone");
+    const em = document.getElementById("contact-email").value.trim();
+    if (!em || !em.includes("@")) showErr("err-email");
+  }
+
+  return valid;
+}
+
+function buildSummary() {
+  const items = Object.values(selectedItems);
+  const eventType    = document.getElementById("event-type").value;
+  const guestCount   = document.getElementById("guest-count").value;
+  const eventDate    = document.getElementById("event-date").value;
+  const eventTime    = document.getElementById("event-time").value;
+  const venueAddress = document.getElementById("venue-address").value;
+
+  const summary = document.getElementById("order-summary");
+  summary.innerHTML = `
+    <div style="font-family:'Oswald',system-ui;font-size:0.9rem;color:var(--gold);margin-bottom:12px;letter-spacing:0.08em;text-transform:uppercase;">Order Summary</div>
+    <div class="summary-row"><span class="label">Event Type</span><span>${eventType || "—"}</span></div>
+    <div class="summary-row"><span class="label">Date &amp; Time</span><span>${eventDate} at ${eventTime}</span></div>
+    <div class="summary-row"><span class="label">Guests</span><span>${guestCount}</span></div>
+    <div class="summary-row"><span class="label">Venue</span><span>${venueAddress}</span></div>
+    <div class="summary-row"><span class="label">Menu Items</span><span>${items.length > 0 ? items.map(i => i.item.name).join(", ") : "None selected"}</span></div>
+    <div class="summary-row"><span class="label">Budget Range</span><span>${selectedBudget || "Not specified"}</span></div>
+  `;
+}
+
+async function submitOrder() {
+  if (!validateStep(3)) return;
+
+  const btn = document.getElementById("submit-btn");
+  btn.disabled = true;
+  btn.textContent = "Submitting…";
+
+  const refNum = "JJJ-" + Date.now().toString(36).toUpperCase();
+
+  const order = {
+    refNumber:     refNum,
+    eventType:     document.getElementById("event-type").value,
+    guestCount:    parseInt(document.getElementById("guest-count").value),
+    eventDate:     document.getElementById("event-date").value,
+    eventTime:     document.getElementById("event-time").value,
+    venueAddress:  document.getElementById("venue-address").value,
+    serviceStyle:  document.getElementById("service-style").value,
+    selectedItems: Object.values(selectedItems).map(si => ({ id: si.item.id, name: si.item.name, qty: si.qty })),
+    contactName:   document.getElementById("contact-name").value.trim(),
+    contactPhone:  document.getElementById("contact-phone").value.trim(),
+    contactEmail:  document.getElementById("contact-email").value.trim(),
+    budgetRange:   selectedBudget,
+    notes:         document.getElementById("contact-notes").value.trim(),
+    referral:      document.getElementById("referral").value,
+    status:        "pending",
+    createdAt:     new Date().toISOString(),
+    adminNotes:    ""
+  };
+
+  try {
+    if (firebaseReady) {
+      await db.collection("catering_orders").add(order);
+    } else {
+      const orders = JSON.parse(localStorage.getItem("jjj_catering_orders") || "[]");
+      orders.push(order);
+      localStorage.setItem("jjj_catering_orders", JSON.stringify(orders));
+    }
+    sessionStorage.setItem("jjj_last_order", JSON.stringify(order));
+    window.location.href = "order-confirm.html";
+  } catch(err) {
+    console.error(err);
+    showToast("Something went wrong. Please try again.", "error");
+    btn.disabled = false;
+    btn.textContent = "🔥 Submit Catering Request";
+  }
+}
+
+loadMenuItems();
+</script>
+</body>
+</html>

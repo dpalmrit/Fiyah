@@ -1,1979 +1,1151 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PitchScout — Admin</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin — Jigga Jerk Joint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/jjj.css" />
+<style>
+/* ── Auth Screen ────────────────────────────────────────── */
+#auth-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--smoke);
+}
+.auth-card {
+  background: var(--smoke2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  width: 380px;
+  text-align: center;
+}
+.auth-logo { font-family:'Oswald',system-ui; font-size:1.8rem; color:var(--gold); font-weight:700; text-transform:uppercase; margin-bottom:6px; }
+.auth-logo .fire { color:var(--pepper); }
+.auth-sub { font-size:0.88rem; color:var(--muted); margin-bottom:32px; }
+.btn-google {
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  width:100%; background:#fff; border:none; border-radius:8px;
+  color:#3c4043; cursor:pointer; font-size:0.95rem; font-weight:600;
+  padding:12px 18px; transition:box-shadow 0.15s;
+}
+.btn-google:hover { box-shadow:0 2px 12px rgba(0,0,0,.3); }
+.auth-err { color:var(--red-err); font-size:0.82rem; margin-top:16px; min-height:18px; }
+.auth-note { font-size:0.78rem; color:var(--muted); margin-top:20px; line-height:1.5; }
 
-    :root {
-      --green:   #00e676;
-      --dark:    #080f0a;
-      --surface: #0d1a10;
-      --card:    #111e14;
-      --border:  #1e3324;
-      --text:    #e8f5e9;
-      --muted:   #6a9b78;
-      --red:     #ef5350;
-      --yellow:  #ffd600;
-      --blue:    #40c4ff;
-    }
+/* ── Demo login ─────────────────────────────────────────── */
+.demo-login {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.demo-login p { font-size:0.8rem; color:var(--muted); margin-bottom:12px; }
 
-    body { background: var(--dark); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; }
+/* ── App shell ──────────────────────────────────────────── */
+#app { display:none; }
 
-    /* ── Auth ── */
-    #auth-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-    .auth-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 40px; width: 360px; text-align: center; }
-    .auth-card h1 { font-size: 1.4rem; margin-bottom: 6px; }
-    .auth-card p  { color: var(--muted); font-size: 0.85rem; margin-bottom: 28px; }
-    .logo { color: var(--green); font-size: 1.6rem; font-weight: 800; margin-bottom: 10px; }
-    .btn-google { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; background: #fff; border: none; border-radius: 7px; color: #3c4043; cursor: pointer; font-size: 0.95rem; font-weight: 600; padding: 11px 16px; transition: box-shadow .15s; }
-    .btn-google:hover { box-shadow: 0 2px 8px rgba(0,0,0,.35); }
-    .btn-google svg { flex-shrink: 0; }
-    .auth-err { color: var(--red); font-size: 0.82rem; margin-top: 14px; min-height: 18px; }
+.admin-header {
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  background:rgba(26,10,0,0.95);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 24px;
+  height:62px;
+}
+.admin-logo { font-family:'Oswald',system-ui; font-size:1.1rem; font-weight:700; text-transform:uppercase; }
+.admin-logo span { color:var(--gold); }
+.admin-logo small { color:var(--muted); font-size:0.65rem; letter-spacing:0.1em; display:block; margin-top:-2px; }
+.header-right { display:flex; align-items:center; gap:12px; }
+.user-chip { font-size:0.78rem; color:var(--muted-hi); }
+.user-chip strong { color:var(--cream); }
+.btn-signout {
+  background:none; border:1px solid var(--border);
+  border-radius:20px; color:var(--muted); cursor:pointer;
+  font-size:0.75rem; padding:5px 14px;
+  transition:all 0.15s;
+}
+.btn-signout:hover { color:var(--red-err); border-color:var(--red-err); }
+.view-site-link { font-size:0.8rem; color:var(--muted-hi); text-decoration:none; }
+.view-site-link:hover { color:var(--cream); }
 
-    /* ── App shell ── */
-    #app { display: none; max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+/* ── Sidebar + Content ──────────────────────────────────── */
+.admin-layout { display:flex; min-height:100vh; padding-top:62px; }
 
-    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 10px; }
-    header h1 { font-size: 1.3rem; }
-    header h1 span { color: var(--green); }
-    .header-right { display: flex; align-items: center; gap: 12px; }
-    .user-badge { font-size: 0.78rem; color: var(--muted); }
-    .user-badge strong { color: var(--text); }
-    .role-chip { display: inline-block; border-radius: 20px; font-size: 0.7rem; font-weight: 700; letter-spacing: .05em; padding: 2px 10px; text-transform: uppercase; }
-    .role-admin { background: rgba(0,230,118,.15); color: var(--green); border: 1px solid rgba(0,230,118,.3); }
-    .role-superuser { background: rgba(64,196,255,.12); color: var(--blue); border: 1px solid rgba(64,196,255,.25); }
-    .btn-signout { background: none; border: 1px solid var(--border); border-radius: 20px; color: var(--muted); cursor: pointer; font-size: 0.75rem; padding: 4px 14px; }
-    .btn-signout:hover { color: var(--red); border-color: var(--red); }
+.sidebar {
+  width:200px; flex-shrink:0;
+  background:var(--smoke2);
+  border-right:1px solid var(--border);
+  padding:24px 0;
+  position:sticky; top:62px; height:calc(100vh - 62px);
+  overflow-y:auto;
+}
+.sidebar-section { margin-bottom:8px; }
+.sidebar-section-label {
+  font-size:0.68rem; letter-spacing:0.12em; text-transform:uppercase;
+  color:var(--muted); padding:0 20px; margin-bottom:4px;
+}
+.sidebar-link {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 20px;
+  font-size:0.9rem; color:var(--muted-hi);
+  cursor:pointer;
+  border-left:2px solid transparent;
+  transition:all 0.15s;
+}
+.sidebar-link:hover { color:var(--cream); background:rgba(255,255,255,0.03); }
+.sidebar-link.active { color:var(--gold); border-left-color:var(--gold); background:rgba(249,199,79,0.06); }
+.sidebar-icon { font-size:1rem; width:20px; text-align:center; }
 
-    /* ── Tabs ── */
-    .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
-    .tab { background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); cursor: pointer; font-size: 0.88rem; font-weight: 500; padding: 10px 18px; margin-bottom: -1px; transition: color .15s, border-color .15s; }
-    .tab:hover { color: var(--text); }
-    .tab.active { color: var(--green); border-bottom-color: var(--green); }
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
+.admin-content { flex:1; padding:32px; max-width:1040px; }
+@media (max-width:768px) {
+  .sidebar { display:none; }
+  .admin-content { padding:20px 16px; }
+}
 
-    /* ── Shared components ── */
-    button { cursor: pointer; }
-    input[type="email"], input[type="text"] { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 0.9rem; padding: 10px 14px; outline: none; transition: border-color .15s; }
-    input:focus { border-color: var(--green); }
-    input::placeholder { color: var(--muted); }
-    .btn-primary { background: var(--green); border: none; border-radius: 7px; color: var(--dark); font-size: 0.9rem; font-weight: 700; padding: 10px 20px; transition: opacity .15s; }
-    .btn-primary:hover { opacity: .85; }
-    .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
-    .btn-danger { background: var(--red); border: none; border-radius: 7px; color: #fff; font-size: 0.8rem; font-weight: 600; padding: 6px 14px; }
-    .msg { font-size: 0.82rem; margin-top: 10px; min-height: 18px; }
-    .msg.ok  { color: var(--green); }
-    .msg.err { color: var(--red); }
-    .section-title { color: var(--muted); font-size: 0.82rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 14px; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
-    .empty { color: var(--muted); font-size: 0.88rem; text-align: center; padding: 32px 0; }
+/* ── Dashboard ──────────────────────────────────────────── */
+.stat-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:1rem; margin-bottom:2rem; }
+.stat-card {
+  background:var(--smoke2);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:20px 22px;
+}
+.stat-card-value { font-family:'Oswald',system-ui; font-size:2.2rem; font-weight:700; color:var(--gold); line-height:1; }
+.stat-card-label { font-size:0.8rem; color:var(--muted-hi); margin-top:4px; }
 
-    /* ── Allowlist tab ── */
-    .form-row { display: flex; gap: 10px; }
-    .form-row input[type="email"] { flex: 1; }
-    .form-row input[type="text"]  { flex: 0 0 180px; }
-    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .count { color: var(--green); font-weight: 700; font-size: 0.88rem; }
-    .user-list { display: flex; flex-direction: column; gap: 8px; }
-    .user-row { background: var(--card); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; }
-    .user-email { font-size: 0.9rem; font-weight: 500; }
-    .user-meta  { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+/* ── Tables ─────────────────────────────────────────────── */
+.data-table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius-lg); }
+.data-table { width:100%; border-collapse:collapse; font-size:0.88rem; }
+.data-table thead { background:var(--smoke3); }
+.data-table th {
+  text-align:left; padding:12px 16px;
+  font-size:0.75rem; font-weight:700; letter-spacing:0.07em;
+  text-transform:uppercase; color:var(--muted);
+  border-bottom:1px solid var(--border);
+}
+.data-table td { padding:12px 16px; border-bottom:1px solid var(--border); color:var(--cream); vertical-align:middle; }
+.data-table tbody tr:last-child td { border-bottom:none; }
+.data-table tbody tr:hover { background:rgba(249,199,79,0.03); }
 
-    /* ── Admin Users tab ── */
-    .admin-section { margin-bottom: 28px; }
-    .admin-row { background: var(--card); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; margin-bottom: 8px; }
-    .admin-email { font-size: 0.9rem; font-weight: 500; }
-    .admin-meta  { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
-    .admin-locked { color: var(--muted); font-size: 0.75rem; font-style: italic; }
+/* ── Status chips ───────────────────────────────────────── */
+.status-chip {
+  display:inline-block; padding:3px 12px; border-radius:20px;
+  font-size:0.72rem; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;
+}
+.status-pending   { background:rgba(249,199,79,0.15); color:var(--gold);       border:1px solid rgba(249,199,79,0.3); }
+.status-confirmed { background:rgba(67,170,139,0.15);  color:var(--green);      border:1px solid rgba(67,170,139,0.3); }
+.status-completed { background:rgba(67,170,139,0.08);  color:#7BCBAE;           border:1px solid rgba(67,170,139,0.2); }
+.status-cancelled { background:rgba(212,56,13,0.12);   color:var(--pepper);     border:1px solid rgba(212,56,13,0.25); }
+.status-paid      { background:rgba(67,170,139,0.15);  color:var(--green);      border:1px solid rgba(67,170,139,0.3); }
+.status-unpaid    { background:rgba(212,56,13,0.12);   color:var(--pepper);     border:1px solid rgba(212,56,13,0.25); }
+.status-draft     { background:rgba(160,128,90,0.15);  color:var(--muted-hi);   border:1px solid rgba(160,128,90,0.3); }
 
-    /* ── Stats tab ── */
-    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
-    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
-    .stat-label { color: var(--muted); font-size: 0.75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 8px; }
-    .stat-value { font-size: 1.8rem; font-weight: 800; line-height: 1; }
-    .stat-value.green  { color: var(--green); }
-    .stat-value.yellow { color: var(--yellow); }
-    .stat-value.red    { color: var(--red); }
-    .stat-value.blue   { color: var(--blue); }
-    .stat-sub { color: var(--muted); font-size: 0.78rem; margin-top: 4px; }
+/* ── Modals ─────────────────────────────────────────────── */
+.modal-overlay {
+  display:none; position:fixed; inset:0; z-index:200;
+  background:rgba(0,0,0,0.7);
+  align-items:center; justify-content:center;
+  padding:20px;
+}
+.modal-overlay.open { display:flex; }
+.modal-box {
+  background:var(--smoke2); border:1px solid var(--border);
+  border-radius:var(--radius-lg); width:100%; max-width:540px;
+  max-height:90vh; overflow-y:auto;
+}
+.modal-header {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:20px 24px 16px;
+  border-bottom:1px solid var(--border);
+}
+.modal-title { font-family:'Oswald',system-ui; font-size:1.2rem; font-weight:600; color:var(--gold); text-transform:uppercase; }
+.modal-close { background:none; border:none; color:var(--muted); font-size:1.3rem; cursor:pointer; }
+.modal-close:hover { color:var(--cream); }
+.modal-body { padding:24px; }
+.modal-footer { padding:16px 24px 20px; display:flex; gap:10px; justify-content:flex-end; border-top:1px solid var(--border); }
 
-    .cost-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-    .cost-table th { color: var(--muted); font-size: 0.75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; text-align: left; padding: 0 0 10px; }
-    .cost-table td { padding: 10px 0; border-top: 1px solid var(--border); }
-    .cost-table td:last-child { text-align: right; color: var(--green); font-weight: 600; }
-    .billing-note { color: var(--muted); font-size: 0.75rem; margin-top: 14px; font-style: italic; }
+/* ── Menu editor ────────────────────────────────────────── */
+.menu-actions { display:flex; gap:10px; margin-bottom:1.5rem; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+.menu-search {
+  background:var(--smoke3); border:1px solid var(--border);
+  border-radius:50px; color:var(--cream); font-size:0.9rem;
+  padding:8px 18px; outline:none; width:220px;
+  transition:border-color 0.2s;
+}
+.menu-search:focus { border-color:var(--gold); }
 
-    /* ── Spending redesign ── */
-    .spending-layout { display: flex; gap: 20px; align-items: flex-start; }
-    .spending-main { flex: 1; min-width: 0; }
-    .spending-sidebar { width: 220px; flex-shrink: 0; }
-    @media (max-width: 700px) { .spending-layout { flex-direction: column; } .spending-sidebar { width: 100%; } }
-    .month-selector { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-    .month-selector select { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 0.88rem; padding: 7px 12px; outline: none; cursor: pointer; }
-    .month-selector select:focus { border-color: var(--green); }
-    .month-total { font-size: 1.4rem; font-weight: 800; color: var(--green); }
-    .month-total-label { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+.toggle-switch {
+  position:relative; display:inline-block; width:36px; height:20px;
+}
+.toggle-switch input { opacity:0; width:0; height:0; }
+.toggle-slider {
+  position:absolute; cursor:pointer; inset:0;
+  background:var(--surface); border-radius:20px; transition:0.2s;
+}
+.toggle-slider::before {
+  content:''; position:absolute; height:14px; width:14px;
+  left:3px; bottom:3px; background:var(--muted);
+  border-radius:50%; transition:0.2s;
+}
+.toggle-switch input:checked + .toggle-slider { background:var(--green); }
+.toggle-switch input:checked + .toggle-slider::before { transform:translateX(16px); background:white; }
 
-    .ytd-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; position: sticky; top: 20px; }
-    .ytd-title { color: var(--muted); font-size: 0.72rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; margin-bottom: 12px; }
-    .ytd-total-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-    .ytd-total-label { font-size: 0.82rem; font-weight: 600; }
-    .ytd-total-value { font-size: 1.2rem; font-weight: 800; color: var(--green); }
-    .ytd-cat-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; padding: 5px 0; }
-    .ytd-cat-name { color: var(--muted); }
-    .ytd-cat-amount { color: var(--text); font-weight: 600; }
+/* ── Order detail drawer ────────────────────────────────── */
+.order-detail-wrap { font-size:0.9rem; }
+.detail-row { display:flex; gap:12px; margin-bottom:10px; align-items:flex-start; }
+.detail-label { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.07em; color:var(--muted); min-width:110px; flex-shrink:0; padding-top:2px; }
+.detail-value { color:var(--cream); line-height:1.5; }
+.order-items-list { list-style:none; }
+.order-items-list li { padding:4px 0; border-bottom:1px solid var(--border); color:var(--muted-hi); }
+.order-items-list li:last-child { border-bottom:none; }
 
-    /* ── Expense section ── */
-    .expense-section { margin-top: 16px; }
-    .exp-row { background: var(--card); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; margin-bottom: 8px; font-size: 0.85rem; }
-    .exp-desc { font-weight: 500; flex: 1; }
-    .exp-meta { color: var(--muted); font-size: 0.75rem; }
-    .exp-amount { color: var(--green); font-weight: 700; white-space: nowrap; }
-    .exp-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 2px 4px; }
-    .exp-del:hover { color: var(--red); }
-    .recurring-badge { display: inline-block; background: rgba(64,196,255,.1); border: 1px solid rgba(64,196,255,.2); border-radius: 4px; color: var(--blue); font-size: 0.68rem; font-weight: 700; letter-spacing: .04em; padding: 1px 6px; text-transform: uppercase; margin-left: 6px; }
+/* ── GMB editor ─────────────────────────────────────────── */
+.gmb-hours-grid {
+  display:grid; grid-template-columns:auto 1fr 1fr auto; gap:10px; align-items:center;
+  margin-bottom:12px;
+}
+.gmb-day-label { font-size:0.85rem; color:var(--cream); font-weight:500; }
+.gmb-closed-label { font-size:0.8rem; color:var(--muted-hi); display:flex; align-items:center; gap:6px; }
 
-    .add-expense-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
-    .add-expense-form input, .add-expense-form select { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 0.85rem; padding: 8px 12px; outline: none; }
-    .add-expense-form input:focus, .add-expense-form select:focus { border-color: var(--green); }
-    .add-expense-form input::placeholder { color: var(--muted); }
-    .add-expense-form .full-width { grid-column: 1 / -1; }
-    .btn-add-exp { background: rgba(0,230,118,.1); border: 1px solid rgba(0,230,118,.3); border-radius: 7px; color: var(--green); font-size: 0.82rem; font-weight: 700; padding: 8px 16px; cursor: pointer; white-space: nowrap; }
-    .btn-add-exp:hover { background: rgba(0,230,118,.2); }
-
-    /* ── Events tab ── */
-    .event-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
-    .event-card-header { display: flex; align-items: center; gap: 14px; padding: 16px 20px; cursor: pointer; }
-    .event-card-header:hover { background: rgba(255,255,255,.03); }
-    .event-logo-thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: contain; background: var(--surface); border: 1px solid var(--border); flex-shrink: 0; }
-    .event-logo-placeholder { width: 44px; height: 44px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
-    .event-card-info { flex: 1; }
-    .event-card-name { font-size: 0.95rem; font-weight: 700; }
-    .event-card-meta { color: var(--muted); font-size: 0.78rem; margin-top: 2px; }
-    .event-card-stats { display: flex; gap: 14px; flex-shrink: 0; }
-    .event-stat { text-align: right; }
-    .event-stat-val { font-size: 1rem; font-weight: 800; }
-    .event-stat-lbl { color: var(--muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: .04em; }
-    .event-card-body { border-top: 1px solid var(--border); padding: 16px 20px; display: none; }
-    .event-card-body.open { display: block; }
-    .chevron { color: var(--muted); font-size: 0.9rem; transition: transform .2s; }
-    .event-card-header.expanded .chevron { transform: rotate(180deg); }
-
-    .roster-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; margin-bottom: 16px; }
-    .roster-table th { color: var(--muted); font-size: 0.72rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; text-align: left; padding: 0 0 8px; border-bottom: 1px solid var(--border); }
-    .roster-table td { padding: 9px 0; border-bottom: 1px solid rgba(30,51,36,.6); }
-    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
-    .dot-green { background: var(--green); }
-    .dot-yellow { background: var(--yellow); }
-    .dot-red   { background: var(--red); }
-    .dot-grey  { background: #555; }
-
-    .create-event-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .create-event-form input { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 0.88rem; padding: 9px 12px; outline: none; }
-    .create-event-form input:focus { border-color: var(--green); }
-    .create-event-form input::placeholder { color: var(--muted); }
-    .create-event-form .full-width { grid-column: 1 / -1; }
-
-    .add-roster-form { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-    .add-roster-form input { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 0.85rem; padding: 8px 12px; outline: none; }
-    .add-roster-form input:focus { border-color: var(--green); }
-    .add-roster-form input::placeholder { color: var(--muted); }
-    .add-roster-form .inp-jersey  { width: 80px; }
-    .add-roster-form .inp-email   { flex: 1; min-width: 160px; }
-    .add-roster-form .inp-name    { flex: 1; min-width: 120px; }
-    .logo-upload-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
-    .logo-preview { width: 40px; height: 40px; border-radius: 8px; object-fit: contain; background: var(--surface); border: 1px solid var(--border); display: none; }
-
-    /* ── Coach view ── */
-    .coach-event-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
-    .coach-event-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
-    .coach-event-logo { width: 48px; height: 48px; border-radius: 10px; object-fit: contain; background: var(--surface); border: 1px solid var(--border); }
-    .coach-event-name { font-size: 1rem; font-weight: 700; }
-    .coach-event-sub  { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
-    .pipeline-stats   { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
-    .pipe-stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; text-align: center; min-width: 70px; }
-    .pipe-stat-val { font-size: 1.2rem; font-weight: 800; }
-    .pipe-stat-lbl { color: var(--muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
-    .upload-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .upload-form input, .upload-form select { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 0.85rem; padding: 9px 12px; outline: none; }
-    .upload-form input:focus, .upload-form select:focus { border-color: var(--green); }
-    .upload-form input::placeholder { color: var(--muted); }
-    .upload-form .full-width { grid-column: 1 / -1; }
-    .upload-form label.field-label { color: var(--muted); font-size: 0.72rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; display: block; margin-bottom: 4px; }
-    .upload-progress { display: none; margin-top: 12px; }
-    .upload-progress.show { display: block; }
-    .progress-bar-wrap { background: var(--border); border-radius: 4px; height: 6px; margin-bottom: 6px; overflow: hidden; }
-    .progress-bar-fill { background: var(--green); height: 100%; border-radius: 4px; transition: width .3s; width: 0; }
-    .progress-label { color: var(--muted); font-size: 0.78rem; }
-
-    /* ── Coach requests ── */
-    .coach-req-row { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--yellow); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
-    .coach-req-name  { font-size: 0.9rem; font-weight: 600; }
-    .coach-req-email { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
-    .coach-req-meta  { color: var(--muted); font-size: 0.76rem; margin-top: 4px; }
-    .coach-req-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
-    .coach-req-actions input { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 0.8rem; padding: 6px 10px; outline: none; flex: 1; min-width: 140px; }
-    .coach-req-actions input:focus { border-color: var(--green); }
-    .coach-req-actions input::placeholder { color: var(--muted); }
-
-    /* ── Sparkline ── */
-    .sparkline-wrap { margin-top: 4px; }
-    .sparkline-wrap canvas { display: block; width: 100%; }
-
-    /* ── Failure alert widget ── */
-    .alert-widget { display: none; background: rgba(239,83,80,.08); border: 1px solid rgba(239,83,80,.35); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; }
-    .alert-widget.visible { display: flex; align-items: center; gap: 14px; }
-    .alert-pulse { width: 10px; height: 10px; border-radius: 50%; background: var(--red); flex-shrink: 0; animation: pulse 1.4s ease-in-out infinite; }
-    @keyframes pulse {
-      0%,100% { box-shadow: 0 0 0 0 rgba(239,83,80,.6); }
-      50%      { box-shadow: 0 0 0 7px rgba(239,83,80,0); }
-    }
-    .alert-body { flex: 1; }
-    .alert-title { font-size: 0.9rem; font-weight: 700; color: var(--red); margin-bottom: 2px; }
-    .alert-sub   { font-size: 0.78rem; color: var(--muted); }
-    .alert-actions { display: flex; gap: 8px; flex-shrink: 0; }
-    .btn-dismiss { background: none; border: 1px solid rgba(239,83,80,.4); border-radius: 6px; color: var(--muted); font-size: 0.78rem; padding: 6px 12px; cursor: pointer; }
-    .btn-dismiss:hover { border-color: var(--muted); }
-    .notify-toggle { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-size: 0.75rem; padding: 4px 10px; cursor: pointer; white-space: nowrap; }
-    .notify-toggle.on  { border-color: var(--green); color: var(--green); }
-    .notify-toggle.off { border-color: var(--border); color: var(--muted); }
-    .poll-status { font-size: 0.72rem; color: var(--muted); margin-left: auto; white-space: nowrap; }
-
-    /* ── Failures tab ── */
-    .failure-list { display: flex; flex-direction: column; gap: 8px; }
-    .failure-row { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; align-items: center; gap: 12px; padding: 12px 16px; font-size: 0.85rem; }
-    .failure-row.analysis_failed { border-left-color: var(--yellow); }
-    .failure-row.upload_failed   { border-left-color: #ff9800; }
-    .failure-email { font-weight: 500; }
-    .failure-meta  { color: var(--muted); font-size: 0.78rem; }
-    .failure-detail { color: var(--muted); font-size: 0.76rem; margin-top: 3px; font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px; }
-    .failure-badge { display: inline-block; border-radius: 4px; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; text-transform: uppercase; letter-spacing: .04em; }
-    .badge-failed   { background: rgba(239,83,80,.15); color: var(--red); }
-    .badge-analysis { background: rgba(255,214,0,.12); color: var(--yellow); }
-    .badge-upload   { background: rgba(255,152,0,.15); color: #ff9800; }
-    .pre-errors-section { margin-top: 24px; }
-    .pre-errors-heading { font-size: 0.72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-    .pre-error-row { background: var(--card); border: 1px solid var(--border); border-left: 3px solid #9e9e9e; border-radius: 8px; display: flex; align-items: center; gap: 12px; padding: 10px 14px; font-size: 0.82rem; }
-    .pre-error-type { font-weight: 600; color: #bbb; min-width: 140px; }
-    .pre-error-msg  { color: var(--muted); font-size: 0.78rem; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .pre-error-date { color: var(--muted); font-size: 0.75rem; white-space: nowrap; }
-    .btn-retry { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-size: 0.75rem; padding: 4px 10px; }
-    .btn-retry:hover { border-color: var(--green); color: var(--green); }
-
-    /* ── Stalls section ── */
-    .stall-section { margin-top: 24px; }
-    .stall-heading { font-size: 0.72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--yellow); margin-bottom: 10px; }
-    .stall-row { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--yellow); border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr auto; align-items: start; gap: 12px; padding: 12px 16px; font-size: 0.85rem; margin-bottom: 8px; }
-    .stall-row.proc { border-left-color: #40c4ff; }
-    .stall-reason { color: var(--muted); font-size: 0.75rem; font-style: italic; margin-top: 4px; }
-
-    /* ── Beta requests section ── */
-    .requests-section { margin-top: 28px; }
-    .req-row { background: var(--card); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; margin-bottom: 8px; }
-    .req-email { font-size: 0.9rem; font-weight: 500; }
-    .req-meta  { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
-    .req-actions { display: flex; gap: 8px; flex-shrink: 0; }
-    .btn-approve { background: rgba(0,230,118,.15); border: 1px solid rgba(0,230,118,.4); border-radius: 6px; color: var(--green); font-size: 0.78rem; font-weight: 600; padding: 5px 14px; }
-    .btn-approve:hover { background: rgba(0,230,118,.25); }
-    .btn-decline { background: rgba(239,83,80,.1); border: 1px solid rgba(239,83,80,.35); border-radius: 6px; color: var(--red); font-size: 0.78rem; font-weight: 600; padding: 5px 14px; }
-    .btn-decline:hover { background: rgba(239,83,80,.2); }
-    .status-chip { display: inline-block; border-radius: 4px; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; text-transform: uppercase; letter-spacing: .04em; }
-    .chip-approved { background: rgba(0,230,118,.12); color: var(--green); }
-    .chip-declined { background: rgba(239,83,80,.1); color: var(--red); }
-    .chip-pending  { background: rgba(255,214,0,.1); color: var(--yellow); }
-
-    @media (max-width: 600px) {
-      .failure-row { grid-template-columns: 1fr; }
-      .form-row { flex-direction: column; }
-      .form-row input[type="text"] { flex: unset; }
-    }
-  </style>
+/* ── Section header ─────────────────────────────────────── */
+.section-hd {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:1.5rem; flex-wrap:wrap; gap:10px;
+}
+.section-hd-title { font-family:'Oswald',system-ui; font-size:1.4rem; font-weight:600; color:var(--gold); text-transform:uppercase; }
+.panel { display:none; }
+.panel.active { display:block; }
+</style>
 </head>
 <body>
 
-<!-- Auth screen -->
+<!-- ── Auth Screen ───────────────────────────────────────── -->
 <div id="auth-screen">
   <div class="auth-card">
-    <div class="logo">⚽</div>
-    <h1>PitchScout Admin</h1>
-    <p>Sign in with your Google account to continue</p>
-    <button class="btn-google" id="auth-google-btn">
-      <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
-        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-        <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
-        <path d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
-        <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
-      </svg>
-      Continue with Google
+    <div class="auth-logo"><span class="fire">Jigga</span> Jerk Joint</div>
+    <div class="auth-sub">Admin Portal · Project Fiyah</div>
+    <button class="btn-google" id="btn-google-login">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z" fill="#4285F4"/><path d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2.02a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z" fill="#34A853"/><path d="M4.5 10.5a4.8 4.8 0 0 1 0-3v-2.07H1.83a8 8 0 0 0 0 7.14L4.5 10.5z" fill="#FBBC05"/><path d="M8.98 4.72c1.22 0 2.31.42 3.17 1.25l2.38-2.38A8 8 0 0 0 1.83 5.43L4.5 7.5A4.77 4.77 0 0 1 8.98 4.72z" fill="#EA4335"/></svg>
+      Sign in with Google
     </button>
     <div class="auth-err" id="auth-err"></div>
+    <div class="demo-login">
+      <p>For demo purposes — skip auth and explore the admin panel:</p>
+      <button class="btn btn-ghost btn-sm btn-full" id="btn-demo-login">Enter Demo Mode</button>
+    </div>
+    <p class="auth-note">Only authorized Google accounts can access this panel.<br>Contact the site administrator to request access.</p>
   </div>
 </div>
 
-<!-- Admin app -->
+<!-- ── App Shell ─────────────────────────────────────────── -->
 <div id="app">
-  <header>
-    <h1>PitchScout <span>Admin</span></h1>
+  <header class="admin-header">
+    <div class="admin-logo">
+      <span>JJJ</span> Admin
+      <small>Project Fiyah</small>
+    </div>
     <div class="header-right">
-      <div class="user-badge">
-        <strong id="header-email"></strong>
-        <span id="header-role-chip"></span>
-      </div>
-      <button class="btn-signout" id="signout-btn">Sign out</button>
+      <a href="index.html" class="view-site-link">← View Site</a>
+      <span class="user-chip">Signed in as <strong id="user-display">Admin</strong></span>
+      <button class="btn-signout" id="btn-signout">Sign Out</button>
     </div>
   </header>
 
-  <nav class="tabs" id="tab-nav">
-    <button class="tab" data-tab="myevents" id="tab-myevents-btn" style="display:none">My Events</button>
-    <button class="tab active" data-tab="allowlist" id="tab-allowlist-btn">Beta Testers</button>
-    <button class="tab" data-tab="stats">Spending</button>
-    <button class="tab" data-tab="failures">Failures <span id="failure-badge"></span></button>
-    <button class="tab" data-tab="events" id="tab-events-btn" style="display:none">Events</button>
-    <button class="tab" data-tab="users" id="tab-users-btn" style="display:none">Admin Users</button>
-  </nav>
-
-  <!-- ── Tab: Allowlist ── -->
-  <div class="tab-panel active" id="tab-allowlist">
-    <div class="card">
-      <div class="section-title">Add beta tester</div>
-      <div class="form-row">
-        <input type="email" id="add-email" placeholder="email@example.com" />
-        <input type="text"  id="add-note"  placeholder="Note (optional)" maxlength="80" />
-        <button class="btn-primary" id="add-btn">Add</button>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Overview</div>
+        <div class="sidebar-link active" data-panel="dashboard">
+          <span class="sidebar-icon">📊</span> Dashboard
+        </div>
       </div>
-      <div class="msg" id="add-msg"></div>
-    </div>
-
-    <div class="list-header">
-      <div class="section-title" style="margin:0">Approved testers</div>
-      <span class="count" id="user-count">—</span>
-    </div>
-    <div class="user-list" id="user-list"><div class="empty">Loading…</div></div>
-
-    <div class="requests-section">
-      <div class="list-header" style="margin-bottom:12px">
-        <div class="section-title" style="margin:0">Beta access requests</div>
-        <span class="count" id="req-count">—</span>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Content</div>
+        <div class="sidebar-link" data-panel="menu">
+          <span class="sidebar-icon">🍗</span> Menu Editor
+        </div>
+        <div class="sidebar-link" data-panel="specials">
+          <span class="sidebar-icon">⭐</span> Specials
+        </div>
       </div>
-      <div id="req-list"><div class="empty">Loading…</div></div>
-    </div>
-  </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Orders</div>
+        <div class="sidebar-link" data-panel="catering">
+          <span class="sidebar-icon">🗓️</span> Catering Orders
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Integrations</div>
+        <div class="sidebar-link" data-panel="square">
+          <span class="sidebar-icon">💳</span> Square Invoices
+        </div>
+        <div class="sidebar-link" data-panel="gmb">
+          <span class="sidebar-icon">📍</span> Google My Business
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Settings</div>
+        <div class="sidebar-link" data-panel="settings">
+          <span class="sidebar-icon">⚙️</span> Site Settings
+        </div>
+      </div>
+    </nav>
 
-  <!-- ── Tab: Spending ── -->
-  <div class="tab-panel" id="tab-stats">
-    <div class="spending-layout">
-      <!-- Main column -->
-      <div class="spending-main">
-        <!-- Month selector + total -->
-        <div class="month-selector">
-          <select id="month-select"></select>
-          <div>
-            <div class="month-total" id="month-total">—</div>
-            <div class="month-total-label">Total this month</div>
+    <!-- Main content -->
+    <main class="admin-content">
+
+      <!-- ── Dashboard ── -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="section-hd"><div class="section-hd-title">Dashboard</div></div>
+        <div class="stat-cards" id="dash-stats">
+          <div class="stat-card"><div class="stat-card-value" id="stat-menu-count">—</div><div class="stat-card-label">Menu Items</div></div>
+          <div class="stat-card"><div class="stat-card-value" id="stat-pending">—</div><div class="stat-card-label">Pending Orders</div></div>
+          <div class="stat-card"><div class="stat-card-value" id="stat-total-orders">—</div><div class="stat-card-label">Total Orders</div></div>
+          <div class="stat-card"><div class="stat-card-value" id="stat-newsletter">—</div><div class="stat-card-label">Newsletter Subs</div></div>
+        </div>
+        <div style="background:var(--smoke2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:1.5rem;">
+          <div style="font-family:'Oswald',system-ui;font-size:1rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Quick Actions</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="switchPanel('menu')">+ Add Menu Item</button>
+            <button class="btn btn-ghost btn-sm" onclick="switchPanel('catering')">View Catering Orders</button>
+            <button class="btn btn-ghost btn-sm" onclick="switchPanel('square')">Check Invoices</button>
+            <button class="btn btn-ghost btn-sm" onclick="switchPanel('settings')">Update Site Info</button>
           </div>
         </div>
+        <div style="background:var(--smoke2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;">
+          <div style="font-family:'Oswald',system-ui;font-size:1rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Recent Catering Requests</div>
+          <div id="dash-recent-orders"><div class="spinner"></div></div>
+        </div>
+      </div>
 
-        <!-- TwelveLabs breakdown -->
-        <div class="card" style="margin-bottom:16px">
-          <div class="section-title">TwelveLabs Analysis</div>
-          <table class="cost-table" id="cost-table">
-            <thead><tr><th>Match type</th><th>Sessions</th><th>Unit cost</th><th>Subtotal</th></tr></thead>
-            <tbody id="cost-body"></tbody>
+      <!-- ── Menu Editor ── -->
+      <div class="panel" id="panel-menu">
+        <div class="section-hd">
+          <div class="section-hd-title">Menu Editor</div>
+          <button class="btn btn-primary btn-sm" onclick="openItemModal()">+ Add Item</button>
+        </div>
+        <div class="menu-actions">
+          <input type="text" class="menu-search" placeholder="Search items…" id="menu-search" oninput="filterMenuTable()" />
+          <div style="display:flex;gap:8px;">
+            <select class="form-select" style="width:160px;" id="menu-cat-filter" onchange="filterMenuTable()">
+              <option value="">All Categories</option>
+              <option>Jerk Chicken</option>
+              <option>Jerk Pork</option>
+              <option>Seafood</option>
+              <option>Sides</option>
+              <option>Drinks</option>
+              <option>Desserts</option>
+            </select>
+          </div>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table" id="menu-table">
+            <thead><tr>
+              <th>Item</th><th>Category</th><th>Price</th><th>Featured</th><th>Active</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="menu-tbody"></tbody>
           </table>
-          <p class="billing-note" id="billing-note"></p>
-        </div>
-
-        <!-- One-time expenses -->
-        <div class="card" style="margin-bottom:16px">
-          <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
-            <span>One-time Expenses</span>
-            <span class="count" id="oneoff-total">$0.00</span>
-          </div>
-          <div id="oneoff-list"><div class="empty" style="padding:12px 0">None this month.</div></div>
-
-          <div class="section-title" style="margin-top:16px;margin-bottom:8px">Add Expense</div>
-          <div class="add-expense-form">
-            <input type="text" id="exp-desc" placeholder="Description" />
-            <input type="number" id="exp-amount" placeholder="Amount ($)" min="0.01" step="0.01" />
-            <select id="exp-category">
-              <option value="other">Category</option>
-              <option value="ai_subscriptions">AI Subscriptions</option>
-              <option value="infrastructure">Infrastructure</option>
-              <option value="platform">Platform</option>
-              <option value="domain">Domain</option>
-              <option value="tooling">Tooling</option>
-              <option value="marketing">Marketing</option>
-              <option value="other">Other</option>
-            </select>
-            <button class="btn-add-exp" id="add-exp-btn">+ Add</button>
-            <div class="msg full-width" id="exp-msg"></div>
-          </div>
-        </div>
-
-        <!-- Recurring expenses -->
-        <div class="card" style="margin-bottom:16px">
-          <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
-            <span>Recurring Expenses</span>
-            <span class="count" id="recurring-total">$0.00</span>
-          </div>
-          <div id="recurring-list"><div class="empty" style="padding:12px 0">Loading…</div></div>
-
-          <div class="section-title" style="margin-top:16px;margin-bottom:8px">Add Recurring</div>
-          <div class="add-expense-form">
-            <input type="text" id="rec-desc" placeholder="Description (e.g. Claude Max)" class="full-width" />
-            <input type="number" id="rec-amount" placeholder="Monthly amount ($)" min="0.01" step="0.01" />
-            <select id="rec-category">
-              <option value="other">Category</option>
-              <option value="ai_subscriptions">AI Subscriptions</option>
-              <option value="infrastructure">Infrastructure</option>
-              <option value="platform">Platform</option>
-              <option value="domain">Domain</option>
-              <option value="tooling">Tooling</option>
-              <option value="marketing">Marketing</option>
-              <option value="other">Other</option>
-            </select>
-            <input type="month" id="rec-start" title="Start month" />
-            <button class="btn-add-exp" id="add-rec-btn">+ Add Recurring</button>
-            <div class="msg full-width" id="rec-msg"></div>
-          </div>
-        </div>
-
-        <!-- Sparkline -->
-        <div class="card">
-          <div class="section-title">Daily completions (last 30 days)</div>
-          <div class="sparkline-wrap"><canvas id="sparkline" height="60"></canvas></div>
         </div>
       </div>
 
-      <!-- YTD sidebar -->
-      <div class="spending-sidebar">
-        <div class="ytd-card">
-          <div class="ytd-title">Year to Date <span id="ytd-year"></span></div>
-          <div class="ytd-total-row">
-            <span class="ytd-total-label">Total</span>
-            <span class="ytd-total-value" id="ytd-total">—</span>
+      <!-- ── Specials ── -->
+      <div class="panel" id="panel-specials">
+        <div class="section-hd"><div class="section-hd-title">Weekly Specials</div></div>
+        <div style="background:var(--smoke2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;">
+          <div class="form-group">
+            <label class="form-label">Special Enabled</label>
+            <label class="toggle-switch"><input type="checkbox" id="special-enabled" /><span class="toggle-slider"></span></label>
           </div>
-          <div id="ytd-cats"><div style="color:var(--muted);font-size:0.8rem">Loading…</div></div>
+          <div class="form-group">
+            <label class="form-label">Special Banner Text</label>
+            <input type="text" class="form-input" id="special-text" placeholder="e.g. Friday Fish Fry — Jerk Snapper $12.99 all day!" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Start Date</label>
+              <input type="date" class="form-input" id="special-start" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">End Date</label>
+              <input type="date" class="form-input" id="special-end" />
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="saveSpecial()">Save Special</button>
         </div>
       </div>
-    </div>
+
+      <!-- ── Catering Orders ── -->
+      <div class="panel" id="panel-catering">
+        <div class="section-hd">
+          <div class="section-hd-title">Catering Orders</div>
+          <button class="btn btn-ghost btn-sm" onclick="exportOrdersCSV()">⬇ Export CSV</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:1.2rem;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm status-filter active" data-status="all" onclick="filterOrders(this)">All</button>
+          <button class="btn btn-ghost btn-sm status-filter" data-status="pending"   onclick="filterOrders(this)">Pending</button>
+          <button class="btn btn-ghost btn-sm status-filter" data-status="confirmed" onclick="filterOrders(this)">Confirmed</button>
+          <button class="btn btn-ghost btn-sm status-filter" data-status="completed" onclick="filterOrders(this)">Completed</button>
+          <button class="btn btn-ghost btn-sm status-filter" data-status="cancelled" onclick="filterOrders(this)">Cancelled</button>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th>Ref #</th><th>Date</th><th>Event</th><th>Guests</th><th>Contact</th><th>Status</th><th></th>
+            </tr></thead>
+            <tbody id="orders-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── Square Invoices ── -->
+      <div class="panel" id="panel-square">
+        <div class="section-hd"><div class="section-hd-title">Square Invoices</div></div>
+        <div style="background:var(--smoke2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:1.5rem;">
+          <div style="font-size:0.9rem;color:var(--muted-hi);margin-bottom:16px;line-height:1.6;">
+            Connect your Square account to retrieve invoices and payment status. You'll need a Square <strong style="color:var(--cream);">Personal Access Token</strong> from your Square Developer Dashboard.
+          </div>
+          <div class="form-group">
+            <label class="form-label">Square Access Token</label>
+            <input type="password" class="form-input" id="square-token" placeholder="EAAAxxxxxxxxxxxx" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Location ID (optional)</label>
+            <input type="text" class="form-input" id="square-location" placeholder="Your Square Location ID" />
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-primary btn-sm" onclick="connectSquare()">Save &amp; Fetch Invoices</button>
+            <a href="https://developer.squareup.com/apps" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Open Square Dashboard ↗</a>
+          </div>
+        </div>
+        <div id="square-invoices-section" class="hidden">
+          <div class="section-hd">
+            <span style="font-size:0.9rem;color:var(--muted-hi);" id="square-sync-time"></span>
+            <button class="btn btn-ghost btn-sm" onclick="fetchSquareInvoices()">↻ Refresh</button>
+          </div>
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead><tr>
+                <th>Invoice #</th><th>Customer</th><th>Amount</th><th>Due Date</th><th>Status</th>
+              </tr></thead>
+              <tbody id="invoices-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Google My Business ── -->
+      <div class="panel" id="panel-gmb">
+        <div class="section-hd"><div class="section-hd-title">Google My Business</div></div>
+        <div id="gmb-connect-section">
+          <div style="background:var(--smoke2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;">
+            <div style="font-size:0.9rem;color:var(--muted-hi);margin-bottom:20px;line-height:1.6;">
+              Connect your Google account (with Business Profile access) to update your listing hours, description, and info directly from this admin panel.
+            </div>
+            <button class="btn btn-primary" onclick="connectGMB()">Connect Google My Business</button>
+          </div>
+        </div>
+        <div id="gmb-editor-section" class="hidden">
+          <div style="background:var(--smoke2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:1.5rem;">
+            <div style="font-family:'Oswald',system-ui;font-size:1rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:20px;">Business Info</div>
+            <div class="form-group">
+              <label class="form-label">Business Description</label>
+              <textarea class="form-textarea" id="gmb-description" rows="4" placeholder="Describe your business for Google Search and Maps…"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number</label>
+              <input type="tel" class="form-input" id="gmb-phone" placeholder="(555) 000-0000" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Website URL</label>
+              <input type="url" class="form-input" id="gmb-website" placeholder="https://yourdomain.com" />
+            </div>
+          </div>
+          <div style="background:var(--smoke2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:1.5rem;">
+            <div style="font-family:'Oswald',system-ui;font-size:1rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:20px;">Business Hours</div>
+            <div id="gmb-hours-editor"></div>
+          </div>
+          <button class="btn btn-primary" onclick="saveGMB()">Save to Google My Business</button>
+          <p style="font-size:0.78rem;color:var(--muted);margin-top:12px;">Changes are pushed directly to your Google Business Profile and may take a few minutes to appear on Search and Maps.</p>
+        </div>
+      </div>
+
+      <!-- ── Settings ── -->
+      <div class="panel" id="panel-settings">
+        <div class="section-hd"><div class="section-hd-title">Site Settings</div></div>
+        <div style="background:var(--smoke2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:1.5rem;">
+          <div style="font-family:'Oswald',system-ui;font-size:1rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:20px;">Links &amp; Contact</div>
+          <div class="form-group">
+            <label class="form-label">DoorDash URL</label>
+            <input type="url" class="form-input" id="setting-doordash" placeholder="https://www.doordash.com/store/..." />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Google Maps URL</label>
+            <input type="url" class="form-input" id="setting-maps" placeholder="https://maps.google.com/..." />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" class="form-input" id="setting-phone" placeholder="(555) 000-0000" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Address (shown on homepage)</label>
+            <textarea class="form-textarea" id="setting-address" rows="2" placeholder="123 Main St\nAtlanta, GA 30301"></textarea>
+          </div>
+        </div>
+        <div style="background:var(--smoke2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:1.5rem;">
+          <div style="font-family:'Oswald',system-ui;font-size:1rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:20px;">Business Hours</div>
+          <div id="hours-editor"></div>
+        </div>
+        <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+      </div>
+
+    </main>
   </div>
+</div>
 
-  <!-- ── Tab: Events (admin/superuser only) ── -->
-  <div class="tab-panel" id="tab-events">
-    <!-- Create event form (admin only) -->
-    <div class="card" id="create-event-card">
-      <div class="section-title">Create New Event</div>
-      <div class="create-event-form">
-        <input type="text" id="new-event-id" placeholder="event_id (e.g. summercamp2026)" />
-        <input type="text" id="new-event-name" placeholder="Display name" />
-        <input type="date" id="new-event-date" />
-        <input type="number" id="new-event-count" placeholder="Expected players" min="1" />
-        <button class="btn-primary full-width" id="create-event-btn">Create Event</button>
-        <div class="msg full-width" id="create-event-msg"></div>
-      </div>
+<!-- ── Item Modal ─────────────────────────────────────────── -->
+<div class="modal-overlay" id="item-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="item-modal-title">Add Menu Item</div>
+      <button class="modal-close" onclick="closeItemModal()">✕</button>
     </div>
-
-    <div class="list-header">
-      <div class="section-title" style="margin:0">Events</div>
-      <span class="count" id="events-count">—</span>
-    </div>
-    <div id="events-list"><div class="empty">Loading…</div></div>
-  </div>
-
-  <!-- ── Tab: My Events (coach only) ── -->
-  <div class="tab-panel" id="tab-myevents">
-    <div id="myevents-list"><div class="empty">Loading…</div></div>
-  </div>
-
-  <!-- ── Tab: Failures ── -->
-  <div class="tab-panel" id="tab-failures">
-
-    <!-- Notification widget -->
-    <div class="alert-widget" id="alert-widget">
-      <div class="alert-pulse"></div>
-      <div class="alert-body">
-        <div class="alert-title" id="alert-title">New failures detected</div>
-        <div class="alert-sub" id="alert-sub"></div>
-      </div>
-      <div class="alert-actions">
-        <button class="btn-dismiss" id="alert-dismiss">Dismiss</button>
-      </div>
-    </div>
-
-    <!-- Toolbar -->
-    <div class="list-header" style="margin-bottom:16px;align-items:center">
-      <div class="section-title" style="margin:0">Failed sessions — last 30 days</div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span class="poll-status" id="poll-status"></span>
-        <button class="notify-toggle off" id="notify-toggle" title="Browser notifications">🔔 Notify</button>
-        <span class="count" id="failure-count">—</span>
-      </div>
-    </div>
-    <div class="failure-list" id="failure-list"><div class="empty">Loading…</div></div>
-  </div>
-
-  <!-- ── Tab: Admin Users (full admin only) ── -->
-  <div class="tab-panel" id="tab-users">
-
-    <!-- Coach requests -->
-    <div class="admin-section">
-      <div class="list-header" style="margin-bottom:12px">
-        <div class="section-title" style="margin:0">Coach Requests</div>
-        <span class="count" id="coach-req-count">—</span>
-      </div>
-      <div id="coach-req-list"><div class="empty">Loading…</div></div>
-    </div>
-
-    <!-- Approved coaches -->
-    <div class="admin-section">
-      <div class="section-title">Coaches</div>
-      <div id="coaches-list"><div class="empty">Loading…</div></div>
-    </div>
-
-    <div class="admin-section">
-      <div class="section-title">Full admins</div>
-      <div id="full-admins-list"><div class="empty">Loading…</div></div>
-    </div>
-
-    <div class="admin-section">
-      <div class="section-title">Superusers</div>
-      <div id="superusers-list"><div class="empty">Loading…</div></div>
-    </div>
-
-    <div class="card">
-      <div class="section-title">Add superuser</div>
+    <div class="modal-body">
+      <input type="hidden" id="item-edit-id" />
       <div class="form-row">
-        <input type="email" id="su-email" placeholder="email@example.com" />
-        <button class="btn-primary" id="su-add-btn">Add superuser</button>
+        <div class="form-group">
+          <label class="form-label">Item Name *</label>
+          <input type="text" class="form-input" id="item-name" placeholder="e.g. Jerk Chicken Half" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Price *</label>
+          <input type="number" class="form-input" id="item-price" placeholder="14.99" step="0.01" min="0" />
+        </div>
       </div>
-      <div class="msg" id="su-msg"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Category *</label>
+          <select class="form-select" id="item-category">
+            <option value="">Select category</option>
+            <option>Jerk Chicken</option><option>Jerk Pork</option><option>Seafood</option>
+            <option>Sides</option><option>Drinks</option><option>Desserts</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Emoji Icon</label>
+          <input type="text" class="form-input" id="item-emoji" placeholder="🍗" maxlength="4" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="item-description" rows="3" placeholder="Describe the dish…"></textarea>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:20px;margin-bottom:1rem;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.88rem;color:var(--muted-hi);">
+          <input type="checkbox" id="item-featured" /> Featured on homepage
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.88rem;color:var(--muted-hi);">
+          <input type="checkbox" id="item-spicy" /> 🌶 Spicy
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.88rem;color:var(--muted-hi);">
+          <input type="checkbox" id="item-gf" /> Gluten Free
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.88rem;color:var(--muted-hi);">
+          <input type="checkbox" id="item-vegan" /> 🌿 Vegan
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.88rem;color:var(--muted-hi);">
+          <input type="checkbox" id="item-active" checked /> Active (visible on menu)
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeItemModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveItem()">Save Item</button>
     </div>
   </div>
 </div>
 
+<!-- ── Order Modal ────────────────────────────────────────── -->
+<div class="modal-overlay" id="order-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="order-modal-title">Order Details</div>
+      <button class="modal-close" onclick="closeOrderModal()">✕</button>
+    </div>
+    <div class="modal-body" id="order-modal-body"></div>
+    <div class="modal-footer" id="order-modal-footer"></div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="js/firebase-init.js"></script>
 <script>
-const API_BASE    = 'https://mdvmhkrsc3.execute-api.us-east-1.amazonaws.com';
-const SESSION_KEY = 'ps_admin_jwt';
+// ── State ────────────────────────────────────────────────
+let currentUser = null;
+let allOrders   = [];
+let allItems    = [];
+let orderFilter = "all";
 
-const COGNITO_DOMAIN = 'https://pitchscout.auth.us-east-1.amazoncognito.com';
-const CLIENT_ID      = '65brgla25g237lk7ajrm7kptm8';
-const REDIRECT_URI   = window.location.origin + '/admin.html';
-
-let jwt      = '';
-let myEmail  = '';
-let myRole   = '';
-
-// ── PKCE helpers ─────────────────────────────────────────────────────────────
-
-function _pkceVerifier() {
-  const arr = new Uint8Array(32);
-  crypto.getRandomValues(arr);
-  return btoa(String.fromCharCode(...arr)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
-}
-
-async function _pkceChallenge(verifier) {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
-  return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
-}
-
-function _decodeEmail(token) {
+// ── Auth ─────────────────────────────────────────────────
+document.getElementById("btn-google-login").addEventListener("click", async () => {
+  if (!firebaseReady) {
+    document.getElementById("auth-err").textContent = "Firebase not configured. Use Demo Mode below.";
+    return;
+  }
   try {
-    const b64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
-    const payload = JSON.parse(atob(b64 + '=='.slice((b64.length + 3) % 4 ? 0 : 2)));
-    return (payload.email || '').trim().toLowerCase();
-  } catch { return ''; }
-}
-
-// ── OAuth flow ────────────────────────────────────────────────────────────────
-
-async function startGoogleSignIn() {
-  const verifier   = _pkceVerifier();
-  const challenge  = await _pkceChallenge(verifier);
-  sessionStorage.setItem('pkce_verifier', verifier);
-  const params = new URLSearchParams({
-    response_type: 'code',
-    client_id:     CLIENT_ID,
-    redirect_uri:  REDIRECT_URI,
-    identity_provider: 'Google',
-    scope: 'openid email profile',
-    code_challenge: challenge,
-    code_challenge_method: 'S256',
-  });
-  window.location.href = `${COGNITO_DOMAIN}/oauth2/authorize?${params}`;
-}
-
-async function handleOAuthCallback() {
-  const code = new URLSearchParams(window.location.search).get('code');
-  if (!code) return false;
-  window.history.replaceState({}, '', window.location.pathname);
-
-  const verifier = sessionStorage.getItem('pkce_verifier');
-  sessionStorage.removeItem('pkce_verifier');
-
-  const body = new URLSearchParams({
-    grant_type:   'authorization_code',
-    client_id:    CLIENT_ID,
-    code,
-    redirect_uri: REDIRECT_URI,
-  });
-  if (verifier) body.set('code_verifier', verifier);
-
-  const resp = await fetch(`${COGNITO_DOMAIN}/oauth2/token`, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-  });
-  if (!resp.ok) {
-    document.getElementById('auth-err').textContent = 'Sign-in failed. Please try again.';
-    return false;
-  }
-  const tokens = await resp.json();
-  sessionStorage.setItem(SESSION_KEY, tokens.access_token);
-  return tokens.access_token;
-}
-
-function authHeaders() {
-  return { 'Authorization': 'Bearer ' + jwt };
-}
-
-async function verifyAndShow(token) {
-  jwt = token;
-
-  const resp = await fetch(`${API_BASE}/admin/me`, {
-    headers: authHeaders(),
-  }).catch(() => null);
-  if (!resp || resp.status === 403) { jwt = ''; return false; }
-
-  const data = await resp.json().catch(() => null);
-  if (!data || !data.role || !data.email) { jwt = ''; return false; }
-
-  myEmail = data.email;
-  myRole  = data.role;
-  return true;
-}
-
-// ── Auth UI ───────────────────────────────────────────────────────────────────
-
-document.getElementById('auth-google-btn').addEventListener('click', startGoogleSignIn);
-
-document.getElementById('signout-btn').addEventListener('click', () => {
-  sessionStorage.removeItem(SESSION_KEY);
-  jwt = myEmail = myRole = '';
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('auth-screen').style.display = 'flex';
-  document.getElementById('auth-err').textContent = '';
-});
-
-// ── Tabs ──────────────────────────────────────────────────────────────────────
-
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
-    // Lazy-load tab data
-    if (tab.dataset.tab === 'stats')    loadSpending();
-    if (tab.dataset.tab === 'users')    { loadAdminUsers(); if (myRole === 'admin') loadCoachRequests(); }
-    if (tab.dataset.tab === 'events')   loadEvents();
-    if (tab.dataset.tab === 'myevents') loadMyEvents();
-  });
-});
-
-// ── Allowlist ─────────────────────────────────────────────────────────────────
-
-async function loadAllowlist() {
-  const resp = await fetch(`${API_BASE}/admin/allowlist`, { headers: authHeaders() });
-  const data = await resp.json();
-  const users = data.users || [];
-  document.getElementById('user-count').textContent = users.length + ' approved';
-  const list = document.getElementById('user-list');
-  if (!users.length) { list.innerHTML = '<div class="empty">No beta testers yet.</div>'; return; }
-  list.innerHTML = users.map(u => `
-    <div class="user-row">
-      <div>
-        <div class="user-email">${esc(u.email)}</div>
-        <div class="user-meta">${u.note ? esc(u.note) + ' · ' : ''}Added ${esc((u.added || u.added_at || '—').slice(0,10))}</div>
-      </div>
-      <button class="btn-danger" data-remove="${esc(u.email)}">Remove</button>
-    </div>
-  `).join('');
-  list.querySelectorAll('[data-remove]').forEach(btn =>
-    btn.addEventListener('click', () => removeUser(btn.dataset.remove)));
-}
-
-async function loadRequests() {
-  const resp = await fetch(`${API_BASE}/admin/requests`, { headers: authHeaders() });
-  if (!resp.ok) {
-    document.getElementById('req-list').innerHTML = '<div class="empty">Could not load requests.</div>';
-    return;
-  }
-  const data = await resp.json();
-  const reqs = data.requests || [];
-  const pending = reqs.filter(r => r.status === 'pending');
-  const others  = reqs.filter(r => r.status !== 'pending');
-
-  document.getElementById('req-count').textContent =
-    pending.length ? `${pending.length} pending` : reqs.length + ' total';
-
-  if (!reqs.length) {
-    document.getElementById('req-list').innerHTML = '<div class="empty">No access requests yet.</div>';
-    return;
-  }
-
-  const STATUS_CHIP = {
-    pending:  '<span class="status-chip chip-pending">Pending</span>',
-    approved: '<span class="status-chip chip-approved">Approved</span>',
-    declined: '<span class="status-chip chip-declined">Declined</span>',
-  };
-
-  const rows = [...pending, ...others].map(r => `
-    <div class="req-row" id="req-${esc(r.email.replace(/[@.]/g,'-'))}">
-      <div>
-        <div class="req-email">${esc(r.email)}</div>
-        <div class="req-meta">Requested ${esc(r.requested_at)} ${STATUS_CHIP[r.status] || ''}</div>
-      </div>
-      ${r.status === 'pending' ? `
-        <div class="req-actions">
-          <button class="btn-approve" data-req-approve="${esc(r.email)}">Approve</button>
-          <button class="btn-decline" data-req-decline="${esc(r.email)}">Decline</button>
-        </div>` : ''}
-    </div>`).join('');
-
-  document.getElementById('req-list').innerHTML = rows;
-
-  document.querySelectorAll('[data-req-approve]').forEach(btn =>
-    btn.addEventListener('click', () => handleRequest(btn.dataset.reqApprove, 'approve')));
-  document.querySelectorAll('[data-req-decline]').forEach(btn =>
-    btn.addEventListener('click', () => handleRequest(btn.dataset.reqDecline, 'decline')));
-}
-
-async function handleRequest(email, action) {
-  const resp = await fetch(`${API_BASE}/admin/requests`, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body:    JSON.stringify({ email, action }),
-  });
-  if (resp.ok) {
-    await loadRequests();
-    if (action === 'approve') await loadAllowlist();
-  } else {
-    const d = await resp.json().catch(() => ({}));
-    alert(d.error || 'Failed.');
-  }
-}
-
-document.getElementById('add-btn').addEventListener('click', async () => {
-  const email = document.getElementById('add-email').value.trim().toLowerCase();
-  const note  = document.getElementById('add-note').value.trim();
-  const msgEl = document.getElementById('add-msg');
-  if (!email || !email.includes('@')) { msgEl.className = 'msg err'; msgEl.textContent = 'Enter a valid email.'; return; }
-  document.getElementById('add-btn').disabled = true;
-  msgEl.className = 'msg'; msgEl.textContent = '';
-  const resp = await fetch(`${API_BASE}/admin/allowlist`, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body:    JSON.stringify({ email, note }),
-  });
-  const data = await resp.json();
-  if (resp.ok) {
-    msgEl.className = 'msg ok'; msgEl.textContent = `${email} added.`;
-    document.getElementById('add-email').value = '';
-    document.getElementById('add-note').value = '';
-    await loadAllowlist();
-  } else {
-    msgEl.className = 'msg err'; msgEl.textContent = data.error || 'Failed.';
-  }
-  document.getElementById('add-btn').disabled = false;
-});
-
-document.getElementById('add-email').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('add-btn').click(); });
-
-async function removeUser(email) {
-  if (!confirm(`Remove ${email}?`)) return;
-  const resp = await fetch(`${API_BASE}/admin/allowlist`, {
-    method:  'DELETE',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body:    JSON.stringify({ email }),
-  });
-  if (resp.ok) await loadAllowlist();
-  else { const d = await resp.json(); alert(d.error || 'Failed.'); }
-}
-
-// ── Spending (new) ───────────────────────────────────────────────────────────
-
-function buildMonthOptions() {
-  const sel = document.getElementById('month-select');
-  if (!sel) return;
-  const now   = new Date();
-  const start = new Date(2026, 0, 1); // Jan 2026
-  const opts  = [];
-  let d = new Date(now.getFullYear(), now.getMonth(), 1);
-  while (d >= start) {
-    const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    const lbl = d.toLocaleString('default', { month: 'long', year: 'numeric' });
-    opts.push(`<option value="${val}">${lbl}</option>`);
-    d.setMonth(d.getMonth() - 1);
-  }
-  sel.innerHTML = opts.join('');
-}
-
-async function loadSpending() {
-  buildMonthOptions();
-  const month = document.getElementById('month-select')?.value ||
-    new Date().toISOString().slice(0,7);
-  await Promise.all([loadMonthSpending(month), loadYtd(), loadRecurringList(), loadSparklineData()]);
-}
-
-async function loadMonthSpending(month) {
-  const resp = await fetch(`${API_BASE}/admin/spending?month=${month}`, { headers: authHeaders() });
-  if (!resp.ok) return;
-  const d = await resp.json();
-
-  document.getElementById('month-total').textContent = `$${(d.grand_total || 0).toFixed(2)}`;
-
-  // TwelveLabs table
-  const tbody = document.getElementById('cost-body');
-  const tl = d.twelvelabs || {};
-  const breakdown = tl.breakdown || {};
-  if (!Object.keys(breakdown).length) {
-    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);padding:10px 0">No analysis sessions this month.</td></tr>';
-  } else {
-    tbody.innerHTML = Object.entries(breakdown).map(([type, v]) => `
-      <tr>
-        <td>${esc(type)}</td>
-        <td>${v.count}</td>
-        <td style="color:var(--muted)">$${v.unit_cost.toFixed(2)}</td>
-        <td>$${v.subtotal.toFixed(2)}</td>
-      </tr>
-    `).join('') + `
-      <tr>
-        <td colspan="3" style="font-weight:700;padding-top:12px;border-top:2px solid var(--border)">TwelveLabs Total</td>
-        <td style="padding-top:12px;border-top:2px solid var(--border)">$${(tl.total||0).toFixed(2)}</td>
-      </tr>`;
-  }
-  document.getElementById('billing-note').textContent =
-    'Estimates: Marengo $0.042/min + Pegasus $0.0292/min. Actuals may vary.';
-
-  // One-off expenses
-  const oneoffList = document.getElementById('oneoff-list');
-  const oneoffs    = d.one_off || [];
-  document.getElementById('oneoff-total').textContent = `$${(d.one_off_total||0).toFixed(2)}`;
-  if (!oneoffs.length) {
-    oneoffList.innerHTML = '<div class="empty" style="padding:10px 0">None this month.</div>';
-  } else {
-    oneoffList.innerHTML = oneoffs.map(e => `
-      <div class="exp-row">
-        <div>
-          <div class="exp-desc">${esc(e.description)}</div>
-          <div class="exp-meta">${esc(e.category)}</div>
-        </div>
-        <div class="exp-amount">$${(e.amount||0).toFixed(2)}</div>
-        <button class="exp-del" data-exp-id="${esc(e.id)}" data-exp-month="${esc(month)}" title="Delete">✕</button>
-      </div>`).join('');
-    oneoffList.querySelectorAll('[data-exp-id]').forEach(btn =>
-      btn.addEventListener('click', () => deleteExpense(btn.dataset.expId, btn.dataset.expMonth)));
-  }
-
-  // Recurring for this month
-  const recList = document.getElementById('recurring-list');
-  const recItems = d.recurring || [];
-  document.getElementById('recurring-total').textContent = `$${(d.recurring_total||0).toFixed(2)}`;
-  renderRecurringList(recItems);
-}
-
-function renderRecurringList(items) {
-  const recList = document.getElementById('recurring-list');
-  if (!items.length) {
-    recList.innerHTML = '<div class="empty" style="padding:10px 0">No recurring expenses set up yet.</div>';
-    return;
-  }
-  recList.innerHTML = items.map(e => `
-    <div class="exp-row">
-      <div>
-        <div class="exp-desc">${esc(e.description)} <span class="recurring-badge">Monthly</span></div>
-        <div class="exp-meta">${esc(e.category)} · From ${esc(e.recurring_start || '')}${e.recurring_end ? ' to ' + esc(e.recurring_end) : ' (ongoing)'}</div>
-      </div>
-      <div class="exp-amount">$${(e.amount||0).toFixed(2)}</div>
-      <button class="exp-del" data-rec-id="${esc(e.id)}" title="Delete recurring">✕</button>
-    </div>`).join('');
-  recList.querySelectorAll('[data-rec-id]').forEach(btn =>
-    btn.addEventListener('click', () => deleteRecurring(btn.dataset.recId)));
-}
-
-async function loadYtd() {
-  const resp = await fetch(`${API_BASE}/admin/spending/ytd`, { headers: authHeaders() });
-  if (!resp.ok) return;
-  const d = await resp.json();
-  document.getElementById('ytd-year').textContent = d.year || new Date().getFullYear();
-  document.getElementById('ytd-total').textContent = `$${(d.ytd_total||0).toFixed(2)}`;
-
-  const cats = d.ytd_by_category || {};
-  const CAT_LABELS = {
-    twelvelabs: 'TwelveLabs', ai_subscriptions: 'AI Subs', infrastructure: 'Infra',
-    platform: 'Platform', domain: 'Domain', tooling: 'Tooling',
-    marketing: 'Marketing', other: 'Other',
-  };
-  const sorted = Object.entries(cats).filter(([,v]) => v > 0).sort((a,b) => b[1]-a[1]);
-  const catsEl = document.getElementById('ytd-cats');
-  if (!sorted.length) { catsEl.innerHTML = '<div style="color:var(--muted);font-size:0.8rem">No data yet</div>'; return; }
-  catsEl.innerHTML = sorted.map(([k,v]) => `
-    <div class="ytd-cat-row">
-      <span class="ytd-cat-name">${CAT_LABELS[k] || k}</span>
-      <span class="ytd-cat-amount">$${v.toFixed(2)}</span>
-    </div>`).join('');
-}
-
-async function loadRecurringList() {
-  const resp = await fetch(`${API_BASE}/admin/spending/recurring`, { headers: authHeaders() });
-  if (!resp.ok) return;
-  const d = await resp.json();
-  renderRecurringList(d.recurring || []);
-}
-
-async function loadSparklineData() {
-  const resp = await fetch(`${API_BASE}/admin/stats`, { headers: authHeaders() });
-  if (!resp.ok) return;
-  const d = await resp.json();
-  drawSparkline(d.daily || []);
-}
-
-async function deleteExpense(id, month) {
-  if (!confirm('Delete this expense?')) return;
-  const r = await fetch(`${API_BASE}/admin/spending/expenses/${id}`, {
-    method: 'DELETE', headers: authHeaders(),
-  });
-  if (r.ok) await loadMonthSpending(month);
-  else alert('Failed to delete.');
-}
-
-async function deleteRecurring(id) {
-  if (!confirm('Delete this recurring expense?')) return;
-  const r = await fetch(`${API_BASE}/admin/spending/recurring/${id}`, {
-    method: 'DELETE', headers: authHeaders(),
-  });
-  if (r.ok) { await loadRecurringList(); await loadYtd(); }
-  else alert('Failed to delete.');
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const monthSel = document.getElementById('month-select');
-  if (monthSel) monthSel.addEventListener('change', () =>
-    loadMonthSpending(monthSel.value));
-
-  const addExpBtn = document.getElementById('add-exp-btn');
-  if (addExpBtn) addExpBtn.addEventListener('click', async () => {
-    const desc   = document.getElementById('exp-desc').value.trim();
-    const amount = parseFloat(document.getElementById('exp-amount').value);
-    const cat    = document.getElementById('exp-category').value;
-    const month  = document.getElementById('month-select')?.value || new Date().toISOString().slice(0,7);
-    const msgEl  = document.getElementById('exp-msg');
-    if (!desc || isNaN(amount) || amount <= 0) {
-      msgEl.className = 'msg err'; msgEl.textContent = 'Description and a positive amount are required.'; return;
-    }
-    msgEl.className = 'msg'; msgEl.textContent = '';
-    addExpBtn.disabled = true;
-    const r = await fetch(`${API_BASE}/admin/spending/expenses`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json', ...authHeaders() },
-      body:    JSON.stringify({ description: desc, amount, category: cat, month }),
-    });
-    addExpBtn.disabled = false;
-    if (r.ok) {
-      document.getElementById('exp-desc').value   = '';
-      document.getElementById('exp-amount').value = '';
-      msgEl.className = 'msg ok'; msgEl.textContent = 'Expense added.';
-      await Promise.all([loadMonthSpending(month), loadYtd()]);
-    } else {
-      const d = await r.json().catch(() => ({}));
-      msgEl.className = 'msg err'; msgEl.textContent = d.error || 'Failed.';
-    }
-  });
-
-  const addRecBtn = document.getElementById('add-rec-btn');
-  if (addRecBtn) addRecBtn.addEventListener('click', async () => {
-    const desc  = document.getElementById('rec-desc').value.trim();
-    const amt   = parseFloat(document.getElementById('rec-amount').value);
-    const cat   = document.getElementById('rec-category').value;
-    const start = document.getElementById('rec-start').value || new Date().toISOString().slice(0,7);
-    const msgEl = document.getElementById('rec-msg');
-    if (!desc || isNaN(amt) || amt <= 0) {
-      msgEl.className = 'msg err'; msgEl.textContent = 'Description and a positive amount are required.'; return;
-    }
-    msgEl.className = 'msg'; msgEl.textContent = '';
-    addRecBtn.disabled = true;
-    const r = await fetch(`${API_BASE}/admin/spending/recurring`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json', ...authHeaders() },
-      body:    JSON.stringify({ description: desc, amount: amt, category: cat, recurring_start: start }),
-    });
-    addRecBtn.disabled = false;
-    if (r.ok) {
-      document.getElementById('rec-desc').value   = '';
-      document.getElementById('rec-amount').value = '';
-      msgEl.className = 'msg ok'; msgEl.textContent = 'Recurring expense added.';
-      await Promise.all([loadRecurringList(), loadYtd()]);
-    } else {
-      const d = await r.json().catch(() => ({}));
-      msgEl.className = 'msg err'; msgEl.textContent = d.error || 'Failed.';
-    }
-  });
-});
-
-// ── Stats (legacy used for sparkline) ─────────────────────────────────────────
-
-async function loadStats() {
-  const resp = await fetch(`${API_BASE}/admin/stats`, { headers: authHeaders() });
-  const d = await resp.json();
-
-  const sc = d.status_counts || {};
-  const complete = sc.complete || 0;
-  const failed   = (sc.failed || 0) + (sc.analysis_failed || 0);
-  const pending  = (sc.pending_upload || 0) + (sc.submitted || 0) + (sc.processing || 0);
-  const total    = Object.values(sc).reduce((a, b) => a + b, 0);
-
-  document.getElementById('stat-grid').innerHTML = `
-    <div class="stat-card">
-      <div class="stat-label">Est. spend (30d)</div>
-      <div class="stat-value green">$${d.total_cost.toFixed(2)}</div>
-      <div class="stat-sub">TwelveLabs estimated</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Completed</div>
-      <div class="stat-value blue">${complete}</div>
-      <div class="stat-sub">Full reports delivered</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">In progress</div>
-      <div class="stat-value yellow">${pending}</div>
-      <div class="stat-sub">Pending / processing</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Failed</div>
-      <div class="stat-value ${failed > 0 ? 'red' : 'green'}">${failed}</div>
-      <div class="stat-sub">Last 30 days</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Total sessions</div>
-      <div class="stat-value">${total}</div>
-      <div class="stat-sub">All statuses</div>
-    </div>
-  `;
-
-  const tbody = document.getElementById('cost-body');
-  const cb = d.cost_by_type || {};
-  if (!Object.keys(cb).length) {
-    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);padding:12px 0">No completed sessions yet.</td></tr>';
-  } else {
-    tbody.innerHTML = Object.entries(cb).map(([type, v]) => `
-      <tr>
-        <td>${type}</td>
-        <td>${v.count}</td>
-        <td style="color:var(--muted)">$${v.unit_cost.toFixed(2)}</td>
-        <td>$${v.subtotal.toFixed(2)}</td>
-      </tr>
-    `).join('') + `
-      <tr>
-        <td colspan="3" style="font-weight:700;padding-top:14px">Total</td>
-        <td style="padding-top:14px">$${d.total_cost.toFixed(2)}</td>
-      </tr>
-    `;
-  }
-  document.getElementById('billing-note').textContent = d.billing_note || '';
-  drawSparkline(d.daily || []);
-}
-
-function drawSparkline(daily) {
-  const canvas = document.getElementById('sparkline');
-  const ctx    = canvas.getContext('2d');
-  const dpr    = window.devicePixelRatio || 1;
-  const w = canvas.offsetWidth || 800;
-  const h = 60;
-  canvas.width  = w * dpr;
-  canvas.height = h * dpr;
-  ctx.scale(dpr, dpr);
-
-  if (!daily.length) {
-    ctx.fillStyle = '#6a9b78';
-    ctx.font = '13px Inter, system-ui';
-    ctx.fillText('No data yet', 10, 34);
-    return;
-  }
-
-  const maxVal = Math.max(...daily.map(d => d.count), 1);
-  const padX = 4;
-  const barW = Math.max(4, Math.floor((w - padX * 2) / daily.length) - 2);
-
-  daily.forEach((d, i) => {
-    const barH = Math.max(3, (d.count / maxVal) * (h - 20));
-    const x    = padX + i * ((w - padX * 2) / daily.length);
-    const y    = h - barH - 4;
-    ctx.fillStyle = '#00e676';
-    ctx.globalAlpha = 0.75;
-    roundRect(ctx, x, y, barW, barH, 2);
-    ctx.fill();
-  });
-  ctx.globalAlpha = 1;
-
-  ctx.fillStyle = '#6a9b78';
-  ctx.font = '10px Inter, system-ui';
-  ctx.fillText(daily[0].date.slice(5), padX, h);
-  const lastLabel = daily[daily.length - 1].date.slice(5);
-  ctx.fillText(lastLabel, w - ctx.measureText(lastLabel).width - padX, h);
-}
-
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h);
-  ctx.lineTo(x, y + h);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
-}
-
-// ── Failures ──────────────────────────────────────────────────────────────────
-
-async function loadFailures() {
-  const resp = await fetch(`${API_BASE}/admin/failures`, { headers: authHeaders() });
-  const data = await resp.json();
-  const failures  = data.failures   || [];
-  const preErrors = data.pre_errors || [];
-
-  const total = failures.length + preErrors.length;
-  document.getElementById('failure-count').textContent = total + ' failure' + (total !== 1 ? 's' : '');
-  const badge = document.getElementById('failure-badge');
-  if (total > 0) badge.textContent = ` (${total})`;
-
-  const list = document.getElementById('failure-list');
-
-  const BADGE = {
-    failed:          { cls: 'badge-failed',   label: 'TwelveLabs failed' },
-    analysis_failed: { cls: 'badge-analysis', label: 'Analysis failed'   },
-    upload_failed:   { cls: 'badge-upload',   label: 'Upload failed'     },
-  };
-
-  const sessionRows = failures.length
-    ? failures.map(f => {
-        const b = BADGE[f.job_status] || BADGE.failed;
-        const detail = f.error_detail
-          ? `<div class="failure-detail" title="${esc(f.error_detail)}">${esc(f.error_detail)}</div>`
-          : '';
-        return `
-          <div class="failure-row ${f.job_status}">
-            <div>
-              <div class="failure-email">${esc(f.email)}</div>
-              <div class="failure-meta">${esc(f.created_at)} · ${esc(f.video_filename || '—')}</div>
-              ${detail}
-            </div>
-            <div class="failure-meta">${esc(f.position || '—')} · #${esc(f.jersey_number || '—')} · ${esc(f.match_type || '—')}</div>
-            <div><span class="failure-badge ${b.cls}">${b.label}</span></div>
-            <a href="/?session_id=${esc(f.session_id)}" target="_blank" style="text-decoration:none">
-              <button class="btn-retry">View</button>
-            </a>
-          </div>`;
-      }).join('')
-    : '<div class="empty">No session failures in the last 30 days.</div>';
-
-  const staleUploads    = data.stale_uploads    || [];
-  const staleProcessing = data.stale_processing || [];
-
-  const staleUploadSection = staleUploads.length ? `
-    <div class="stall-section">
-      <div class="stall-heading">⚠ Stalled uploads (pending_upload >2 h) — ${staleUploads.length}</div>
-      ${staleUploads.map(f => `
-        <div class="stall-row">
-          <div>
-            <div class="failure-email">${esc(f.email)}</div>
-            <div class="failure-meta">${esc(f.created_at.slice(0,10))} · ${esc(f.video_filename || '—')}</div>
-            <div class="stall-reason">${esc(f.stall_reason)}</div>
-          </div>
-          <div class="failure-meta">${esc(f.position || '—')} · #${esc(f.jersey_number || '—')} · ${esc(f.match_type || '—')}</div>
-          <a href="/?session_id=${esc(f.session_id)}" target="_blank" style="text-decoration:none">
-            <button class="btn-retry">View</button>
-          </a>
-        </div>`).join('')}
-    </div>` : '';
-
-  const staleProcSection = staleProcessing.length ? `
-    <div class="stall-section">
-      <div class="stall-heading" style="color:var(--blue)">⚠ Stalled processing (>30 min) — ${staleProcessing.length}</div>
-      ${staleProcessing.map(f => `
-        <div class="stall-row proc">
-          <div>
-            <div class="failure-email">${esc(f.email)}</div>
-            <div class="failure-meta">${esc((f.updated_at || '').slice(0,10))} · ${esc(f.task_id || '—')}</div>
-            <div class="stall-reason">${esc(f.stall_reason)}</div>
-          </div>
-          <div class="failure-meta">${esc(f.position || '—')} · ${esc(f.match_type || '—')}</div>
-          <a href="/?session_id=${esc(f.session_id)}" target="_blank" style="text-decoration:none">
-            <button class="btn-retry">View</button>
-          </a>
-        </div>`).join('')}
-    </div>` : '';
-
-  const preSection = preErrors.length ? `
-    <div class="pre-errors-section">
-      <div class="pre-errors-heading">Pre-session errors (CORS / auth / allowlist) — ${preErrors.length}</div>
-      ${preErrors.map(e => `
-        <div class="pre-error-row">
-          <span class="pre-error-type">${esc(e.error_type)}</span>
-          <span class="pre-error-msg" title="${esc(e.error_message)}">${esc(e.error_message || '—')}</span>
-          <span class="pre-error-date">${esc(e.stage || '')} · ${esc(e.occurred_at)}</span>
-        </div>`).join('')}
-    </div>` : '';
-
-  list.innerHTML = sessionRows + staleUploadSection + staleProcSection + preSection;
-}
-
-// ── Events tab ───────────────────────────────────────────────────────────────
-
-async function loadEvents() {
-  const resp = await fetch(`${API_BASE}/admin/events`, { headers: authHeaders() });
-  if (!resp.ok) return;
-  const d = await resp.json();
-  const events = d.events || [];
-  const countEl = document.getElementById('events-count');
-  if (countEl) countEl.textContent = events.length + ' event' + (events.length !== 1 ? 's' : '');
-
-  const listEl = document.getElementById('events-list');
-  if (!listEl) return;
-  if (!events.length) { listEl.innerHTML = '<div class="empty">No events yet. Create one above.</div>'; return; }
-
-  listEl.innerHTML = events.map((ev, idx) => {
-    const rs = ev.roster_stats || {};
-    const logoHtml = ev.logo_url
-      ? `<img class="event-logo-thumb" src="${esc(ev.logo_url)}" alt="logo">`
-      : `<div class="event-logo-placeholder">⚽</div>`;
-    return `
-      <div class="event-card" id="ev-card-${idx}">
-        <div class="event-card-header" data-ev-idx="${idx}" onclick="toggleEventCard(${idx})">
-          ${logoHtml}
-          <div class="event-card-info">
-            <div class="event-card-name">${esc(ev.name || ev.event_id)}</div>
-            <div class="event-card-meta">${esc(ev.event_id)}${ev.date ? ' · ' + esc(ev.date) : ''}</div>
-          </div>
-          <div class="event-card-stats">
-            <div class="event-stat">
-              <div class="event-stat-val">${rs.total || 0}</div>
-              <div class="event-stat-lbl">On Roster</div>
-            </div>
-            <div class="event-stat">
-              <div class="event-stat-val green">${rs.analyzed || 0}</div>
-              <div class="event-stat-lbl">Analysed</div>
-            </div>
-          </div>
-          <span class="chevron">▾</span>
-        </div>
-        <div class="event-card-body" id="ev-body-${idx}">
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
-            <div style="flex:1;min-width:200px">
-              <span style="color:var(--muted);font-size:0.78rem">
-                Released: ${rs.release_signed||0}/${rs.total||0} &nbsp;·&nbsp;
-                Uploaded: ${rs.uploaded||0} &nbsp;·&nbsp;
-                Claimed: ${rs.claimed||0}
-              </span>
-            </div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <span style="font-size:0.78rem;color:var(--muted)">Logo:</span>
-              <input type="file" id="logo-file-${idx}" accept="image/*" style="display:none" data-ev-id="${esc(ev.event_id)}" data-ev-idx="${idx}" />
-              <button class="btn-add-exp" onclick="document.getElementById('logo-file-${idx}').click()">Upload Logo</button>
-              ${ev.logo_url ? `<img src="${esc(ev.logo_url)}" class="logo-preview" style="display:block">` : ''}
-            </div>
-          </div>
-
-          <div id="roster-${idx}"><div class="empty">Loading roster…</div></div>
-
-          <div class="section-title" style="margin-top:14px;margin-bottom:8px">Add Player to Roster</div>
-          <div class="add-roster-form">
-            <input type="text" class="inp-jersey"  id="r-jersey-${idx}"  placeholder="#" maxlength="10" />
-            <input type="email" class="inp-email"  id="r-email-${idx}"   placeholder="Parent email" />
-            <input type="text"  class="inp-name"   id="r-name-${idx}"    placeholder="Player name (optional)" />
-            <button class="btn-primary" onclick="addToRoster('${esc(ev.event_id)}', ${idx})">+ Add</button>
-          </div>
-          <div class="msg" id="r-msg-${idx}"></div>
-        </div>
-      </div>`;
-  }).join('');
-
-  // Logo file upload handlers
-  events.forEach((ev, idx) => {
-    const fileInput = document.getElementById(`logo-file-${idx}`);
-    if (fileInput) fileInput.addEventListener('change', e => uploadLogo(ev.event_id, idx, e.target.files[0]));
-  });
-
-  // Load rosters for visible cards
-  events.forEach((ev, idx) => loadRoster(ev.event_id, idx));
-}
-
-function toggleEventCard(idx) {
-  const header = document.querySelector(`#ev-card-${idx} .event-card-header`);
-  const body   = document.getElementById(`ev-body-${idx}`);
-  if (!header || !body) return;
-  header.classList.toggle('expanded');
-  body.classList.toggle('open');
-}
-
-async function loadRoster(eventId, idx) {
-  const el = document.getElementById(`roster-${idx}`);
-  if (!el) return;
-  const r = await fetch(`${API_BASE}/admin/events/${encodeURIComponent(eventId)}/roster`, { headers: authHeaders() });
-  if (!r.ok) { el.innerHTML = '<div class="empty">Could not load roster.</div>'; return; }
-  const d = await r.json();
-  const players = d.players || [];
-  if (!players.length) { el.innerHTML = '<div class="empty" style="padding:8px 0">No players on roster yet.</div>'; return; }
-
-  const STATUS_MAP = {
-    complete:        ['dot-green',  'Ready'],
-    submitted:       ['dot-yellow', 'Queued'],
-    processing:      ['dot-yellow', 'Processing'],
-    pending_upload:  ['dot-grey',   'Pending upload'],
-    failed:          ['dot-red',    'Failed'],
-    analysis_failed: ['dot-red',    'Failed'],
-  };
-
-  el.innerHTML = `
-    <table class="roster-table">
-      <thead><tr><th>Jersey</th><th>Player</th><th>Release</th><th>Analysis</th><th>Claimed</th><th></th></tr></thead>
-      <tbody>
-        ${players.map(p => {
-          const [dotCls, statusLabel] = STATUS_MAP[p.session_status] || ['dot-grey', p.session_status || 'Not uploaded'];
-          const releaseDot = p.release_signed ? 'dot-green' : 'dot-yellow';
-          const releaseLabel = p.release_signed ? 'Signed' : 'Pending';
-          const claimLabel = p.claimed ? `✅ ${esc(p.claim_email || '')}` : '—';
-          const reportLink = p.report_token
-            ? `<a href="/?token=${esc(p.report_token)}" target="_blank" style="color:var(--green);font-size:0.75rem">View</a>`
-            : '';
-          return `
-            <tr>
-              <td><strong>#${esc(p.jersey_number)}</strong></td>
-              <td>${esc(p.player_name || p.parent_email || '—')}</td>
-              <td><span class="status-dot ${releaseDot}"></span>${releaseLabel}</td>
-              <td><span class="status-dot ${dotCls}"></span>${statusLabel} ${reportLink}</td>
-              <td style="font-size:0.78rem">${claimLabel}</td>
-              <td><button class="exp-del" data-del-event="${esc(eventId)}" data-del-jersey="${esc(p.jersey_number)}" data-del-idx="${idx}" title="Remove">✕</button></td>
-            </tr>`;
-        }).join('')}
-      </tbody>
-    </table>`;
-
-  el.querySelectorAll('[data-del-event]').forEach(btn =>
-    btn.addEventListener('click', () =>
-      removeFromRoster(btn.dataset.delEvent, btn.dataset.delJersey, parseInt(btn.dataset.delIdx))));
-}
-
-async function addToRoster(eventId, idx) {
-  const jersey = document.getElementById(`r-jersey-${idx}`)?.value.trim();
-  const email  = document.getElementById(`r-email-${idx}`)?.value.trim().toLowerCase();
-  const name   = document.getElementById(`r-name-${idx}`)?.value.trim();
-  const msgEl  = document.getElementById(`r-msg-${idx}`);
-  if (!jersey) { msgEl.className = 'msg err'; msgEl.textContent = 'Jersey required.'; return; }
-  if (!email || !email.includes('@')) { msgEl.className = 'msg err'; msgEl.textContent = 'Valid parent email required.'; return; }
-  msgEl.className = 'msg'; msgEl.textContent = '';
-  const r = await fetch(`${API_BASE}/admin/events/${encodeURIComponent(eventId)}/roster`, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body:    JSON.stringify({ jersey_number: jersey, parent_email: email, player_name: name }),
-  });
-  const d = await r.json();
-  if (r.ok) {
-    msgEl.className = 'msg ok';
-    msgEl.textContent = `#${jersey} added. Release email sent: ${d.release_email_sent ? 'yes' : 'no'}.`;
-    document.getElementById(`r-jersey-${idx}`).value = '';
-    document.getElementById(`r-email-${idx}`).value  = '';
-    document.getElementById(`r-name-${idx}`).value   = '';
-    await loadRoster(eventId, idx);
-  } else {
-    msgEl.className = 'msg err'; msgEl.textContent = d.error || 'Failed.';
-  }
-}
-
-async function removeFromRoster(eventId, jersey, idx) {
-  if (!confirm(`Remove Jersey #${jersey} from roster?`)) return;
-  const r = await fetch(`${API_BASE}/admin/events/${encodeURIComponent(eventId)}/roster/${encodeURIComponent(jersey)}`, {
-    method: 'DELETE', headers: authHeaders(),
-  });
-  if (r.ok) await loadRoster(eventId, idx);
-  else { const d = await r.json(); alert(d.error || 'Failed.'); }
-}
-
-async function uploadLogo(eventId, idx, file) {
-  if (!file) return;
-  // Step 1: get presigned PUT URL
-  const r1 = await fetch(`${API_BASE}/admin/events/${encodeURIComponent(eventId)}/logo`, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body:    JSON.stringify({ filename: file.name, content_type: file.type }),
-  });
-  if (!r1.ok) { alert('Could not get upload URL.'); return; }
-  const { upload_url, logo_key } = await r1.json();
-
-  // Step 2: PUT to S3
-  const r2 = await fetch(upload_url, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } });
-  if (!r2.ok) { alert('Upload failed.'); return; }
-
-  // Step 3: save logo_key to event
-  await fetch(`${API_BASE}/admin/events/${encodeURIComponent(eventId)}`, {
-    method:  'PUT',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body:    JSON.stringify({ logo_key }),
-  });
-  await loadEvents();
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const createBtn = document.getElementById('create-event-btn');
-  if (createBtn) createBtn.addEventListener('click', async () => {
-    const event_id     = document.getElementById('new-event-id').value.trim().toLowerCase();
-    const name         = document.getElementById('new-event-name').value.trim();
-    const date         = document.getElementById('new-event-date').value;
-    const player_count = parseInt(document.getElementById('new-event-count').value) || 0;
-    const msgEl        = document.getElementById('create-event-msg');
-    if (!event_id || !name) { msgEl.className = 'msg err'; msgEl.textContent = 'ID and name required.'; return; }
-    msgEl.className = 'msg'; msgEl.textContent = '';
-    createBtn.disabled = true;
-    const r = await fetch(`${API_BASE}/admin/events`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json', ...authHeaders() },
-      body:    JSON.stringify({ event_id, name, date, player_count }),
-    });
-    createBtn.disabled = false;
-    const d = await r.json();
-    if (r.ok) {
-      msgEl.className = 'msg ok'; msgEl.textContent = `Event "${name}" created.`;
-      document.getElementById('new-event-id').value    = '';
-      document.getElementById('new-event-name').value  = '';
-      document.getElementById('new-event-date').value  = '';
-      document.getElementById('new-event-count').value = '';
-      await loadEvents();
-    } else {
-      msgEl.className = 'msg err'; msgEl.textContent = d.error || 'Failed.';
-    }
-  });
-});
-
-// ── Coach Requests ────────────────────────────────────────────────────────────
-
-async function loadCoachRequests() {
-  const resp = await fetch(`${API_BASE}/admin/coach-requests`, { headers: authHeaders() });
-  if (!resp.ok) return;
-  const d = await resp.json();
-  const reqs = d.requests || [];
-  const countEl = document.getElementById('coach-req-count');
-  if (countEl) countEl.textContent = reqs.length ? `${reqs.length} pending` : '0 pending';
-
-  const listEl = document.getElementById('coach-req-list');
-  if (!listEl) return;
-  if (!reqs.length) { listEl.innerHTML = '<div class="empty">No pending coach requests.</div>'; return; }
-
-  listEl.innerHTML = reqs.map(r => `
-    <div class="coach-req-row" id="coach-req-${esc(r.id)}">
-      <div class="coach-req-name">${esc(r.name)}</div>
-      <div class="coach-req-email">${esc(r.email)}</div>
-      <div class="coach-req-meta">
-        ${r.organization ? esc(r.organization) + ' · ' : ''}
-        ${r.requested_event ? 'Event: ' + esc(r.requested_event) + ' · ' : ''}
-        Requested ${esc(r.requested_at)}
-      </div>
-      <div class="coach-req-actions">
-        <input type="text" id="cr-events-${esc(r.id)}" placeholder="Event IDs (comma-separated)" value="${esc(r.requested_event || '')}" />
-        <button class="btn-approve" onclick="handleCoachRequest('${esc(r.id)}', 'approve')">Approve</button>
-        <button class="btn-decline" onclick="handleCoachRequest('${esc(r.id)}', 'reject')">Reject</button>
-      </div>
-    </div>`).join('');
-}
-
-async function handleCoachRequest(id, action) {
-  const evInput = document.getElementById(`cr-events-${id}`);
-  const evList  = evInput ? evInput.value.split(',').map(s => s.trim().toLowerCase()).filter(Boolean) : [];
-  const r = await fetch(`${API_BASE}/admin/coach-requests/${id}/${action}`, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body:    JSON.stringify({ assigned_events: evList }),
-  });
-  if (r.ok) { await loadCoachRequests(); await loadAdminUsers(); }
-  else { const d = await r.json(); alert(d.error || 'Failed.'); }
-}
-
-// ── Coach: My Events view ─────────────────────────────────────────────────────
-
-async function loadMyEvents() {
-  const resp = await fetch(`${API_BASE}/admin/events`, { headers: authHeaders() });
-  if (!resp.ok) return;
-  const d = await resp.json();
-  const events = d.events || [];
-  const listEl = document.getElementById('myevents-list');
-  if (!listEl) return;
-
-  if (!events.length) {
-    listEl.innerHTML = '<div class="empty">You have no assigned events yet. Contact an admin to be assigned to an event.</div>';
-    return;
-  }
-
-  listEl.innerHTML = events.map((ev, idx) => {
-    const logoHtml = ev.logo_url
-      ? `<img src="${esc(ev.logo_url)}" class="coach-event-logo" alt="logo">`
-      : `<div class="event-logo-placeholder" style="width:48px;height:48px;font-size:1.5rem">⚽</div>`;
-    return `
-      <div class="coach-event-card">
-        <div class="coach-event-header">
-          ${logoHtml}
-          <div>
-            <div class="coach-event-name">${esc(ev.name || ev.event_id)}</div>
-            <div class="coach-event-sub">${esc(ev.event_id)}${ev.date ? ' · ' + esc(ev.date) : ''}</div>
-          </div>
-        </div>
-
-        <div id="coach-roster-${idx}"><div class="empty" style="padding:8px 0">Loading roster…</div></div>
-
-        <div class="section-title" style="margin-top:18px;margin-bottom:10px">Upload Video</div>
-        <div class="upload-form">
-          <div>
-            <label class="field-label" for="u-jersey-${idx}">Jersey #</label>
-            <input type="text" id="u-jersey-${idx}" placeholder="e.g. 7" maxlength="10" />
-          </div>
-          <div>
-            <label class="field-label" for="u-pos-${idx}">Position</label>
-            <select id="u-pos-${idx}">
-              <option value="CM">CM</option><option value="ST">ST</option><option value="GK">GK</option>
-              <option value="CB">CB</option><option value="LB">LB</option><option value="RB">RB</option>
-              <option value="CDM">CDM</option><option value="CAM">CAM</option>
-              <option value="LW">LW</option><option value="RW">RW</option>
-            </select>
-          </div>
-          <div>
-            <label class="field-label" for="u-age-${idx}">Age Bracket</label>
-            <select id="u-age-${idx}">
-              <option value="U13">U13</option><option value="U14">U14</option><option value="U15">U15</option>
-              <option value="U16">U16</option><option value="U17">U17</option><option value="U18">U18</option>
-              <option value="U19">U19</option><option value="Other">Other</option>
-            </select>
-          </div>
-          <div>
-            <label class="field-label" for="u-foot-${idx}">Dominant Foot</label>
-            <select id="u-foot-${idx}">
-              <option value="Right">Right</option><option value="Left">Left</option><option value="Both">Both</option>
-            </select>
-          </div>
-          <div>
-            <label class="field-label" for="u-match-${idx}">Match Type</label>
-            <select id="u-match-${idx}">
-              <option value="League">League</option><option value="Tournament">Tournament</option>
-              <option value="Friendly">Friendly</option><option value="Training">Training</option>
-            </select>
-          </div>
-          <div>
-            <label class="field-label" for="u-kit-${idx}">Kit Colour</label>
-            <input type="text" id="u-kit-${idx}" placeholder="e.g. blue" />
-          </div>
-          <div class="full-width">
-            <label class="field-label" for="u-file-${idx}">Video File</label>
-            <input type="file" id="u-file-${idx}" accept="video/*" data-ev-id="${esc(ev.event_id)}" data-ev-idx="${idx}" style="color:var(--text)" />
-          </div>
-          <button class="btn-primary full-width" id="u-submit-${idx}" onclick="coachUpload('${esc(ev.event_id)}', ${idx})">Upload for Analysis</button>
-        </div>
-        <div class="upload-progress" id="u-progress-${idx}">
-          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="u-bar-${idx}"></div></div>
-          <div class="progress-label" id="u-label-${idx}">Preparing…</div>
-        </div>
-        <div class="msg" id="u-msg-${idx}"></div>
-      </div>`;
-  }).join('');
-
-  events.forEach((ev, idx) => loadCoachRoster(ev.event_id, idx));
-}
-
-async function loadCoachRoster(eventId, idx) {
-  const el = document.getElementById(`coach-roster-${idx}`);
-  if (!el) return;
-  const r = await fetch(`${API_BASE}/admin/events/${encodeURIComponent(eventId)}/roster`, { headers: authHeaders() });
-  if (!r.ok) { el.innerHTML = '<div class="empty">Could not load roster.</div>'; return; }
-  const d  = await r.json();
-  const ps = d.players || [];
-  if (!ps.length) { el.innerHTML = '<div class="empty" style="padding:6px 0">Roster is empty.</div>'; return; }
-
-  const STATUS_MAP = {
-    complete:        ['dot-green',  'Report Ready'],
-    submitted:       ['dot-yellow', 'Queued'],
-    processing:      ['dot-yellow', 'Processing'],
-    pending_upload:  ['dot-grey',   'Uploaded'],
-    failed:          ['dot-red',    'Failed'],
-    analysis_failed: ['dot-red',    'Failed'],
-  };
-
-  el.innerHTML = `
-    <table class="roster-table">
-      <thead><tr><th>Jersey</th><th>Release</th><th>Status</th></tr></thead>
-      <tbody>
-        ${ps.map(p => {
-          const relDot = p.release_signed ? 'dot-green' : 'dot-yellow';
-          const [dotCls, lbl] = STATUS_MAP[p.session_status] || ['dot-grey', 'Not uploaded'];
-          return `<tr>
-            <td><strong>#${esc(p.jersey_number)}</strong>${p.player_name ? ' · ' + esc(p.player_name) : ''}</td>
-            <td><span class="status-dot ${relDot}"></span>${p.release_signed ? 'Signed' : 'Pending'}</td>
-            <td><span class="status-dot ${dotCls}"></span>${lbl}</td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>`;
-}
-
-async function coachUpload(eventId, idx) {
-  const jersey = document.getElementById(`u-jersey-${idx}`)?.value.trim();
-  const pos    = document.getElementById(`u-pos-${idx}`)?.value;
-  const age    = document.getElementById(`u-age-${idx}`)?.value;
-  const foot   = document.getElementById(`u-foot-${idx}`)?.value;
-  const match  = document.getElementById(`u-match-${idx}`)?.value;
-  const kit    = document.getElementById(`u-kit-${idx}`)?.value.trim();
-  const fileEl = document.getElementById(`u-file-${idx}`);
-  const file   = fileEl?.files?.[0];
-  const msgEl  = document.getElementById(`u-msg-${idx}`);
-  const prog   = document.getElementById(`u-progress-${idx}`);
-  const bar    = document.getElementById(`u-bar-${idx}`);
-  const lbl    = document.getElementById(`u-label-${idx}`);
-  const btn    = document.getElementById(`u-submit-${idx}`);
-
-  if (!jersey) { msgEl.className = 'msg err'; msgEl.textContent = 'Jersey number required.'; return; }
-  if (!file)   { msgEl.className = 'msg err'; msgEl.textContent = 'Please select a video file.'; return; }
-
-  btn.disabled = true;
-  msgEl.className = 'msg'; msgEl.textContent = '';
-  prog.classList.add('show');
-  lbl.textContent = 'Requesting upload URL…';
-
-  try {
-    // Step 1: get presigned URL
-    const r1 = await fetch(`${API_BASE}/upload-url`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json', ...authHeaders() },
-      body:    JSON.stringify({
-        filename:      file.name,
-        content_type:  file.type || 'video/mp4',
-        file_size:     file.size,
-        jersey_number: jersey,
-        position:      pos,
-        age_bracket:   age,
-        dominant_foot: foot,
-        match_type:    match,
-        kit_colour:    kit,
-        event_id:      eventId,
-      }),
-    });
-    if (!r1.ok) {
-      const e = await r1.json().catch(() => ({}));
-      throw new Error(e.error || `HTTP ${r1.status}`);
-    }
-    const presigned = await r1.json();
-
-    // Step 2: upload to S3
-    lbl.textContent = 'Uploading video…';
-    bar.style.width = '10%';
-
-    const xhr = new XMLHttpRequest();
-    await new Promise((resolve, reject) => {
-      xhr.upload.onprogress = e => {
-        if (e.lengthComputable) bar.style.width = Math.round(10 + (e.loaded/e.total)*80) + '%';
-      };
-      xhr.onload  = () => xhr.status < 300 ? resolve() : reject(new Error(`S3 upload failed: ${xhr.status}`));
-      xhr.onerror = () => reject(new Error('Network error during upload'));
-      xhr.open('PUT', presigned.upload_url);
-      xhr.setRequestHeader('Content-Type', file.type || 'video/mp4');
-      xhr.send(file);
-    });
-
-    bar.style.width = '100%';
-    lbl.textContent = 'Video uploaded. Queued for analysis.';
-    msgEl.className = 'msg ok';
-    msgEl.textContent = `#${jersey} uploaded and queued for AI analysis. Session ID: ${presigned.session_id}`;
-    fileEl.value = '';
-    btn.disabled = false;
-    await loadCoachRoster(eventId, idx);
-  } catch (err) {
-    prog.classList.remove('show');
-    bar.style.width = '0';
-    btn.disabled = false;
-    msgEl.className = 'msg err';
-    msgEl.textContent = err.message || 'Upload failed. Please try again.';
-  }
-}
-
-// ── Admin Users ───────────────────────────────────────────────────────────────
-
-async function loadAdminUsers() {
-  const resp = await fetch(`${API_BASE}/admin/users`, { headers: authHeaders() });
-  const data = await resp.json();
-
-  const fullAdmins = data.full_admins || [];
-  document.getElementById('full-admins-list').innerHTML = fullAdmins.map(u => `
-    <div class="admin-row">
-      <div>
-        <div class="admin-email">${esc(u.email)}</div>
-        <div class="admin-meta">Full admin</div>
-      </div>
-      <span class="admin-locked">Protected — contact Dee to change</span>
-    </div>
-  `).join('') || '<div class="empty">None.</div>';
-
-  const superusers = data.superusers || [];
-  document.getElementById('superusers-list').innerHTML = superusers.length
-    ? superusers.map(u => `
-        <div class="admin-row">
-          <div>
-            <div class="admin-email">${esc(u.email)}</div>
-            <div class="admin-meta">Added by ${esc(u.added_by || '—')} · ${esc((u.added_at || '').slice(0,10))}</div>
-          </div>
-          <button class="btn-danger" data-remove-su="${esc(u.email)}">Remove</button>
-        </div>
-      `).join('')
-    : '<div class="empty">No superusers yet.</div>';
-
-  document.querySelectorAll('[data-remove-su]').forEach(btn =>
-    btn.addEventListener('click', () => removeSuperuser(btn.dataset.removeSu)));
-
-  // Coaches section
-  const coaches = data.coaches || [];
-  const coachesList = document.getElementById('coaches-list');
-  if (coachesList) {
-    coachesList.innerHTML = coaches.length
-      ? coaches.map(u => `
-          <div class="admin-row">
-            <div>
-              <div class="admin-email">${esc(u.email)}</div>
-              <div class="admin-meta">
-                ${u.organization ? esc(u.organization) + ' · ' : ''}
-                Events: ${(u.assigned_events||[]).map(esc).join(', ') || 'none'}
-                · Added ${esc((u.added_at || '').slice(0,10))}
-              </div>
-            </div>
-            <button class="btn-danger" data-remove-coach="${esc(u.email)}">Remove</button>
-          </div>`).join('')
-      : '<div class="empty">No coaches yet.</div>';
-    coachesList.querySelectorAll('[data-remove-coach]').forEach(btn =>
-      btn.addEventListener('click', () => removeAdminUser(btn.dataset.removeCoach)));
-  }
-}
-
-async function removeAdminUser(email) {
-  if (!confirm(`Remove ${email}?`)) return;
-  const resp = await fetch(`${API_BASE}/admin/users`, {
-    method:  'DELETE',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body:    JSON.stringify({ email }),
-  });
-  if (resp.ok) await loadAdminUsers();
-  else { const d = await resp.json(); alert(d.error || 'Failed.'); }
-}
-
-document.getElementById('su-add-btn').addEventListener('click', async () => {
-  const email = document.getElementById('su-email').value.trim().toLowerCase();
-  const msgEl = document.getElementById('su-msg');
-  if (!email || !email.includes('@')) { msgEl.className = 'msg err'; msgEl.textContent = 'Enter a valid email.'; return; }
-  document.getElementById('su-add-btn').disabled = true;
-  msgEl.className = 'msg'; msgEl.textContent = '';
-  const resp = await fetch(`${API_BASE}/admin/users`, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body:    JSON.stringify({ email }),
-  });
-  const data = await resp.json();
-  if (resp.ok) {
-    msgEl.className = 'msg ok'; msgEl.textContent = `${email} added as superuser.`;
-    document.getElementById('su-email').value = '';
-    await loadAdminUsers();
-  } else {
-    msgEl.className = 'msg err'; msgEl.textContent = data.error || 'Failed.';
-  }
-  document.getElementById('su-add-btn').disabled = false;
-});
-
-async function removeSuperuser(email) {
-  if (!confirm(`Remove superuser ${email}?`)) return;
-  const resp = await fetch(`${API_BASE}/admin/users`, {
-    method:  'DELETE',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body:    JSON.stringify({ email }),
-  });
-  if (resp.ok) await loadAdminUsers();
-  else { const d = await resp.json(); alert(d.error || 'Failed.'); }
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function esc(str) {
-  return String(str ?? '')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ── Failure polling + notifications ───────────────────────────────────────────
-
-let _lastFailureKey = null;
-let _pollInterval   = null;
-let _notifyEnabled  = false;
-const POLL_MS       = 60_000;
-
-function _failureFingerprint(data) {
-  const ids = (data.failures || []).map(f => f.session_id + ':' + f.job_status).sort();
-  return ids.join('|') + '|total:' + (data.total || 0);
-}
-
-function _formatAlertSub(data) {
-  const n      = data.total || 0;
-  const stalls = (data.stale_uploads || []).length + (data.stale_processing || []).length;
-  const parts  = [];
-  if (n)      parts.push(`${n} failed session${n !== 1 ? 's' : ''}`);
-  if (stalls) parts.push(`${stalls} stalled`);
-  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  return parts.join(', ') + ` — detected at ${now}`;
-}
-
-function _showAlert(data) {
-  const widget = document.getElementById('alert-widget');
-  const n      = data.total || 0;
-  document.getElementById('alert-title').textContent = n === 1 ? '1 new failure detected' : `${n} failures detected`;
-  document.getElementById('alert-sub').textContent   = _formatAlertSub(data);
-  widget.classList.add('visible');
-  document.getElementById('failure-badge').textContent = n > 0 ? ` (${n})` : '';
-
-  if (_notifyEnabled && document.hidden) {
-    new Notification('PitchScout — Failures', {
-      body: document.getElementById('alert-sub').textContent,
-      icon: '/favicon.ico',
-      tag:  'ps-failure',
-    });
-  }
-}
-
-function _updatePollStatus() {
-  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  document.getElementById('poll-status').textContent = `Last checked ${now}`;
-}
-
-async function pollFailures() {
-  if (!jwt) return;
-  try {
-    const resp = await fetch(`${API_BASE}/admin/failures`, { headers: authHeaders() });
-    if (!resp.ok) return;
-    const data = await resp.json();
-    const key  = _failureFingerprint(data);
-    _updatePollStatus();
-    if (_lastFailureKey !== null && key !== _lastFailureKey && (data.total || 0) > 0) {
-      _showAlert(data);
-      await loadFailures();
-    }
-    _lastFailureKey = key;
-  } catch (_) {}
-}
-
-function startPolling() {
-  if (_pollInterval) return;
-  _pollInterval = setInterval(pollFailures, POLL_MS);
-}
-
-document.getElementById('notify-toggle').addEventListener('click', async () => {
-  const btn = document.getElementById('notify-toggle');
-  if (_notifyEnabled) {
-    _notifyEnabled  = false;
-    btn.textContent = '🔔 Notify';
-    btn.className   = 'notify-toggle off';
-    return;
-  }
-  if (!('Notification' in window)) { alert('Browser notifications are not supported.'); return; }
-  const perm = await Notification.requestPermission();
-  if (perm === 'granted') {
-    _notifyEnabled  = true;
-    btn.textContent = '🔔 On';
-    btn.className   = 'notify-toggle on';
-  } else {
-    btn.textContent = '🔕 Blocked';
-    btn.className   = 'notify-toggle off';
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+  } catch(e) {
+    document.getElementById("auth-err").textContent = e.message;
   }
 });
 
-document.getElementById('alert-dismiss').addEventListener('click', () => {
-  document.getElementById('alert-widget').classList.remove('visible');
+document.getElementById("btn-demo-login").addEventListener("click", () => {
+  currentUser = { displayName: "Demo Admin", email: "demo@jiggajerkjoint.com" };
+  showApp();
 });
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+document.getElementById("btn-signout").addEventListener("click", async () => {
+  if (firebaseReady) await auth.signOut();
+  document.getElementById("app").style.display = "none";
+  document.getElementById("auth-screen").style.display = "flex";
+  currentUser = null;
+});
+
+if (firebaseReady) {
+  auth.onAuthStateChanged(user => {
+    if (user) { currentUser = user; showApp(); }
+  });
+}
 
 function showApp() {
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
+  document.getElementById("auth-screen").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("user-display").textContent = currentUser.displayName || currentUser.email;
+  loadDashboard();
+  loadMenuItems();
+  loadOrders();
+  loadSettings();
+  buildHoursEditor("hours-editor");
+  buildGMBHoursEditor();
+}
 
-  document.getElementById('header-email').textContent = myEmail;
-  const chip = document.getElementById('header-role-chip');
-  if (myRole === 'admin') {
-    chip.innerHTML = ' <span class="role-chip role-admin">Full Admin</span>';
-  } else if (myRole === 'coach') {
-    chip.innerHTML = ' <span class="role-chip" style="background:rgba(255,214,0,.12);color:var(--yellow);border:1px solid rgba(255,214,0,.25)">Coach</span>';
-  } else {
-    chip.innerHTML = ' <span class="role-chip role-superuser">Superuser</span>';
-  }
+// ── Sidebar navigation ────────────────────────────────────
+document.querySelectorAll(".sidebar-link").forEach(link => {
+  link.addEventListener("click", () => switchPanel(link.dataset.panel));
+});
 
-  if (myRole === 'coach') {
-    // Coach sees only My Events tab
-    document.getElementById('tab-myevents-btn').style.display = '';
-    document.getElementById('tab-allowlist-btn').style.display = 'none';
-    // Switch to My Events
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('tab-myevents-btn').classList.add('active');
-    document.getElementById('tab-myevents').classList.add('active');
-    loadMyEvents();
-    return;
-  }
-
-  // Admin / superuser view
-  if (myRole === 'admin') {
-    document.getElementById('tab-users-btn').style.display = '';
-    document.getElementById('tab-events-btn').style.display = '';
-  } else if (myRole === 'superuser') {
-    document.getElementById('tab-events-btn').style.display = '';
-  }
-
-  loadAllowlist();
-  loadRequests();
-  loadSpending();
-  loadFailures().then(() => {
-    fetch(`${API_BASE}/admin/failures`, { headers: authHeaders() })
-      .then(r => r.json()).then(d => { _lastFailureKey = _failureFingerprint(d); _updatePollStatus(); });
-    startPolling();
+function switchPanel(name) {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".sidebar-link").forEach(l => {
+    l.classList.toggle("active", l.dataset.panel === name);
   });
-  if (myRole === 'admin') {
-    loadAdminUsers();
-    loadCoachRequests();
+  document.getElementById("panel-" + name).classList.add("active");
+}
+
+// ── Dashboard ─────────────────────────────────────────────
+async function loadDashboard() {
+  const items   = await getMenuItems();
+  const orders  = await loadCateringOrders();
+  const pending = orders.filter(o => o.status === "pending").length;
+
+  document.getElementById("stat-menu-count").textContent   = items.length;
+  document.getElementById("stat-pending").textContent      = pending;
+  document.getElementById("stat-total-orders").textContent = orders.length;
+
+  let newsletterCount = "—";
+  if (firebaseReady) {
+    try {
+      const snap = await db.collection("newsletter").get();
+      newsletterCount = snap.size;
+    } catch(e) {}
+  } else {
+    const subs = JSON.parse(localStorage.getItem("jjj_newsletter") || "[]");
+    newsletterCount = subs.length;
+  }
+  document.getElementById("stat-newsletter").textContent = newsletterCount;
+
+  const recents = orders.slice(0, 5);
+  const tbody   = document.getElementById("dash-recent-orders");
+  if (!recents.length) {
+    tbody.innerHTML = "<p style='color:var(--muted);font-size:0.88rem;'>No catering orders yet.</p>";
+    return;
+  }
+  tbody.innerHTML = `
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Ref #</th><th>Event</th><th>Guests</th><th>Status</th></tr></thead>
+        <tbody>${recents.map(o => `
+          <tr>
+            <td style="font-weight:600;color:var(--gold)">${o.refNumber||"—"}</td>
+            <td>${o.eventType||"—"}</td>
+            <td>${o.guestCount||"—"}</td>
+            <td><span class="status-chip status-${o.status||'pending'}">${o.status||"pending"}</span></td>
+          </tr>
+        `).join("")}</tbody>
+      </table>
+    </div>`;
+}
+
+// ── Menu Editor ───────────────────────────────────────────
+async function loadMenuItems() {
+  allItems = await getMenuItems();
+  renderMenuTable(allItems);
+}
+
+function renderMenuTable(items) {
+  const tbody = document.getElementById("menu-tbody");
+  tbody.innerHTML = items.map(item => `
+    <tr data-id="${item.id}" data-cat="${item.category}" data-name="${item.name.toLowerCase()}">
+      <td><strong>${item.emoji||"🍽️"} ${item.name}</strong><div style="font-size:0.78rem;color:var(--muted-hi);margin-top:2px;">${(item.description||"").substring(0,60)}…</div></td>
+      <td>${item.category}</td>
+      <td>$${parseFloat(item.price).toFixed(2)}</td>
+      <td>${item.featured ? "⭐" : "—"}</td>
+      <td>
+        <label class="toggle-switch">
+          <input type="checkbox" ${item.active?"checked":""} onchange="toggleItemActive('${item.id}',this.checked)" />
+          <span class="toggle-slider"></span>
+        </label>
+      </td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm" onclick="openItemModal('${item.id}')">Edit</button>
+          <button class="btn btn-sm" style="background:rgba(212,56,13,0.15);color:var(--pepper);border:1px solid rgba(212,56,13,0.3);border-radius:6px;" onclick="deleteItem('${item.id}','${item.name}')">Del</button>
+        </div>
+      </td>
+    </tr>
+  `).join("");
+}
+
+function filterMenuTable() {
+  const q   = document.getElementById("menu-search").value.toLowerCase();
+  const cat = document.getElementById("menu-cat-filter").value;
+  const rows = document.querySelectorAll("#menu-tbody tr");
+  rows.forEach(row => {
+    const matchQ   = !q   || row.dataset.name.includes(q);
+    const matchCat = !cat || row.dataset.cat === cat;
+    row.style.display = (matchQ && matchCat) ? "" : "none";
+  });
+}
+
+function openItemModal(id) {
+  const isEdit = !!id;
+  document.getElementById("item-modal-title").textContent = isEdit ? "Edit Menu Item" : "Add Menu Item";
+  document.getElementById("item-edit-id").value  = id || "";
+
+  if (isEdit) {
+    const item = allItems.find(i => i.id === id);
+    if (!item) return;
+    document.getElementById("item-name").value        = item.name;
+    document.getElementById("item-price").value       = item.price;
+    document.getElementById("item-category").value    = item.category;
+    document.getElementById("item-emoji").value       = item.emoji || "";
+    document.getElementById("item-description").value = item.description || "";
+    document.getElementById("item-featured").checked  = !!item.featured;
+    document.getElementById("item-spicy").checked     = !!item.spicy;
+    document.getElementById("item-gf").checked        = !!item.glutenFree;
+    document.getElementById("item-vegan").checked     = !!item.vegan;
+    document.getElementById("item-active").checked    = item.active !== false;
+  } else {
+    ["item-name","item-price","item-emoji","item-description"].forEach(id => {
+      document.getElementById(id).value = "";
+    });
+    document.getElementById("item-category").value = "";
+    ["item-featured","item-spicy","item-gf","item-vegan"].forEach(id => {
+      document.getElementById(id).checked = false;
+    });
+    document.getElementById("item-active").checked = true;
+  }
+  document.getElementById("item-modal").classList.add("open");
+}
+function closeItemModal() { document.getElementById("item-modal").classList.remove("open"); }
+
+async function saveItem() {
+  const id   = document.getElementById("item-edit-id").value;
+  const name = document.getElementById("item-name").value.trim();
+  const price = parseFloat(document.getElementById("item-price").value);
+  const cat  = document.getElementById("item-category").value;
+
+  if (!name || !price || !cat) { showToast("Name, price, and category are required.", "error"); return; }
+
+  const itemData = {
+    name, price, category: cat,
+    emoji:       document.getElementById("item-emoji").value.trim() || "🍽️",
+    description: document.getElementById("item-description").value.trim(),
+    featured:    document.getElementById("item-featured").checked,
+    spicy:       document.getElementById("item-spicy").checked,
+    glutenFree:  document.getElementById("item-gf").checked,
+    vegan:       document.getElementById("item-vegan").checked,
+    active:      document.getElementById("item-active").checked,
+  };
+
+  if (firebaseReady) {
+    if (id) {
+      await db.collection("menu_items").doc(id).update(itemData);
+    } else {
+      await db.collection("menu_items").add(itemData);
+    }
+  } else {
+    let items = localGet("menu_items") || [...SEED_MENU];
+    if (id) {
+      const idx = items.findIndex(i => i.id === id);
+      if (idx !== -1) items[idx] = { ...items[idx], ...itemData };
+    } else {
+      items.push({ id: Date.now().toString(), ...itemData });
+    }
+    localSet("menu_items", items);
+  }
+
+  showToast(id ? "Item updated!" : "Item added!");
+  closeItemModal();
+  await loadMenuItems();
+}
+
+async function toggleItemActive(id, active) {
+  if (firebaseReady) {
+    await db.collection("menu_items").doc(id).update({ active });
+  } else {
+    let items = localGet("menu_items") || [...SEED_MENU];
+    const idx = items.findIndex(i => i.id === id);
+    if (idx !== -1) { items[idx].active = active; localSet("menu_items", items); }
+  }
+  showToast(active ? "Item activated." : "Item hidden from menu.");
+}
+
+async function deleteItem(id, name) {
+  if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+  if (firebaseReady) {
+    await db.collection("menu_items").doc(id).delete();
+  } else {
+    let items = localGet("menu_items") || [];
+    localSet("menu_items", items.filter(i => i.id !== id));
+  }
+  showToast("Item deleted.");
+  await loadMenuItems();
+}
+
+// ── Catering Orders ───────────────────────────────────────
+async function loadCateringOrders() {
+  if (firebaseReady) {
+    const snap = await db.collection("catering_orders").orderBy("createdAt","desc").get();
+    allOrders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } else {
+    allOrders = JSON.parse(localStorage.getItem("jjj_catering_orders") || "[]")
+      .reverse()
+      .map((o, i) => ({ ...o, id: o.refNumber || ("LOCAL-" + i) }));
+  }
+  return allOrders;
+}
+
+async function loadOrders() {
+  await loadCateringOrders();
+  renderOrders();
+}
+
+function renderOrders() {
+  const visible = orderFilter === "all" ? allOrders : allOrders.filter(o => o.status === orderFilter);
+  const tbody = document.getElementById("orders-tbody");
+  if (!visible.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:28px;">No orders found.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = visible.map(o => `
+    <tr>
+      <td style="font-weight:600;color:var(--gold)">${o.refNumber||o.id||"—"}</td>
+      <td>${o.eventDate||"—"}</td>
+      <td>${o.eventType||"—"}</td>
+      <td>${o.guestCount||"—"}</td>
+      <td>${o.contactName||"—"}<div style="font-size:0.75rem;color:var(--muted)">${o.contactEmail||""}</div></td>
+      <td><span class="status-chip status-${o.status||'pending'}">${o.status||"pending"}</span></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="openOrderModal('${o.id}')">View</button></td>
+    </tr>
+  `).join("");
+}
+
+function filterOrders(btn) {
+  document.querySelectorAll(".status-filter").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  orderFilter = btn.dataset.status;
+  renderOrders();
+}
+
+function openOrderModal(id) {
+  const o = allOrders.find(o => o.id === id);
+  if (!o) return;
+  document.getElementById("order-modal-title").textContent = `Order ${o.refNumber || id}`;
+
+  const items = (o.selectedItems || []);
+  document.getElementById("order-modal-body").innerHTML = `
+    <div class="order-detail-wrap">
+      <div class="detail-row"><div class="detail-label">Event Type</div><div class="detail-value">${o.eventType||"—"}</div></div>
+      <div class="detail-row"><div class="detail-label">Date &amp; Time</div><div class="detail-value">${o.eventDate||"—"} at ${o.eventTime||"—"}</div></div>
+      <div class="detail-row"><div class="detail-label">Guest Count</div><div class="detail-value">${o.guestCount||"—"}</div></div>
+      <div class="detail-row"><div class="detail-label">Venue</div><div class="detail-value">${o.venueAddress||"—"}</div></div>
+      <div class="detail-row"><div class="detail-label">Service Style</div><div class="detail-value">${o.serviceStyle||"—"}</div></div>
+      <div class="detail-row"><div class="detail-label">Contact</div><div class="detail-value">${o.contactName||"—"}<br>${o.contactPhone||""}<br>${o.contactEmail||""}</div></div>
+      <div class="detail-row"><div class="detail-label">Budget</div><div class="detail-value">${o.budgetRange||"—"}</div></div>
+      <div class="detail-row"><div class="detail-label">Menu Items</div><div class="detail-value">
+        <ul class="order-items-list">${items.length ? items.map(i => `<li>${i.name} × ${i.qty}</li>`).join("") : "<li>None specified</li>"}</ul>
+      </div></div>
+      <div class="detail-row"><div class="detail-label">Notes</div><div class="detail-value">${o.notes||"—"}</div></div>
+      <div class="detail-row"><div class="detail-label">Referral</div><div class="detail-value">${o.referral||"—"}</div></div>
+      <div class="detail-row"><div class="detail-label">Submitted</div><div class="detail-value">${o.createdAt ? new Date(o.createdAt).toLocaleString() : "—"}</div></div>
+      <div class="form-group" style="margin-top:16px;">
+        <label class="form-label">Update Status</label>
+        <select class="form-select" id="order-status-select">
+          ${["pending","confirmed","completed","cancelled"].map(s => `<option value="${s}" ${o.status===s?"selected":""}>${s}</option>`).join("")}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Admin Notes</label>
+        <textarea class="form-textarea" id="order-admin-notes">${o.adminNotes||""}</textarea>
+      </div>
+    </div>`;
+
+  document.getElementById("order-modal-footer").innerHTML = `
+    <button class="btn btn-ghost btn-sm" onclick="closeOrderModal()">Close</button>
+    <button class="btn btn-primary btn-sm" onclick="saveOrderStatus('${id}')">Save Changes</button>`;
+
+  document.getElementById("order-modal").classList.add("open");
+}
+function closeOrderModal() { document.getElementById("order-modal").classList.remove("open"); }
+
+async function saveOrderStatus(id) {
+  const status = document.getElementById("order-status-select").value;
+  const notes  = document.getElementById("order-admin-notes").value;
+
+  if (firebaseReady) {
+    await db.collection("catering_orders").doc(id).update({ status, adminNotes: notes });
+  } else {
+    const orders = JSON.parse(localStorage.getItem("jjj_catering_orders") || "[]");
+    const idx    = orders.findIndex(o => (o.refNumber || ("LOCAL-" + orders.indexOf(o))) === id || o.refNumber === id);
+    if (idx !== -1) { orders[idx].status = status; orders[idx].adminNotes = notes; }
+    localStorage.setItem("jjj_catering_orders", JSON.stringify(orders));
+    allOrders.forEach(o => { if (o.id === id) { o.status = status; o.adminNotes = notes; } });
+  }
+
+  showToast("Order updated!");
+  closeOrderModal();
+  renderOrders();
+}
+
+function exportOrdersCSV() {
+  const headers = ["Ref #","Event Date","Event Type","Guests","Contact Name","Email","Phone","Status","Budget","Notes"];
+  const rows    = allOrders.map(o => [
+    o.refNumber||"", o.eventDate||"", o.eventType||"", o.guestCount||"",
+    o.contactName||"", o.contactEmail||"", o.contactPhone||"",
+    o.status||"", o.budgetRange||"", (o.notes||"").replace(/,/g,"")
+  ]);
+  const csv     = [headers, ...rows].map(r => r.join(",")).join("\n");
+  const blob    = new Blob([csv], { type:"text/csv" });
+  const url     = URL.createObjectURL(blob);
+  const a       = document.createElement("a");
+  a.href = url; a.download = "jjj-catering-orders.csv"; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Square ────────────────────────────────────────────────
+function connectSquare() {
+  const token    = document.getElementById("square-token").value.trim();
+  const location = document.getElementById("square-location").value.trim();
+  if (!token) { showToast("Enter your Square Access Token.", "error"); return; }
+  localSet("square_token", token);
+  localSet("square_location", location);
+  fetchSquareInvoices();
+}
+
+async function fetchSquareInvoices() {
+  const token    = localGet("square_token");
+  const location = localGet("square_location");
+
+  if (!token) { showToast("Connect Square first.", "error"); return; }
+
+  document.getElementById("square-invoices-section").classList.remove("hidden");
+  document.getElementById("invoices-tbody").innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;"><div class="spinner" style="margin:0 auto;width:24px;height:24px;"></div></td></tr>`;
+
+  try {
+    const url = location
+      ? `https://connect.squareup.com/v2/invoices?location_id=${location}`
+      : `https://connect.squareup.com/v2/invoices`;
+
+    const res  = await fetch(url, {
+      headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json", "Square-Version": "2024-01-18" }
+    });
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.errors?.[0]?.detail || "Square API error");
+
+    const invoices = data.invoices || [];
+    document.getElementById("square-sync-time").textContent = `Last synced: ${new Date().toLocaleString()}`;
+
+    if (!invoices.length) {
+      document.getElementById("invoices-tbody").innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">No invoices found.</td></tr>`;
+      return;
+    }
+
+    document.getElementById("invoices-tbody").innerHTML = invoices.map(inv => {
+      const amt = inv.payment_requests?.[0]?.computed_amount_money;
+      const due = inv.payment_requests?.[0]?.due_date;
+      return `
+        <tr>
+          <td style="font-weight:600;color:var(--gold)">${inv.invoice_number||inv.id?.slice(-8)||"—"}</td>
+          <td>${inv.primary_recipient?.display_name||"—"}</td>
+          <td>${amt ? "$" + (amt.amount/100).toFixed(2) : "—"}</td>
+          <td>${due||"—"}</td>
+          <td><span class="status-chip status-${(inv.status||"draft").toLowerCase()}">${inv.status||"—"}</span></td>
+        </tr>`;
+    }).join("");
+  } catch(err) {
+    showToast("Square error: " + err.message, "error");
+    document.getElementById("invoices-tbody").innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--red-err);padding:20px;">${err.message}</td></tr>`;
   }
 }
 
-async function init() {
-  // Handle OAuth callback
-  const code = new URLSearchParams(window.location.search).get('code');
-  if (code) {
-    const token = await handleOAuthCallback();
-    if (token) {
-      const ok = await verifyAndShow(token);
-      if (ok) { showApp(); return; }
-      document.getElementById('auth-err').textContent = 'Access denied. Admin accounts only.';
-    }
+// ── Google My Business ────────────────────────────────────
+function connectGMB() {
+  if (!firebaseReady) {
+    showToast("Firebase required for GMB integration. See docs.", "error");
+    document.getElementById("gmb-connect-section").classList.add("hidden");
+    document.getElementById("gmb-editor-section").classList.remove("hidden");
+    return;
+  }
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.addScope("https://www.googleapis.com/auth/business.manage");
+  auth.signInWithPopup(provider).then(result => {
+    const token = result.credential.accessToken;
+    localSet("gmb_token", token);
+    document.getElementById("gmb-connect-section").classList.add("hidden");
+    document.getElementById("gmb-editor-section").classList.remove("hidden");
+    showToast("Google My Business connected!");
+  }).catch(e => showToast("GMB connect error: " + e.message, "error"));
+}
+
+function buildGMBHoursEditor() {
+  buildHoursEditorInEl("gmb-hours-editor");
+}
+
+async function saveGMB() {
+  const description = document.getElementById("gmb-description").value.trim();
+  const phone       = document.getElementById("gmb-phone").value.trim();
+  const website     = document.getElementById("gmb-website").value.trim();
+  const token       = localGet("gmb_token");
+
+  // Save to local settings
+  const settings = localGet("site_settings") || { ...SITE_SETTINGS };
+  settings.description = description;
+  settings.phone       = phone;
+  if (website) settings.websiteUrl = website;
+  localSet("site_settings", settings);
+
+  if (!token) {
+    showToast("GMB data saved locally. Connect GMB to push to Google.", "error");
     return;
   }
 
-  // Restore from session
-  const saved = sessionStorage.getItem(SESSION_KEY);
-  if (saved) {
-    const ok = await verifyAndShow(saved);
-    if (ok) { showApp(); return; }
-    sessionStorage.removeItem(SESSION_KEY);
+  // Push to GMB API
+  const locationId = localGet("gmb_location_id");
+  if (!locationId) {
+    showToast("Enter your GMB Location ID in settings first.", "error");
+    return;
+  }
+
+  try {
+    await fetch(`https://mybusinessbusinessinformation.googleapis.com/v1/locations/${locationId}?updateMask=profile.description,phoneNumbers.primaryPhone,websiteUri`, {
+      method: "PATCH",
+      headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ profile: { description }, phoneNumbers: { primaryPhone: phone }, websiteUri: website })
+    });
+    showToast("Google My Business updated!");
+  } catch(e) {
+    showToast("GMB push failed: " + e.message + ". Data saved locally.", "error");
   }
 }
 
-init();
+// ── Settings ──────────────────────────────────────────────
+async function loadSettings() {
+  const s = await getSiteSettings();
+  document.getElementById("setting-doordash").value = s.doordashUrl  || "";
+  document.getElementById("setting-maps").value     = s.googleMapsUrl || "";
+  document.getElementById("setting-phone").value    = s.phone         || "";
+  document.getElementById("setting-address").value  = s.address       || "";
+}
+
+async function saveSettings() {
+  const newSettings = {
+    doordashUrl:   document.getElementById("setting-doordash").value.trim(),
+    googleMapsUrl: document.getElementById("setting-maps").value.trim(),
+    phone:         document.getElementById("setting-phone").value.trim(),
+    address:       document.getElementById("setting-address").value.trim(),
+  };
+
+  if (firebaseReady) {
+    await db.collection("settings").doc("site").set(newSettings, { merge: true });
+  } else {
+    const existing = localGet("site_settings") || { ...SITE_SETTINGS };
+    localSet("site_settings", { ...existing, ...newSettings });
+  }
+  showToast("Settings saved!");
+}
+
+// ── Specials ──────────────────────────────────────────────
+async function saveSpecial() {
+  const special = {
+    enabled: document.getElementById("special-enabled").checked,
+    text:    document.getElementById("special-text").value.trim(),
+    start:   document.getElementById("special-start").value,
+    end:     document.getElementById("special-end").value,
+  };
+
+  if (firebaseReady) {
+    await db.collection("settings").doc("special").set(special);
+  } else {
+    localSet("site_special", special);
+  }
+  showToast("Special saved!");
+}
+
+// ── Shared hours editor ───────────────────────────────────
+const DAYS = ["mon","tue","wed","thu","fri","sat","sun"];
+const DAY_LABELS = { mon:"Monday",tue:"Tuesday",wed:"Wednesday",thu:"Thursday",fri:"Friday",sat:"Saturday",sun:"Sunday" };
+
+function buildHoursEditor(containerId) {
+  buildHoursEditorInEl(containerId);
+}
+
+function buildHoursEditorInEl(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = DAYS.map(d => `
+    <div style="display:grid;grid-template-columns:100px 1fr 1fr auto;gap:10px;align-items:center;margin-bottom:10px;">
+      <span style="font-size:0.88rem;color:var(--cream);">${DAY_LABELS[d]}</span>
+      <input type="time" class="form-input" id="${containerId}-open-${d}" value="11:00" />
+      <input type="time" class="form-input" id="${containerId}-close-${d}" value="21:00" />
+      <label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:var(--muted-hi);cursor:pointer;white-space:nowrap;">
+        <input type="checkbox" id="${containerId}-closed-${d}" onchange="toggleDayClosed('${containerId}','${d}',this.checked)" /> Closed
+      </label>
+    </div>
+  `).join("");
+}
+
+function toggleDayClosed(prefix, day, closed) {
+  document.getElementById(prefix + "-open-" + day).disabled  = closed;
+  document.getElementById(prefix + "-close-" + day).disabled = closed;
+}
+
+// Close modals on overlay click
+document.querySelectorAll(".modal-overlay").forEach(overlay => {
+  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.classList.remove("open"); });
+});
 </script>
 </body>
 </html>
