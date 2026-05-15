@@ -496,7 +496,7 @@
     <div class="hours-location">
       <div class="info-card">
         <div class="info-card-title">📍 Find Us</div>
-        <p class="location-address" id="location-address">Miami, FL<br><span style="font-size:0.85rem;color:var(--muted-hi);">Full address on Instagram</span></p>
+        <p class="location-address" id="location-address">6200 NE 2 Ave<br>Miami, FL 33138</p>
         <p class="location-phone" id="location-phone">📞 (786) 694-1440</p>
         <a href="#" id="maps-link" target="_blank" rel="noopener" class="map-placeholder" style="text-decoration:none;cursor:pointer;transition:border-color var(--transition),background var(--transition);" onmouseover="this.style.borderColor='var(--border-mid)'" onmouseout="this.style.borderColor=''">
           <span style="display:flex;flex-direction:column;align-items:center;gap:6px;">
@@ -512,7 +512,9 @@
           <li><span class="day">Tuesday</span>   <span style="color:var(--muted)">Closed</span></li>
           <li><span class="day">Wednesday</span> <span>12:00 PM – 6:00 PM</span></li>
           <li><span class="day">Thursday</span>  <span>12:00 PM – 8:00 PM</span></li>
-          <li><span class="day">Friday – Sunday</span> <span><a href="https://www.instagram.com/jiggajerkjoint/" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:underline;font-size:0.82rem;">Check Instagram</a></span></li>
+          <li><span class="day">Friday</span>    <span>4:00 PM – 12:00 AM</span></li>
+          <li><span class="day">Saturday</span>  <span>4:00 PM – 12:00 AM</span></li>
+          <li><span class="day">Sunday</span>    <span>4:00 PM – 10:00 PM</span></li>
         </ul>
         <div id="open-status" style="margin-top:12px;"></div>
         <div class="mt-2">
@@ -640,21 +642,24 @@ getFeaturedItems().then(items => {
 
 // Live open/closed status badge
 (function() {
-  const now   = new Date();
-  const day   = now.getDay(); // 0=Sun,1=Mon,...6=Sat
-  const hour  = now.getHours() + now.getMinutes() / 60;
-  // Known hours: Mon(1)/Tue(2) closed; Wed(3) 12-18; Thu(4) 12-20
-  let isOpen  = false;
-  if (day === 3 && hour >= 12 && hour < 18) isOpen = true;
-  if (day === 4 && hour >= 12 && hour < 20) isOpen = true;
+  const now  = new Date();
+  const day  = now.getDay(); // 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
+  const hour = now.getHours() + now.getMinutes() / 60;
+  let isOpen = false;
+  if (day === 3 && hour >= 12 && hour < 18) isOpen = true; // Wed 12–6pm
+  if (day === 4 && hour >= 12 && hour < 20) isOpen = true; // Thu 12–8pm
+  if (day === 5 && hour >= 16)              isOpen = true; // Fri 4pm–midnight
+  if (day === 6 && hour >= 16)              isOpen = true; // Sat 4pm–midnight
+  if (day === 0 && hour >= 16 && hour < 22) isOpen = true; // Sun 4–10pm
+  const closedToday = (day === 1 || day === 2);
   const el = document.getElementById("open-status");
   if (!el) return;
   if (isOpen) {
-    el.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,155,58,0.15);border:1px solid rgba(0,155,58,0.4);border-radius:20px;padding:5px 12px;font-size:0.8rem;font-weight:700;color:var(--green-bright)"><span style="width:7px;height:7px;background:var(--green-bright);border-radius:50%;animation:pulse 1.5s infinite;"></span> Open Now</span>`;
-  } else if (day === 1 || day === 2) {
+    el.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,155,58,0.15);border:1px solid rgba(0,155,58,0.4);border-radius:20px;padding:5px 12px;font-size:0.8rem;font-weight:700;color:var(--green-bright)"><span style="width:7px;height:7px;background:var(--green-bright);border-radius:50%;animation:pulse 1.5s infinite;display:inline-block;"></span> Open Now</span>`;
+  } else if (closedToday) {
     el.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(212,56,13,0.12);border:1px solid rgba(212,56,13,0.3);border-radius:20px;padding:5px 12px;font-size:0.8rem;font-weight:700;color:var(--pepper)">Closed Today</span>`;
   } else {
-    el.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(160,128,90,0.12);border:1px solid rgba(160,128,90,0.25);border-radius:20px;padding:5px 12px;font-size:0.8rem;color:var(--muted-hi)">Currently Closed · <a href="https://www.instagram.com/jiggajerkjoint/" target="_blank" style="color:var(--gold)">Check IG for hours</a></span>`;
+    el.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(160,128,90,0.12);border:1px solid rgba(160,128,90,0.25);border-radius:20px;padding:5px 12px;font-size:0.8rem;color:var(--muted-hi)">Currently Closed</span>`;
   }
 })();
 

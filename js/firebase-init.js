@@ -31,17 +31,17 @@ const SEED_MENU = [
 const SITE_SETTINGS = {
   doordashUrl:   "https://www.doordash.com",
   instagramUrl:  "https://www.instagram.com/jiggajerkjoint/",
-  googleMapsUrl: "https://www.google.com/maps/search/Jigga+Jerk+Joint+Miami+FL",
+  googleMapsUrl: "https://maps.google.com/?q=6200+NE+2+Ave,+Miami,+FL+33138",
   phone:         "(786) 694-1440",
-  address:       "Miami, FL",
+  address:       "6200 NE 2 Ave\nMiami, FL 33138",
   hours: {
     mon: { closed: true },
     tue: { closed: true },
     wed: { open:"12:00", close:"18:00", closed:false },
     thu: { open:"12:00", close:"20:00", closed:false },
-    fri: { open:"12:00", close:"20:00", closed:false },
-    sat: { open:"12:00", close:"20:00", closed:false },
-    sun: { open:"12:00", close:"20:00", closed:false },
+    fri: { open:"16:00", close:"00:00", closed:false },
+    sat: { open:"16:00", close:"00:00", closed:false },
+    sun: { open:"16:00", close:"22:00", closed:false },
   }
 };
 
