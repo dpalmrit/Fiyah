@@ -40,7 +40,7 @@
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--green-bright);
   margin-bottom: 16px;
   display: flex;
   align-items: center;
@@ -51,7 +51,7 @@
   display: block;
   width: 32px;
   height: 2px;
-  background: var(--gold);
+  background: var(--green-bright);
 }
 
 .hero-title {
@@ -102,6 +102,7 @@
 .stats-strip {
   background: var(--pepper);
   padding: 20px 5%;
+  border-bottom: 4px solid var(--green);
 }
 .stats-inner {
   max-width: 1140px;
@@ -290,6 +291,9 @@
   </button>
 </nav>
 
+<!-- Jamaica flag stripe below nav -->
+<div class="jamaica-stripe"></div>
+
 <!-- ── Hero ──────────────────────────────────────────────── -->
 <section class="hero">
   <div class="hero-bg-fallback"></div>
@@ -352,13 +356,19 @@
   </div>
 </section>
 
+<!-- Jamaica flag stripe between sections -->
+<div class="jamaica-stripe"></div>
+
 <!-- ── About ─────────────────────────────────────────────── -->
 <section class="section" id="about">
   <div class="section-inner">
     <div class="about-grid">
       <div>
-        <div class="section-title">Our Story</div>
-        <p style="color:var(--muted-hi);line-height:1.8;margin-bottom:1.5rem;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
+          <span style="display:block;width:4px;height:36px;background:var(--green);border-radius:2px;flex-shrink:0;"></span>
+          <div class="section-title" style="margin-bottom:0;">Our Story</div>
+        </div>
+        <p style="color:var(--muted-hi);line-height:1.8;margin-bottom:1.5rem;margin-top:1rem;">
           Jigga Jerk Joint was born from a family recipe passed down through three generations — a secret marinade of scotch bonnet peppers, allspice, fresh thyme, and love. We brought those Jamaican roots to the streets and never looked back.
         </p>
         <p style="color:var(--muted-hi);line-height:1.8;margin-bottom:2rem;">
@@ -366,13 +376,18 @@
         </p>
         <div class="flex gap-2" style="flex-wrap:wrap;">
           <a href="https://www.instagram.com/jiggajerkjoint/" target="_blank" rel="noopener" class="btn btn-ghost">📸 Follow on Instagram</a>
-          <a href="menu.html" class="btn btn-secondary">Explore the Menu</a>
+          <a href="menu.html" class="btn btn-green">Explore the Menu</a>
         </div>
       </div>
-      <div style="background:var(--smoke2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:40px;text-align:center;">
-        <div style="font-size:5rem;margin-bottom:16px;">🔥</div>
-        <div style="font-family:'Oswald',system-ui;font-size:1.5rem;color:var(--gold);margin-bottom:8px;">THREE GENERATIONS</div>
+      <div style="background:var(--smoke2);border:1px solid var(--border);border-top:3px solid var(--green);border-radius:var(--radius-lg);padding:40px;text-align:center;">
+        <div style="font-size:5rem;margin-bottom:16px;">🌿</div>
+        <div style="font-family:'Oswald',system-ui;font-size:1.5rem;color:var(--green-bright);margin-bottom:8px;">THREE GENERATIONS</div>
         <div style="color:var(--muted-hi);font-size:0.9rem;line-height:1.6;">Of secret recipes,<br>Caribbean tradition,<br>&amp; serious jerk.</div>
+        <div style="margin-top:20px;display:flex;justify-content:center;gap:8px;">
+          <span style="width:32px;height:6px;background:var(--green);border-radius:3px;display:block;"></span>
+          <span style="width:32px;height:6px;background:var(--gold);border-radius:3px;display:block;"></span>
+          <span style="width:32px;height:6px;background:var(--green);border-radius:3px;display:block;"></span>
+        </div>
       </div>
     </div>
   </div>
@@ -450,7 +465,8 @@
 </div>
 
 <!-- ── Footer ────────────────────────────────────────────── -->
-<footer class="site-footer">
+<div class="jamaica-stripe"></div>
+<footer class="site-footer" style="border-top:none;">
   <div class="footer-grid">
     <div>
       <div class="footer-brand-name">Jigga Jerk Joint</div>

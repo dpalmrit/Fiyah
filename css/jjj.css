@@ -9,8 +9,10 @@
   --pepper-glow: rgba(212,56,13,0.18);
   --gold:        #F9C74F;
   --gold-dim:    #D4A017;
-  --green:       #43AA8B;
-  --green-dim:   #2E7D65;
+  --green:       #009B3A;
+  --green-dim:   #007A2D;
+  --green-bright:#00C44A;
+  --green-glow:  rgba(0,155,58,0.2);
   --smoke:       #1A0A00;
   --smoke2:      #261200;
   --smoke3:      #311800;
@@ -202,6 +204,18 @@ a { color: inherit; text-decoration: none; }
   transform: translateY(-1px);
 }
 
+.btn-green {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+.btn-green:hover {
+  background: var(--green-dim);
+  border-color: var(--green-dim);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,155,58,0.4);
+}
+
 .btn-ghost {
   background: transparent;
   color: var(--cream);
@@ -275,10 +289,10 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
-.badge-spicy { background: rgba(212,56,13,0.2); color: var(--pepper); border: 1px solid rgba(212,56,13,0.35); }
-.badge-gf    { background: rgba(67,170,139,0.2); color: var(--green); border: 1px solid rgba(67,170,139,0.35); }
-.badge-vegan { background: rgba(67,170,139,0.15); color: #7BCBAE; border: 1px solid rgba(67,170,139,0.25); }
-.badge-new   { background: rgba(249,199,79,0.2); color: var(--gold); border: 1px solid rgba(249,199,79,0.35); }
+.badge-spicy { background: rgba(212,56,13,0.2);  color: var(--pepper);      border: 1px solid rgba(212,56,13,0.35); }
+.badge-gf    { background: rgba(0,155,58,0.18);  color: var(--green-bright); border: 1px solid rgba(0,155,58,0.4); }
+.badge-vegan { background: rgba(0,155,58,0.12);  color: var(--green-bright); border: 1px solid rgba(0,155,58,0.3); }
+.badge-new   { background: rgba(249,199,79,0.2); color: var(--gold);         border: 1px solid rgba(249,199,79,0.35); }
 
 /* ── Tabs ───────────────────────────────────────────────── */
 .tabs-bar {
@@ -458,10 +472,45 @@ a { color: inherit; text-decoration: none; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ── Jamaica flag stripe — decorative divider ───────────── */
+.jamaica-stripe {
+  height: 6px;
+  background: linear-gradient(90deg,
+    var(--green) 0%,
+    var(--green) 38%,
+    var(--gold)  38%,
+    var(--gold)  62%,
+    var(--green) 62%,
+    var(--green) 100%
+  );
+}
+
+/* ── Green accent card variant ──────────────────────────── */
+.card-green-accent {
+  border-top: 3px solid var(--green);
+}
+.card-green-accent:hover {
+  box-shadow: 0 12px 40px rgba(0,155,58,0.2);
+}
+
+/* ── Green highlight text / underline ───────────────────── */
+.highlight-green {
+  position: relative;
+  display: inline-block;
+  color: var(--green-bright);
+}
+
+/* ── Section with green left border ────────────────────── */
+.section-green-border {
+  border-left: 4px solid var(--green);
+  padding-left: 16px;
+}
+
 /* ── Utility ────────────────────────────────────────────── */
 .text-gold   { color: var(--gold); }
 .text-pepper { color: var(--pepper); }
 .text-green  { color: var(--green); }
+.text-green-bright { color: var(--green-bright); }
 .text-muted  { color: var(--muted-hi); }
 .text-center { text-align: center; }
 .mt-1 { margin-top: 8px; }
