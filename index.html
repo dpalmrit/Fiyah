@@ -22,9 +22,10 @@
 .hero-bg-fallback {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 30% 60%, rgba(212,56,13,0.35) 0%, transparent 55%),
-              radial-gradient(ellipse at 70% 30%, rgba(249,199,79,0.2) 0%, transparent 50%),
-              linear-gradient(180deg, #1A0A00 0%, #261200 50%, #1A0A00 100%);
+  background: radial-gradient(ellipse at 30% 65%, rgba(212,56,13,0.50) 0%, transparent 52%),
+              radial-gradient(ellipse at 75% 25%, rgba(249,199,79,0.28) 0%, transparent 48%),
+              radial-gradient(ellipse at 55% 85%, rgba(0,155,58,0.18) 0%, transparent 40%),
+              linear-gradient(180deg, #1A0A00 0%, #2E0E00 50%, #1A0A00 100%);
 }
 
 .hero-content {
@@ -118,9 +119,10 @@
 
 /* ── Stats strip ────────────────────────────────────────── */
 .stats-strip {
-  background: var(--pepper);
-  padding: 20px 5%;
+  background: linear-gradient(90deg, #C23209 0%, #D4380D 40%, #E04A1A 60%, #C23209 100%);
+  padding: 22px 5%;
   border-bottom: 4px solid var(--green);
+  box-shadow: 0 4px 24px rgba(212,56,13,0.35);
 }
 .stats-inner {
   max-width: 1140px;
@@ -149,30 +151,31 @@
 
 /* ── Catering Banner ────────────────────────────────────── */
 .catering-banner {
-  background: linear-gradient(135deg, var(--smoke3) 0%, var(--surface) 50%, var(--smoke3) 100%);
-  border: 1px solid var(--border-mid);
+  background: linear-gradient(135deg, #F9C74F 0%, #FFE260 35%, #FFC930 65%, #F9C74F 100%);
+  border: none;
   border-radius: var(--radius-lg);
   padding: 60px 40px;
   text-align: center;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 8px 48px rgba(212,160,0,0.28);
 }
 .catering-banner::before {
   content: '🔥';
   position: absolute;
   font-size: 8rem;
-  opacity: 0.06;
+  opacity: 0.18;
   top: -20px; left: -20px;
 }
 .catering-banner::after {
   content: '🔥';
   position: absolute;
   font-size: 8rem;
-  opacity: 0.06;
+  opacity: 0.18;
   bottom: -20px; right: -20px;
 }
-.catering-banner h2 { margin-bottom: 12px; }
-.catering-banner p { font-size: 1rem; color: var(--muted-hi); max-width: 560px; margin: 0 auto 28px; line-height: 1.6; }
+.catering-banner h2 { margin-bottom: 12px; color: var(--dark-bg) !important; }
+.catering-banner p { font-size: 1rem; color: rgba(26,10,0,0.7); max-width: 560px; margin: 0 auto 28px; line-height: 1.6; }
 .catering-features {
   display: flex;
   justify-content: center;
@@ -180,7 +183,7 @@
   gap: 24px;
   margin-bottom: 32px;
 }
-.catering-feat { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--muted-hi); }
+.catering-feat { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: rgba(26,10,0,0.65); }
 .catering-feat-icon { font-size: 1.3rem; }
 
 /* ── Hours & Location ───────────────────────────────────── */
@@ -192,18 +195,22 @@
 @media (max-width: 768px) { .hours-location { grid-template-columns: 1fr; } }
 
 .info-card {
-  background: var(--smoke2);
+  background: #fff;
   border: 1px solid var(--border);
+  border-top: 3px solid var(--gold);
   border-radius: var(--radius-lg);
   padding: 32px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  transition: transform var(--transition), box-shadow var(--transition);
 }
+.info-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(212,56,13,0.10); }
 .info-card-title {
   font-family: 'Oswald', system-ui;
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--pepper);
   margin-bottom: 20px;
 }
 .hours-list { list-style: none; }
@@ -213,12 +220,12 @@
   padding: 8px 0;
   border-bottom: 1px solid var(--border);
   font-size: 0.9rem;
-  color: var(--muted-hi);
+  color: var(--ink-mid);
 }
 .hours-list li:last-child { border-bottom: none; }
-.hours-list .day { color: var(--cream); font-weight: 500; }
-.location-address { font-size: 1.05rem; color: var(--cream); margin-bottom: 20px; line-height: 1.5; }
-.location-phone { font-size: 1rem; color: var(--muted-hi); margin-bottom: 20px; }
+.hours-list .day { color: var(--ink); font-weight: 600; }
+.location-address { font-size: 1.05rem; color: var(--ink); margin-bottom: 20px; line-height: 1.5; }
+.location-phone { font-size: 1rem; color: var(--ink-mid); margin-bottom: 20px; }
 .map-placeholder {
   background: var(--smoke3);
   border: 1px solid var(--border);
@@ -227,7 +234,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--muted);
+  color: var(--ink-mid);
   font-size: 0.85rem;
   gap: 8px;
   margin-bottom: 16px;
@@ -242,22 +249,26 @@
 @media (max-width: 768px) { .reviews-grid { grid-template-columns: 1fr; } }
 
 .review-card {
-  background: var(--smoke2);
+  background: #fff;
   border: 1px solid var(--border);
+  border-top: 3px solid var(--gold);
   border-radius: var(--radius-lg);
   padding: 24px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  transition: transform var(--transition), box-shadow var(--transition);
 }
-.review-stars { color: var(--gold); font-size: 0.9rem; letter-spacing: 2px; margin-bottom: 12px; }
-.review-text { font-size: 0.92rem; color: var(--muted-hi); line-height: 1.6; margin-bottom: 16px; font-style: italic; }
-.review-author { font-size: 0.82rem; font-weight: 600; color: var(--cream); }
+.review-card:hover { transform: translateY(-4px); box-shadow: 0 10px 36px rgba(212,56,13,0.18); }
+.review-stars { color: #F59E0B; font-size: 0.9rem; letter-spacing: 2px; margin-bottom: 12px; }
+.review-text { font-size: 0.92rem; color: var(--ink-mid); line-height: 1.6; margin-bottom: 16px; font-style: italic; }
+.review-author { font-size: 0.82rem; font-weight: 700; color: var(--ink); }
 
 /* ── Newsletter ─────────────────────────────────────────── */
 .newsletter-section {
-  background: var(--smoke2);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, #00A83E 0%, #00CC50 45%, #008A32 100%);
+  border: none;
   text-align: center;
   padding: 60px 5%;
+  color: #fff;
 }
 .newsletter-form {
   display: flex;
@@ -268,17 +279,17 @@
 @media (max-width: 480px) { .newsletter-form { flex-direction: column; } }
 .newsletter-input {
   flex: 1;
-  background: var(--smoke3);
-  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.2);
+  border: 1.5px solid rgba(255,255,255,0.4);
   border-radius: 50px;
-  color: var(--cream);
+  color: #fff;
   font-size: 0.95rem;
   padding: 12px 20px;
   outline: none;
-  transition: border-color var(--transition);
+  transition: border-color var(--transition), background var(--transition);
 }
-.newsletter-input:focus { border-color: var(--gold); }
-.newsletter-input::placeholder { color: var(--muted); }
+.newsletter-input:focus { border-color: #fff; background: rgba(255,255,255,0.28); }
+.newsletter-input::placeholder { color: rgba(255,255,255,0.6); }
 
 /* ── About grid ─────────────────────────────────────────── */
 .about-grid {
@@ -353,7 +364,7 @@
 </div>
 
 <!-- ── Featured Menu ─────────────────────────────────────── -->
-<section class="section" id="menu">
+<section class="section section-warm" id="menu">
   <div class="section-inner">
     <div class="section-header">
       <div class="section-title">🔥 Fan Favorites</div>
@@ -392,60 +403,60 @@
     <div class="about-grid">
       <div>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
-          <span style="display:block;width:4px;height:36px;background:var(--green);border-radius:2px;flex-shrink:0;"></span>
+          <span style="display:block;width:4px;height:36px;background:var(--pepper);border-radius:2px;flex-shrink:0;"></span>
           <div class="section-title" style="margin-bottom:0;">Our Story</div>
         </div>
-        <p style="color:var(--muted-hi);line-height:1.8;margin-bottom:1.5rem;margin-top:1rem;">
+        <p style="color:var(--ink-mid);line-height:1.8;margin-bottom:1.5rem;margin-top:1rem;">
           Jigga Jerk Joint is Miami's Caribbean jerk spot — bold scotch bonnet heat, authentic island marinades, and real wood-fire smoke. We bring the culture and the flavor together, every single time.
         </p>
-        <p style="color:var(--muted-hi);line-height:1.8;margin-bottom:2rem;">
+        <p style="color:var(--ink-mid);line-height:1.8;margin-bottom:2rem;">
           7,400+ followers and counting. The community keeps growing because the food speaks for itself. If you haven't tried it yet — come see what Miami's been talking about.
         </p>
         <div class="flex gap-2" style="flex-wrap:wrap;">
-          <a href="https://www.instagram.com/jiggajerkjoint/" target="_blank" rel="noopener" class="btn btn-ghost">📸 7.4K on Instagram</a>
+          <a href="https://www.instagram.com/jiggajerkjoint/" target="_blank" rel="noopener" class="btn btn-outline">📸 7.4K on Instagram</a>
           <a href="menu.html" class="btn btn-green">Explore the Menu</a>
         </div>
       </div>
-      <div style="background:var(--smoke2);border:1px solid var(--border);border-top:3px solid var(--green);border-radius:var(--radius-lg);padding:36px 32px;">
+      <div style="background:#fff;border:1px solid var(--border);border-top:3px solid var(--green);border-radius:var(--radius-lg);padding:36px 32px;box-shadow:0 4px 32px rgba(0,155,58,0.12),0 2px 16px rgba(0,0,0,0.06);">
         <div style="font-family:'Oswald',system-ui;font-size:0.75rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:18px;">The Secret Blend</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;">
-          <div style="background:var(--smoke3);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;">
+          <div style="background:linear-gradient(135deg,#FFF0CC,#FFE8B8);border:1px solid rgba(212,56,13,0.18);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;">
             <span style="font-size:1.4rem;">🌶️</span>
             <div>
-              <div style="font-size:0.82rem;font-weight:700;color:var(--cream);">Scotch Bonnet</div>
+              <div style="font-size:0.82rem;font-weight:700;color:var(--ink);">Scotch Bonnet</div>
               <div style="font-size:0.72rem;color:var(--muted);">Heat &amp; Depth</div>
             </div>
           </div>
-          <div style="background:var(--smoke3);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;">
+          <div style="background:linear-gradient(135deg,#EDF9F0,#D4F2DC);border:1px solid rgba(0,155,58,0.18);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;">
             <span style="font-size:1.4rem;">🌿</span>
             <div>
-              <div style="font-size:0.82rem;font-weight:700;color:var(--cream);">Fresh Thyme</div>
+              <div style="font-size:0.82rem;font-weight:700;color:var(--ink);">Fresh Thyme</div>
               <div style="font-size:0.72rem;color:var(--muted);">Caribbean Aroma</div>
             </div>
           </div>
-          <div style="background:var(--smoke3);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;">
+          <div style="background:linear-gradient(135deg,#FFF0CC,#FFE8B8);border:1px solid rgba(212,56,13,0.18);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;">
             <span style="font-size:1.4rem;">🫚</span>
             <div>
-              <div style="font-size:0.82rem;font-weight:700;color:var(--cream);">Allspice</div>
+              <div style="font-size:0.82rem;font-weight:700;color:var(--ink);">Allspice</div>
               <div style="font-size:0.72rem;color:var(--muted);">Signature Warmth</div>
             </div>
           </div>
-          <div style="background:var(--smoke3);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;">
+          <div style="background:linear-gradient(135deg,#FFF0CC,#FFE8B8);border:1px solid rgba(212,56,13,0.18);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;">
             <span style="font-size:1.4rem;">🔥</span>
             <div>
-              <div style="font-size:0.82rem;font-weight:700;color:var(--cream);">Wood Fire</div>
+              <div style="font-size:0.82rem;font-weight:700;color:var(--ink);">Wood Fire</div>
               <div style="font-size:0.72rem;color:var(--muted);">The Real Smoke</div>
             </div>
           </div>
         </div>
         <div style="display:flex;gap:10px;justify-content:space-between;text-align:center;">
           <div>
-            <div style="font-family:'Oswald',system-ui;font-size:1.6rem;color:var(--green-bright);font-weight:700;">3</div>
+            <div style="font-family:'Oswald',system-ui;font-size:1.6rem;color:var(--green);font-weight:700;">3</div>
             <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Generations</div>
           </div>
           <div style="width:1px;background:var(--border);"></div>
           <div>
-            <div style="font-family:'Oswald',system-ui;font-size:1.6rem;color:var(--gold);font-weight:700;">24h</div>
+            <div style="font-family:'Oswald',system-ui;font-size:1.6rem;color:var(--gold-dim);font-weight:700;">24h</div>
             <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Marinade</div>
           </div>
           <div style="width:1px;background:var(--border);"></div>
@@ -460,7 +471,7 @@
 </section>
 
 <!-- ── Reviews ───────────────────────────────────────────── -->
-<section class="section" style="padding-top:0;">
+<section class="section section-bright" style="padding-top:0;">
   <div class="section-inner">
     <div class="section-header text-center">
       <div class="section-title">What People Say</div>
@@ -484,13 +495,13 @@
       </div>
     </div>
     <div class="text-center mt-3">
-      <a href="#" id="gmaps-review-link" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Read all reviews on Google →</a>
+      <a href="#" id="gmaps-review-link" target="_blank" rel="noopener" class="btn btn-outline btn-sm">Read all reviews on Google →</a>
     </div>
   </div>
 </section>
 
 <!-- ── Hours & Location ──────────────────────────────────── -->
-<section class="section" id="hours">
+<section class="section section-warm" id="hours">
   <div class="section-inner">
     <div class="section-header"><div class="section-title">Hours &amp; Location</div></div>
     <div class="hours-location">
@@ -527,8 +538,8 @@
 
 <!-- ── Newsletter ─────────────────────────────────────────── -->
 <div class="newsletter-section">
-  <div class="section-title" style="margin-bottom:8px;">Get the Weekly Specials</div>
-  <p style="color:var(--muted-hi);margin-bottom:24px;font-size:0.95rem;">Drop your email — deals, event announcements, and new menu drops. No spam.</p>
+  <div class="section-title" style="margin-bottom:8px;color:#fff;">Get the Weekly Specials</div>
+  <p style="color:rgba(255,255,255,0.8);margin-bottom:24px;font-size:0.95rem;">Drop your email — deals, event announcements, and new menu drops. No spam.</p>
   <form class="newsletter-form" id="newsletter-form">
     <input type="email" class="newsletter-input" placeholder="your@email.com" required />
     <button type="submit" class="btn btn-primary">Subscribe</button>

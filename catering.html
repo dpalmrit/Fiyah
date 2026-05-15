@@ -10,11 +10,13 @@
 <link rel="stylesheet" href="css/jjj.css" />
 <style>
 .page-hero {
-  background: linear-gradient(180deg, var(--smoke2) 0%, var(--smoke) 100%);
-  border-bottom: 1px solid var(--border);
+  background: linear-gradient(160deg, #1A0A00 0%, #3D1000 55%, #1A0A00 100%);
+  border-bottom: none;
   padding: 110px 5% 50px;
   text-align: center;
 }
+.page-hero .section-title { color: var(--gold); }
+.page-hero .section-subtitle { color: rgba(255,248,240,0.7); }
 
 .progress-bar {
   display: flex;
@@ -65,12 +67,13 @@
 .progress-step.active .step-label { color: var(--gold); }
 
 .form-card {
-  background: var(--smoke2);
+  background: #fff;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 40px;
   max-width: 760px;
   margin: 0 auto;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.08);
 }
 @media (max-width: 580px) { .form-card { padding: 24px 18px; } }
 
@@ -81,11 +84,11 @@
   font-family: 'Oswald', system-ui;
   font-size: 1.4rem;
   font-weight: 600;
-  color: var(--gold);
+  color: var(--pepper);
   text-transform: uppercase;
   margin-bottom: 6px;
 }
-.step-desc { font-size: 0.88rem; color: var(--muted-hi); margin-bottom: 28px; }
+.step-desc { font-size: 0.88rem; color: var(--ink-mid); margin-bottom: 28px; }
 
 .menu-select-grid {
   display: grid;
@@ -94,18 +97,19 @@
   margin-bottom: 1.5rem;
 }
 .menu-select-item {
-  background: var(--smoke3);
-  border: 1px solid var(--border);
+  background: #fff;
+  border: 1.5px solid var(--border);
   border-radius: var(--radius);
   padding: 14px 16px;
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
   display: flex;
   align-items: center;
   gap: 12px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
 }
-.menu-select-item:hover { border-color: var(--border-mid); }
-.menu-select-item.selected { border-color: var(--gold); background: rgba(249,199,79,0.07); }
+.menu-select-item:hover { border-color: rgba(212,56,13,0.3); }
+.menu-select-item.selected { border-color: var(--pepper); background: rgba(212,56,13,0.05); }
 .menu-select-item input[type=checkbox] { display: none; }
 .item-check {
   width: 20px; height: 20px;
@@ -120,8 +124,8 @@
 }
 .menu-select-item.selected .item-check { border-color: var(--gold); background: rgba(249,199,79,0.15); }
 .item-info { flex: 1; }
-.item-info-name  { font-size: 0.9rem; font-weight: 600; color: var(--cream); }
-.item-info-price { font-size: 0.8rem; color: var(--muted-hi); margin-top: 2px; }
+.item-info-name  { font-size: 0.9rem; font-weight: 600; color: var(--ink); }
+.item-info-price { font-size: 0.8rem; color: var(--ink-mid); margin-top: 2px; }
 .item-qty {
   display: flex;
   align-items: center;
@@ -152,11 +156,11 @@
   justify-content: space-between;
   padding: 6px 0;
   font-size: 0.9rem;
-  color: var(--muted-hi);
+  color: var(--ink-mid);
   border-bottom: 1px solid var(--border);
 }
 .summary-row:last-child { border-bottom: none; }
-.summary-row .label { color: var(--cream); }
+.summary-row .label { color: var(--ink); font-weight: 600; }
 
 .form-nav {
   display: flex;
@@ -300,7 +304,7 @@
         <p class="step-desc">Choose the items you'd like. We'll confirm availability and finalize quantities with you.</p>
         <div class="menu-select-grid" id="menu-select-grid"><div class="spinner"></div></div>
         <div class="form-nav">
-          <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+          <button class="btn btn-outline" onclick="goStep(1)">← Back</button>
           <button class="btn btn-primary" onclick="goStep(3)">Next: Contact Info →</button>
         </div>
       </div>
@@ -362,7 +366,7 @@
         <div class="order-summary" id="order-summary"></div>
 
         <div class="form-nav">
-          <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
+          <button class="btn btn-outline" onclick="goStep(2)">← Back</button>
           <button class="btn btn-primary btn-lg" id="submit-btn" onclick="submitOrder()">
             🔥 Submit Catering Request
           </button>

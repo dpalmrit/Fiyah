@@ -10,11 +10,13 @@
 <link rel="stylesheet" href="css/jjj.css" />
 <style>
 .page-hero {
-  background: linear-gradient(180deg, var(--smoke2) 0%, var(--smoke) 100%);
-  border-bottom: 1px solid var(--border);
+  background: linear-gradient(160deg, #1A0A00 0%, #3D1000 55%, #1A0A00 100%);
+  border-bottom: none;
   padding: 110px 5% 50px;
   text-align: center;
 }
+.page-hero .section-title { color: var(--gold); }
+.page-hero .section-subtitle { color: rgba(255,248,240,0.7); }
 .menu-sticky {
   position: sticky;
   top: 66px;
@@ -28,12 +30,12 @@
   font-family: 'Oswald', system-ui;
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--gold);
+  color: var(--pepper);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: 1.2rem;
   padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--border);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -45,16 +47,21 @@
   margin-bottom: 3rem;
 }
 .menu-item {
-  background: var(--smoke2);
+  background: #fff;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 18px 20px;
   display: flex;
   gap: 16px;
   align-items: flex-start;
-  transition: border-color var(--transition), transform var(--transition);
+  transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+  box-shadow: 0 1px 8px rgba(0,0,0,0.05);
 }
-.menu-item:hover { border-color: var(--border-mid); transform: translateY(-2px); }
+.menu-item:hover {
+  border-color: rgba(212,56,13,0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212,56,13,0.10);
+}
 .menu-item-emoji {
   font-size: 2.2rem;
   flex-shrink: 0;
@@ -62,10 +69,10 @@
   text-align: center;
 }
 .menu-item-body { flex: 1; }
-.menu-item-name { font-size: 1rem; font-weight: 700; color: var(--cream); margin-bottom: 5px; }
-.menu-item-desc { font-size: 0.85rem; color: var(--muted-hi); line-height: 1.5; margin-bottom: 8px; }
+.menu-item-name { font-size: 1rem; font-weight: 700; color: var(--ink); margin-bottom: 5px; }
+.menu-item-desc { font-size: 0.85rem; color: var(--ink-mid); line-height: 1.5; margin-bottom: 8px; }
 .menu-item-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-.menu-item-price { font-size: 1.05rem; font-weight: 700; color: var(--gold); }
+.menu-item-price { font-size: 1.05rem; font-weight: 700; color: var(--pepper); }
 .menu-item-badges { display: flex; gap: 4px; flex-wrap: wrap; }
 
 .order-cta-bar {
